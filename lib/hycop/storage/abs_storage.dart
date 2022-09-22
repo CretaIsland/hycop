@@ -25,9 +25,9 @@ abstract class AbsStorage {
 
 
 
-  void initialize();
+  Future<void> initialize();
 
-  Future<void> uploadFile(String fileName, String fileType, Uint8List fileBytes);
+  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes);
 
   Future<Uint8List> downloadFile(String fileId);
 

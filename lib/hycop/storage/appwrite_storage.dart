@@ -2,6 +2,8 @@
 
 import 'dart:typed_data';
 
+import 'package:hycop/hycop/hycop_factory.dart';
+
 import '../../common/util/config.dart';
 import '../../hycop/utils/hycop_exceptions.dart';
 import '../enum/model_enums.dart';
@@ -22,34 +24,50 @@ class AppwriteStorage extends AbsStorage {
 
 
   @override
-  void initialize() {
-    AbsStorage.setAppwriteApp(Client()
-      ..setEndpoint(myConfig!.serverConfig!.storageConnInfo.storageURL)
-      ..setProject(myConfig!.serverConfig!.storageConnInfo.projectId)
-      ..setSelfSigned(status: true)
-    );
-    _storage = Storage(AbsStorage.awStorageConn!);
+  Future<void> initialize() async {
+    if(AbsStorage.awStorageConn == null) {
+      HycopFactory.initAll();
+      AbsStorage.setAppwriteApp(Client()
+        ..setEndpoint(myConfig!.serverConfig!.storageConnInfo.storageURL)
+        ..setProject(myConfig!.serverConfig!.storageConnInfo.projectId)
+        ..setSelfSigned(status: true)
+      );
+    
+      _serverStorage = aw_server.Storage(aw_server.Client()
+        ..setEndpoint(myConfig!.serverConfig!.storageConnInfo.storageURL)
+        ..setProject(myConfig!.serverConfig!.storageConnInfo.projectId)
+        ..setKey(myConfig!.serverConfig!.storageConnInfo.apiKey)
+      );
+    }
 
-    _serverStorage = aw_server.Storage(aw_server.Client()
-      ..setEndpoint(myConfig!.serverConfig!.storageConnInfo.storageURL)
-      ..setProject(myConfig!.serverConfig!.storageConnInfo.projectId)
-      ..setKey(myConfig!.serverConfig!.storageConnInfo.apiKey)
-    );
-
-    setBucketId("userId");
+    
+    // ignore: prefer_conditional_assignment, unnecessary_null_comparison
+    if(_storage == null) {
+      _storage = Storage(AbsStorage.awStorageConn!);
+    }
+    
+    // setBucketId("userId");
   }
 
   @override
-  Future<void> uploadFile(String fileName, String fileType, Uint8List fileBytes) async {
+  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes) async {
+    await initialize();
+
+    String fileId = StorageUtils.cidToKey(StorageUtils.genCid(ContentsType.getContentTypes(fileType)));
+
     await _storage.createFile(
       bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId,
-      fileId: StorageUtils.cidToKey(StorageUtils.genCid(ContentsType.getContentTypes(fileType))), 
+      fileId: fileId, 
       file: InputFile(filename: fileName, contentType: fileType, bytes: fileBytes)
     ).onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
+
+    return await getFileInfo(fileId);
   }
 
   @override
   Future<Uint8List> downloadFile(String fileId) async {
+    await initialize();
+
     return await _storage.getFileDownload(
       bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, 
       fileId: fileId
@@ -58,6 +76,8 @@ class AppwriteStorage extends AbsStorage {
 
   @override
   Future<void> deleteFile(String fileId) async {
+    await initialize();
+
     await _storage.deleteFile(
       bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, 
       fileId: fileId
@@ -66,6 +86,8 @@ class AppwriteStorage extends AbsStorage {
 
   @override
   Future<FileModel> getFileInfo(String fileId) async {
+    await initialize();
+
     final res = await _storage.getFile(
       bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, 
       fileId: fileId
@@ -84,6 +106,8 @@ class AppwriteStorage extends AbsStorage {
   @override
   Future<List<FileModel>> getFileInfoList({String? search, int? limit, int? offset, String? cursor, String? cursorDirection = "after", String? orderType = "DESC"}) async {
     List<FileModel> fileInfoList = [];
+
+    await initialize();
 
     final res = await _storage.listFiles(
       bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId,
@@ -114,6 +138,8 @@ class AppwriteStorage extends AbsStorage {
 
   @override
   Future<void> setBucketId(String userId) async {
+    await initialize();
+    
     final res = await _serverStorage.listBuckets();
 
     for(var element in res.buckets) {

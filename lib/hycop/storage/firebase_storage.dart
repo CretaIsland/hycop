@@ -1,9 +1,13 @@
 import 'dart:typed_data';
 
+import 'package:hycop/common/util/logger.dart';
+import 'package:logging/logging.dart';
+
 import '../../common/util/config.dart';
 import '../../hycop/utils/hycop_exceptions.dart';
 import '../enum/model_enums.dart';
 import '../../hycop/storage/abs_storage.dart';
+import '../hycop_factory.dart';
 import '../model/file_model.dart';
 
 // ignore: depend_on_referenced_packages
@@ -20,27 +24,37 @@ class FirebaseAppStorage extends AbsStorage {
 
 
   @override
-  void initialize() async {
+  Future<void> initialize() async {
+    if(AbsStorage.fbStorageConn == null) {
+      HycopFactory.initAll();
+      logger.info("storage initialize");
 
-    AbsStorage.setFirebaseApp(await Firebase.initializeApp(
-      name: 'storage',
-      options: FirebaseOptions(
-        apiKey: myConfig!.serverConfig!.storageConnInfo.apiKey,
-        appId: myConfig!.serverConfig!.storageConnInfo.appId,
-        messagingSenderId: myConfig!.serverConfig!.storageConnInfo.messagingSenderId,
-        projectId: myConfig!.serverConfig!.storageConnInfo.projectId,
-        storageBucket: myConfig!.serverConfig!.storageConnInfo.storageURL
-      )
-    ));
+      AbsStorage.setFirebaseApp(await Firebase.initializeApp(
+        name: 'storage',
+        options: FirebaseOptions(
+          apiKey: myConfig!.serverConfig!.storageConnInfo.apiKey,
+          appId: myConfig!.serverConfig!.storageConnInfo.appId,
+          messagingSenderId: myConfig!.serverConfig!.storageConnInfo.messagingSenderId,
+          projectId: myConfig!.serverConfig!.storageConnInfo.projectId,
+          storageBucket: myConfig!.serverConfig!.storageConnInfo.storageURL
+        )
+      ));
+    }
 
-    _storage = FirebaseStorage.instanceFor(app: AbsStorage.fbStorageConn);
-    setBucketId("userId1");
+    // ignore: prefer_conditional_assignment, unnecessary_null_comparison
+    if(_storage == null) {
+      logger.info("_storage init");
+      _storage = FirebaseStorage.instanceFor(app: AbsStorage.fbStorageConn);
+    }
     
+    // setBucketId("userId1");
   }
 
   @override
-  Future<void> uploadFile(String fileName, String fileType, Uint8List fileBytes) async {
-    final uploadFile = _storage.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}/$fileName");
+  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes) async {
+    await initialize();
+
+    final uploadFile = _storage.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
 
     try {
       await uploadFile.getDownloadURL();
@@ -51,11 +65,15 @@ class FirebaseAppStorage extends AbsStorage {
       await uploadFile.updateMetadata(SettableMetadata(contentType: fileType)).onError((error, stackTrace) {
         throw HycopException(message: stackTrace.toString());
       });
+      return await getFileInfo("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
     }
+    return null;
   }
 
   @override
   Future<Uint8List> downloadFile(String fileId) async {
+    await initialize();
+
     Uint8List? fileBytes = await _storage.ref().child(fileId).getData().onError((error, stackTrace)
      => throw HycopException(message: stackTrace.toString()));
 
@@ -64,12 +82,16 @@ class FirebaseAppStorage extends AbsStorage {
 
   @override
   Future<void> deleteFile(String fileId) async {
+    await initialize();
+
    await _storage.ref().child(fileId).delete().onError((error, stackTrace)
      => throw HycopException(message: stackTrace.toString()));
   }
 
   @override
   Future<FileModel> getFileInfo(String fileId) async {
+    await initialize();
+
     final res = await _storage.ref().child(fileId).getMetadata().onError((error, stackTrace) {
       throw HycopException(message: stackTrace.toString());
     });
@@ -86,6 +108,8 @@ class FirebaseAppStorage extends AbsStorage {
   @override
   Future<List<FileModel>> getFileInfoList({String? search, int? limit, int? offset, String? cursor, String? cursorDirection = "after", String? orderType = "DESC"}) async {
     List<FileModel> fileInfoList = [];
+
+    await initialize();
 
     final res = await _storage.ref().child(myConfig!.serverConfig!.storageConnInfo.bucketId).list(
       ListOptions(
@@ -111,6 +135,7 @@ class FirebaseAppStorage extends AbsStorage {
 
   @override
   Future<void> setBucketId(String userId) async {
+    await initialize();
     myConfig!.serverConfig!.storageConnInfo.bucketId = userId;
   }
 
