@@ -1,0 +1,42 @@
+
+import '../enum/model_enums.dart';
+
+class FileModel {
+
+  late String fileId;
+  late String fileName;
+  late dynamic fileView;
+  late String fileMd5;
+  late int fileSize;
+  late ContentsType fileType;
+
+  FileModel({
+    required this.fileId,
+    required this.fileName,
+    required this.fileView,
+    required this.fileMd5,
+    required this.fileSize,
+    required this.fileType
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'fileId' : fileId,
+      'fileName' : fileName,
+      'fileUrl' : fileView,
+      'fileMd5' : fileMd5,
+      'fileSize' : fileSize,
+      'fileType' : fileType
+    };
+  }
+
+  void fromMap(Map<String, dynamic> map) {
+    fileId = map['fileId'];
+    fileName = map['fileName'];
+    fileView = map['fileUrl'];
+    fileMd5 = map['fileMd5'];
+    fileSize = map['fileSize'];
+    fileType = map['fileType'];
+  }
+
+}
