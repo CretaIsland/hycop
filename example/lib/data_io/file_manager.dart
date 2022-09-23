@@ -16,6 +16,9 @@ class FileManager extends ChangeNotifier {
   List<FileModel> etcFileList = [];
 
 
+
+  void notify() => notifyListeners();
+
   Future<void> getImgFileList() async {
 
     imgFileList = [];

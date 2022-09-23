@@ -57,7 +57,7 @@ class FirebaseAppStorage extends AbsStorage {
     final uploadFile = _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
 
     try {
-      await uploadFile.getDownloadURL();
+      final res = await getFileInfo(uploadFile.fullPath);
     } catch (e) {
       await uploadFile.putData(fileBytes).onError((error, stackTrace) {
         throw HycopException(message: stackTrace.toString());
@@ -67,7 +67,7 @@ class FirebaseAppStorage extends AbsStorage {
       });
       return await getFileInfo("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
     }
-    return null;
+	return null;
   }
 
   @override
@@ -96,7 +96,7 @@ class FirebaseAppStorage extends AbsStorage {
       throw HycopException(message: stackTrace.toString());
     });
     return FileModel(
-      fileId: res.name, 
+      fileId: res.fullPath, 
       fileName: res.name, 
       fileView: await _storage!.ref().child(res.fullPath).getDownloadURL(),
       fileMd5: res.md5Hash!, 
@@ -136,7 +136,7 @@ class FirebaseAppStorage extends AbsStorage {
   @override
   Future<void> setBucketId(String userId) async {
     await initialize();
-    myConfig!.serverConfig!.storageConnInfo.bucketId = userId;
+    myConfig!.serverConfig!.storageConnInfo.bucketId = "$userId/";
   }
 
 

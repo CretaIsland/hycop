@@ -1,3 +1,5 @@
+import 'package:hycop/hycop/account/account_manager.dart';
+
 import '../../hycop/storage/abs_storage.dart';
 import '../../hycop/storage/appwrite_storage.dart';
 import '../../hycop/storage/firebase_storage.dart';
@@ -62,6 +64,11 @@ class HycopFactory {
     }
     storage!.initialize();
     return;
+  }
+  static void setBucketId() {
+    if(AccountManager.currentLoginUser.isLoginedUser) {
+      storage!.setBucketId(AccountManager.currentLoginUser.email);
+    }
   }
 
   static AbsAccount? account; // = null;

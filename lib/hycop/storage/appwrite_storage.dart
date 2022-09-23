@@ -18,8 +18,8 @@ import 'package:dart_appwrite/dart_appwrite.dart' as aw_server;
 
 class AppwriteStorage extends AbsStorage {
 
-  late Storage _storage;
-  late aw_server.Storage _serverStorage;
+  Storage? _storage;
+  aw_server.Storage? _serverStorage;
 
 
 
@@ -55,7 +55,7 @@ class AppwriteStorage extends AbsStorage {
 
     String fileId = StorageUtils.cidToKey(StorageUtils.genCid(ContentsType.getContentTypes(fileType)));
 
-    await _storage.createFile(
+    await _storage!.createFile(
       bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId,
       fileId: fileId, 
       file: InputFile(filename: fileName, contentType: fileType, bytes: fileBytes)
@@ -68,7 +68,7 @@ class AppwriteStorage extends AbsStorage {
   Future<Uint8List> downloadFile(String fileId) async {
     await initialize();
 
-    return await _storage.getFileDownload(
+    return await _storage!.getFileDownload(
       bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, 
       fileId: fileId
     ).onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
@@ -78,7 +78,7 @@ class AppwriteStorage extends AbsStorage {
   Future<void> deleteFile(String fileId) async {
     await initialize();
 
-    await _storage.deleteFile(
+    await _storage!.deleteFile(
       bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, 
       fileId: fileId
     ).onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
@@ -88,7 +88,7 @@ class AppwriteStorage extends AbsStorage {
   Future<FileModel> getFileInfo(String fileId) async {
     await initialize();
 
-    final res = await _storage.getFile(
+    final res = await _storage!.getFile(
       bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, 
       fileId: fileId
     ).onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
@@ -96,7 +96,7 @@ class AppwriteStorage extends AbsStorage {
     return FileModel(
       fileId: res.$id,
       fileName: res.name,
-      fileView:  await _storage.getFileView(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: res.$id),
+      fileView:  await _storage!.getFileView(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: res.$id),
       fileMd5: res.signature,
       fileSize: res.sizeOriginal,
       fileType: ContentsType.getContentTypes(res.mimeType)
@@ -109,7 +109,7 @@ class AppwriteStorage extends AbsStorage {
 
     await initialize();
 
-    final res = await _storage.listFiles(
+    final res = await _storage!.listFiles(
       bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId,
       search: search,
       limit: limit,
@@ -122,7 +122,7 @@ class AppwriteStorage extends AbsStorage {
     for(var element in res.files) {
 
       Uint8List fileData =
-        await _storage.getFileView(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: element.$id);
+        await _storage!.getFileView(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: element.$id);
 
       fileInfoList.add(FileModel(
         fileId: element.$id,
@@ -140,7 +140,7 @@ class AppwriteStorage extends AbsStorage {
   Future<void> setBucketId(String userId) async {
     await initialize();
     
-    final res = await _serverStorage.listBuckets();
+    final res = await _serverStorage!.listBuckets();
 
     for(var element in res.buckets) {
       if(element.name == userId) {
@@ -149,7 +149,7 @@ class AppwriteStorage extends AbsStorage {
       }
     }
 
-     _serverStorage.createBucket(
+     _serverStorage!.createBucket(
       bucketId: userId,
       name: userId,
       permission: 'bucket',

@@ -31,6 +31,7 @@ class StorageExamplePage extends StatefulWidget {
 }
 
 class _StorageExamplePageState extends State<StorageExamplePage> with TickerProviderStateMixin {
+
   late TabController _tabController;
   // late DropzoneViewController _dropZonecontroller;
   late html.File dropFile;
@@ -70,10 +71,18 @@ class _StorageExamplePageState extends State<StorageExamplePage> with TickerProv
           children: [
             Expanded(
                 flex: 6,
-                child: Container(
-                  color: Colors.yellow[600],
-                  child: dropZoneWidget(context),
-                )),
+                child: Stack(
+                  children: [
+                    Container(
+                      color: Colors.yellow[600],
+                      child: const Center(
+                        child: Text("이곳에 파일을 올려두세요.", style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                    dropZoneWidget(context)
+                  ]
+                )
+			      ),
             Expanded(
                 flex: 4,
                 child: Column(
@@ -127,18 +136,22 @@ class _StorageExamplePageState extends State<StorageExamplePage> with TickerProv
                 .then((value) async {
               switch (ContentsType.getContentTypes(dropFile.type)) {
                 case ContentsType.image:
-                  await fileManagerHolder!.getImgFileList();
+                  fileManagerHolder!.imgFileList.add(value!);
+                  fileManagerHolder!.notify();
                   break;
                 case ContentsType.video:
-                  await fileManagerHolder!.getVideoFileList();
+                  fileManagerHolder!.videoFileList.add(value!);
+                  fileManagerHolder!.notify();
                   break;
                 case ContentsType.octetstream:
-                  await fileManagerHolder!.getEtcFileList();
+                   fileManagerHolder!.etcFileList.add(value!);
+                  fileManagerHolder!.notify();
                   break;
                 default:
                   break;
               }
             });
+            fileReader = html.FileReader(); // file reader 초기화
           });
 
           fileReader.onError.listen((err) {
