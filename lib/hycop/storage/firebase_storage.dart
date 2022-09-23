@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:hycop/common/util/logger.dart';
-import 'package:logging/logging.dart';
+// import 'package:logging/logging.dart';
 
 import '../../common/util/config.dart';
 import '../../hycop/utils/hycop_exceptions.dart';
@@ -18,7 +18,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 class FirebaseAppStorage extends AbsStorage {
 
-  late FirebaseStorage _storage;
+  FirebaseStorage? _storage;
 
 
 
@@ -54,7 +54,7 @@ class FirebaseAppStorage extends AbsStorage {
   Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes) async {
     await initialize();
 
-    final uploadFile = _storage.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
+    final uploadFile = _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
 
     try {
       await uploadFile.getDownloadURL();
@@ -74,7 +74,7 @@ class FirebaseAppStorage extends AbsStorage {
   Future<Uint8List> downloadFile(String fileId) async {
     await initialize();
 
-    Uint8List? fileBytes = await _storage.ref().child(fileId).getData().onError((error, stackTrace)
+    Uint8List? fileBytes = await _storage!.ref().child(fileId).getData().onError((error, stackTrace)
      => throw HycopException(message: stackTrace.toString()));
 
     return fileBytes!;
@@ -84,7 +84,7 @@ class FirebaseAppStorage extends AbsStorage {
   Future<void> deleteFile(String fileId) async {
     await initialize();
 
-   await _storage.ref().child(fileId).delete().onError((error, stackTrace)
+   await _storage!.ref().child(fileId).delete().onError((error, stackTrace)
      => throw HycopException(message: stackTrace.toString()));
   }
 
@@ -92,13 +92,13 @@ class FirebaseAppStorage extends AbsStorage {
   Future<FileModel> getFileInfo(String fileId) async {
     await initialize();
 
-    final res = await _storage.ref().child(fileId).getMetadata().onError((error, stackTrace) {
+    final res = await _storage!.ref().child(fileId).getMetadata().onError((error, stackTrace) {
       throw HycopException(message: stackTrace.toString());
     });
     return FileModel(
       fileId: res.name, 
       fileName: res.name, 
-      fileView: await _storage.ref().child(res.fullPath).getDownloadURL(), 
+      fileView: await _storage!.ref().child(res.fullPath).getDownloadURL(),
       fileMd5: res.md5Hash!, 
       fileSize: res.size!, 
       fileType: ContentsType.getContentTypes(res.contentType!)
@@ -111,7 +111,7 @@ class FirebaseAppStorage extends AbsStorage {
 
     await initialize();
 
-    final res = await _storage.ref().child(myConfig!.serverConfig!.storageConnInfo.bucketId).list(
+    final res = await _storage!.ref().child(myConfig!.serverConfig!.storageConnInfo.bucketId).list(
       ListOptions(
         maxResults: limit
       )
@@ -124,7 +124,7 @@ class FirebaseAppStorage extends AbsStorage {
       fileInfoList.add(FileModel(
         fileId: fileData.fullPath, 
         fileName: fileData.name, 
-        fileView: await _storage.ref().child(fileData.fullPath).getDownloadURL(), 
+        fileView: await _storage!.ref().child(fileData.fullPath).getDownloadURL(),
         fileMd5: fileData.md5Hash!, 
         fileSize: fileData.size!, 
         fileType: ContentsType.getContentTypes(fileData.contentType!))

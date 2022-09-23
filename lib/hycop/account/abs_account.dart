@@ -3,7 +3,7 @@
 //import 'package:appwrite/appwrite.dart';
 //import 'package:firebase_core/firebase_core.dart';
 //import 'package:flutter/material.dart';
-import 'account_manager.dart'; // AccountSignUpType 사용
+// import 'account_manager.dart'; // AccountSignUpType 사용
 import '../enum/model_enums.dart'; // AccountSignUpType 사용
 
 
