@@ -21,6 +21,16 @@ import 'package:provider/provider.dart';
 import 'dart:html' as html;
 import 'package:flutter_dropzone/flutter_dropzone.dart';
 
+
+class LoadIconVisible extends ChangeNotifier {
+  bool isIconVisible = false;
+
+  void changeState() {
+    isIconVisible = !isIconVisible;
+    notifyListeners();
+  }
+}
+
 class StorageExamplePage extends StatefulWidget {
   final VoidCallback? openDrawer;
 
@@ -36,6 +46,7 @@ class _StorageExamplePageState extends State<StorageExamplePage> with TickerProv
   // late DropzoneViewController _dropZonecontroller;
   late html.File dropFile;
   html.FileReader fileReader = html.FileReader();
+  final LoadIconVisible _loadIconVisible = LoadIconVisible();
 
   @override
   void initState() {
@@ -53,7 +64,10 @@ class _StorageExamplePageState extends State<StorageExamplePage> with TickerProv
   Widget build(BuildContext context) {
     //Size screenSize = MediaQuery.of(context).size;
     return MultiProvider(
-      providers: [ChangeNotifierProvider<FileManager>.value(value: fileManagerHolder!)],
+      providers: [
+        ChangeNotifierProvider<FileManager>.value(value: fileManagerHolder!),
+        ChangeNotifierProvider<LoadIconVisible>.value(value: _loadIconVisible)
+      ],
       child: Scaffold(
         appBar: AppBar(
           actions: WidgetSnippets.hyAppBarActions(context),
@@ -79,7 +93,21 @@ class _StorageExamplePageState extends State<StorageExamplePage> with TickerProv
                         child: Text("이곳에 파일을 올려두세요.", style: TextStyle(color: Colors.white)),
                       ),
                     ),
-                    dropZoneWidget(context)
+                    dropZoneWidget(context),
+                    Consumer<LoadIconVisible>(builder: (context, loadIconManager, child) {
+                      return Visibility(
+                        visible: loadIconManager.isIconVisible,
+                        child: Center(
+                          child: Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(image: Image.asset("assets/hourglass.gif").image)
+                            ),
+                          )
+                        )
+                      );
+                    }),
                   ]
                 )
 			      ),
@@ -126,8 +154,9 @@ class _StorageExamplePageState extends State<StorageExamplePage> with TickerProv
         onLeave: () => logger.finest("dropZone leave"),
         onError: (err) => throw HycopException(message: err.toString()),
         onDrop: (ev) async {
-          logger.finest("drop");
-
+          logger.info("drop");
+          
+          _loadIconVisible.changeState();
           dropFile = ev as html.File;
 
           fileReader.onLoadEnd.listen((event) {
@@ -138,14 +167,17 @@ class _StorageExamplePageState extends State<StorageExamplePage> with TickerProv
                 case ContentsType.image:
                   fileManagerHolder!.imgFileList.add(value!);
                   fileManagerHolder!.notify();
+                  _loadIconVisible.changeState();
                   break;
                 case ContentsType.video:
                   fileManagerHolder!.videoFileList.add(value!);
                   fileManagerHolder!.notify();
+				          _loadIconVisible.changeState();
                   break;
                 case ContentsType.octetstream:
-                   fileManagerHolder!.etcFileList.add(value!);
+                  fileManagerHolder!.etcFileList.add(value!);
                   fileManagerHolder!.notify();
+                  _loadIconVisible.changeState();
                   break;
                 default:
                   break;
