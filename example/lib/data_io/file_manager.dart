@@ -1,6 +1,9 @@
+import 'package:flutter/material.dart';
+import 'package:hycop/common/util/config.dart';
 import 'package:hycop/hycop/enum/model_enums.dart';
 import 'package:hycop/hycop/hycop_factory.dart';
 import 'package:hycop/hycop/model/file_model.dart';
+// ignore: unnecessary_import
 import 'package:flutter/foundation.dart';
 
 
@@ -54,6 +57,22 @@ class FileManager extends ChangeNotifier {
       }
     }
     notifyListeners();
+  }
+
+  ImageProvider<Object> getThumbnail(String fileId) {
+    
+    // get thumbnail logic
+    // ignore: prefer_const_declarations
+    final thumbnailView = null;
+
+    if(thumbnailView == null) {
+      return Image.asset("assets/video_icon.png").image;
+    } else {
+      if(HycopFactory.serverType == ServerType.appwrite) {
+        return Image.memory(thumbnailView.fileView).image;
+      }
+       return NetworkImage(thumbnailView);
+    }
   }
 
   Future<void> deleteFile(String fileId, ContentsType contentsType) async {

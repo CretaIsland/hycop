@@ -133,6 +133,8 @@ flutter:
     - assets/built_with_firebase.png
     - assets/jisoo.png
     - assets/hourglass.gif
+    - assets/video_icon.png
+    - assets/file_icon.png
   fonts:
     - family: NanumMyeongjo
       fonts:

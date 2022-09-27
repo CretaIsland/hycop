@@ -160,9 +160,7 @@ class _StorageExamplePageState extends State<StorageExamplePage> with TickerProv
           dropFile = ev as html.File;
 
           fileReader.onLoadEnd.listen((event) {
-            HycopFactory.storage!
-                .uploadFile(dropFile.name, dropFile.type, fileReader.result as Uint8List)
-                .then((value) async {
+            HycopFactory.storage!.uploadFile(dropFile.name, dropFile.type, fileReader.result as Uint8List).then((value) async {
               switch (ContentsType.getContentTypes(dropFile.type)) {
                 case ContentsType.image:
                   fileManagerHolder!.imgFileList.add(value!);
@@ -180,6 +178,9 @@ class _StorageExamplePageState extends State<StorageExamplePage> with TickerProv
                   _loadIconVisible.changeState();
                   break;
                 default:
+                  fileManagerHolder!.etcFileList.add(value!);
+                  fileManagerHolder!.notify();
+                  _loadIconVisible.changeState();
                   break;
               }
             });
@@ -222,25 +223,55 @@ class _StorageExamplePageState extends State<StorageExamplePage> with TickerProv
 
   Widget videoFileListView(ContentsType contentsType) {
     return FutureBuilder(
-        future: fileManagerHolder!.getVideoFileList(),
-        builder: (context, AsyncSnapshot snapshot) {
-          if (snapshot.hasError) {
-            logger.severe("data fetch error");
-            return const Center(child: Text('data fetch error'));
-          }
-          if (snapshot.hasData) {
-            logger.severe("No data founded");
-            return const Center(
-              child: CircularProgressIndicator(),
+      future: fileManagerHolder!.getVideoFileList(),
+      builder: (context, AsyncSnapshot snapshot) {
+        if (snapshot.hasError) {
+          logger.severe("data fetch error");
+          return const Center(child: Text('data fetch error'));
+        }
+        if (snapshot.hasData) {
+          logger.severe("No data founded");
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (snapshot.connectionState == ConnectionState.done) {
+          return Consumer<FileManager>(builder: (context, fileManager, child) {
+            return GridView.builder(
+              controller: ScrollController(),
+              itemCount: fileManagerHolder!.videoFileList.length,
+              itemBuilder: (context, int index) {
+              return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width * .18,
+                      height: MediaQuery.of(context).size.width * .1,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: fileManagerHolder!.getThumbnail(fileManagerHolder!.videoFileList[index].fileId)
+                        )
+                      )
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * .2,
+                      height: MediaQuery.of(context).size.width * .02,
+                      child: Text(fileManagerHolder!.videoFileList[index].fileName, textAlign: TextAlign.center),
+                    )
+                  ]
+                );
+              },
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: MediaQuery.of(context).size.width * .2,
+                crossAxisSpacing: 3,
+                mainAxisSpacing: 3,
+                childAspectRatio: 2 / 1.3
+              ), 
             );
-          }
-          if (snapshot.connectionState == ConnectionState.done) {
-            return Consumer<FileManager>(builder: (context, fileManager, child) {
-              return fileListTileView(fileManager.videoFileList, contentsType);
-            });
-          }
-          return Container();
-        });
+          });
+        }   
+        return Container();
+      });
   }
 
   Widget etcFileListView(ContentsType contentsType) {
@@ -285,7 +316,11 @@ class _StorageExamplePageState extends State<StorageExamplePage> with TickerProv
                               : NetworkImage(fileList[index].fileView),
                           fit: BoxFit.cover),
                       borderRadius: BorderRadius.circular(10))
-                  : BoxDecoration(color: Colors.grey, borderRadius: BorderRadius.circular(10)),
+                  : BoxDecoration(
+                      image: DecorationImage(
+                          image: Image.asset("assets/file_icon.png").image,
+                          fit: BoxFit.cover),
+                      borderRadius: BorderRadius.circular(10)),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisAlignment: MainAxisAlignment.end,
