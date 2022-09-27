@@ -13,7 +13,7 @@ void showSnackBar(BuildContext context, String message) {
 }
 
 void setupLogger() {
-  Logger.root.level = Level.INFO;
+  Logger.root.level = Level.FINEST;
   Logger.root.onRecord.listen((record) {
     String emoji = '';
     if (record.level == Level.INFO) {

@@ -26,7 +26,8 @@ class AppwriteAccount extends AbsAccount {
     if (createUserData['accountSignUpType'] == null) {
       createUserData['accountSignUpType'] = accountSignUpType.index;
     } else {
-      accountSignUpType = AccountSignUpType.fromInt(int.parse(createUserData['accountSignUpType'].toString()));
+      accountSignUpType =
+          AccountSignUpType.fromInt(int.parse(createUserData['accountSignUpType'].toString()));
       if (accountSignUpType == AccountSignUpType.none) {
         logger.severe('invalid sign-up type !!!');
         throw HycopUtils.getHycopException(defaultMessage: 'invalid sign-up type !!!');
@@ -56,52 +57,63 @@ class AppwriteAccount extends AbsAccount {
     if (accountSignUpType == AccountSignUpType.creta) {
       // creta service password = sha1-hash of password
       passwordSha1 = HycopUtils.stringToSha1(password);
-      logger.finest('password resetting to [$password] (creta service - [${accountSignUpType.name}]');
+      logger
+          .finest('password resetting to [$password] (creta service - [${accountSignUpType.name}]');
     } else {
       // accountSignUpType != AccountSignUpType.creta ==>
       // external service password = sha1-hash of email
       passwordSha1 = HycopUtils.stringToSha1(email); //sha1.convert(bytes).toString();
       password = passwordSha1;
-      logger.finest('password resetting to [$password] (external service - [${accountSignUpType.name}]');
+      logger.finest(
+          'password resetting to [$password] (external service - [${accountSignUpType.name}]');
     }
     createUserData['password'] = passwordSha1;
 
     String userForeignKey = const Uuid().v4().replaceAll('-', '');
-    logger.finest('createAccount(userId:$userId, email:$email, password:$password, name:$userForeignKey)');
+    logger.finest(
+        'createAccount(userId:$userId, email:$email, password:$password, name:$userForeignKey)');
     createUserData['userForeignKey'] = userForeignKey;
 
     Account account = Account(AbsDatabase.awDBConn!);
     final accountCreateResult = await account
         .create(userId: userId, email: email, password: password, name: userForeignKey)
-        .catchError((error, stackTrace) =>
-            throw HycopUtils.getHycopException(error: error, defaultMessage: 'Unknown DB Error !!!'));
+        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'Unknown DB Error !!!'));
     if (accountCreateResult.email.isEmpty) {
       logger.severe('account.create error !!!');
       throw HycopUtils.getHycopException(defaultMessage: 'account.create error !!!');
     }
 
-    await login(email, password, accountSignUpType: accountSignUpType).catchError((error, stackTrace) =>
+    await login(email, password, accountSignUpType: accountSignUpType).catchError((error,
+            stackTrace) =>
         throw HycopUtils.getHycopException(error: error, defaultMessage: 'loginByEmail Error !!!'));
 
-    await HycopFactory.dataBase!.createData('hycop_users', 'user=$userForeignKey', createUserData).catchError(
-        (error, stackTrace) =>
-            throw HycopUtils.getHycopException(error: error, defaultMessage: 'createData Error !!!'));
+    logger.fine("[===========================");
+
+    await HycopFactory.dataBase!
+        .createData('hycop_users', 'user=$userForeignKey', createUserData)
+        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'createData Error !!!'));
+
+    logger.fine("===========================]");
+
     // final getUserData = await HycopFactory.dataBase!.getData('hycop_users', 'user=$userForeignKey').catchError(
     //     (error, stackTrace) => throw HycopUtils.getHycopException(error: error, defaultMessage: 'No User Data !!!'));
     // if (getUserData.isEmpty) {
     //   logger.severe('No User Data !!!');
     //   throw HycopUtils.getHycopException(defaultMessage: 'No User Data !!!');
     // }
-    logger.finest('createAccount(userId:$userId, email:$email, password:$password, name:$userForeignKey) success');
+    logger.finest(
+        'createAccount(userId:$userId, email:$email, password:$password, name:$userForeignKey) success');
   }
 
   @override
   Future<bool> isExistAccount(String email) async {
-    //final getUserData = 
+    //final getUserData =
     await HycopFactory.dataBase!
         .simpleQueryData('hycop_users', name: 'email', value: email, orderBy: 'email')
-        .catchError((error, stackTrace) =>
-            throw HycopUtils.getHycopException(error: error, defaultMessage: 'not exist account(email:$email) !!!'))
+        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'not exist account(email:$email) !!!'))
         .then((value) {
       if (value.isEmpty) {
         logger.finest('not exist account(email:$email) !!!');
@@ -132,8 +144,10 @@ class AppwriteAccount extends AbsAccount {
     if (userForeignKey.isEmpty) {
       throw HycopUtils.getHycopException(defaultMessage: 'userForeignKey is null !!!');
     }
-    await HycopFactory.dataBase!.setData('hycop_users', 'user=$userForeignKey', updateUserData).catchError(
-        (error, stackTrace) => throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
+    await HycopFactory.dataBase!
+        .setData('hycop_users', 'user=$userForeignKey', updateUserData)
+        .catchError((error, stackTrace) =>
+            throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
   }
 
   @override
@@ -155,11 +169,14 @@ class AppwriteAccount extends AbsAccount {
     }
     // set to appwrite-account
     Account account = Account(AbsDatabase.awDBConn!);
-    await account.updatePassword(password: newPassword, oldPassword: oldPassword).catchError((error, stackTrace) =>
+    await account.updatePassword(password: newPassword, oldPassword: oldPassword).catchError((error,
+            stackTrace) =>
         throw HycopUtils.getHycopException(error: error, defaultMessage: 'Unknown DB Error !!!'));
     // set to hycop_users collection
-    await HycopFactory.dataBase!.setData('hycop_users', 'user=$userForeignKey', newUserData).catchError(
-        (error, stackTrace) => throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
+    await HycopFactory.dataBase!
+        .setData('hycop_users', 'user=$userForeignKey', newUserData)
+        .catchError((error, stackTrace) =>
+            throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
   }
 
   @override
@@ -173,18 +190,22 @@ class AppwriteAccount extends AbsAccount {
       throw HycopUtils.getHycopException(defaultMessage: 'userForeignKey is null !!!');
     }
     newUserData['isRemoved'] = true;
-    await HycopFactory.dataBase!.setData('hycop_users', 'user=$userForeignKey', newUserData).catchError(
-        (error, stackTrace) => throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
+    await HycopFactory.dataBase!
+        .setData('hycop_users', 'user=$userForeignKey', newUserData)
+        .catchError((error, stackTrace) =>
+            throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
   }
 
   @override
   Future<void> login(String email, String password,
-      {Map<String, dynamic>? returnUserData, AccountSignUpType accountSignUpType = AccountSignUpType.creta}) async {
+      {Map<String, dynamic>? returnUserData,
+      AccountSignUpType accountSignUpType = AccountSignUpType.creta}) async {
     logger.finest('loginByEmail($email, $password)');
     //
     Account account = Account(AbsDatabase.awDBConn!);
-    final result = await account.createEmailSession(email: email, password: password).catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(error: error, defaultMessage: 'createEmailSession failed !!!'));
+    final result = await account.createEmailSession(email: email, password: password).catchError(
+        (error, stackTrace) => throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'createEmailSession failed !!!'));
     if (result.userId.isEmpty) {
       logger.severe('createEmailSession failed !!!');
       throw HycopUtils.getHycopException(defaultMessage: 'createEmailSession failed !!!');
@@ -195,18 +216,20 @@ class AppwriteAccount extends AbsAccount {
       }
       final userObject = await account.get().catchError((error, stackTrace) =>
           throw HycopUtils.getHycopException(error: error, defaultMessage: 'User.get failed !!!'));
-      final resultUserData = await HycopFactory.dataBase!.getData('hycop_users', 'user=${userObject.name}').catchError(
-          (error, stackTrace) =>
-              throw HycopUtils.getHycopException(error: error, defaultMessage: 'getData failed !!!'));
+      final resultUserData = await HycopFactory.dataBase!
+          .getData('hycop_users', 'user=${userObject.name}')
+          .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
+              error: error, defaultMessage: 'getData failed !!!'));
       if (resultUserData.isEmpty) {
         logger.severe('getData error !!!');
         throw HycopUtils.getHycopException(defaultMessage: 'getData failed !!!');
       }
-      final type = AccountSignUpType.fromInt(
-          int.parse(resultUserData['accountSignUpType'].toString()));
+      final type =
+          AccountSignUpType.fromInt(int.parse(resultUserData['accountSignUpType'].toString()));
       if (type != accountSignUpType) {
         logger.severe('not [${accountSignUpType.name}] sign-up user !!!');
-        throw HycopUtils.getHycopException(defaultMessage: 'not [${accountSignUpType.name}] sign-up user !!!');
+        throw HycopUtils.getHycopException(
+            defaultMessage: 'not [${accountSignUpType.name}] sign-up user !!!');
       }
 
       if (resultUserData['isRemoved'] == true) {
@@ -222,19 +245,20 @@ class AppwriteAccount extends AbsAccount {
   Future<void> logout() async {
     logger.finest('logout');
     Account account = Account(AbsDatabase.awDBConn!);
-    //Future result = 
+    //Future result =
     account.deleteSession(sessionId: 'current').catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(error: error, defaultMessage: 'deleteSession failed !!!'));
+        throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'deleteSession failed !!!'));
   }
 
   @override
   Future<void> resetPassword(String email) async {
     logger.finest('resetPassword($email)');
     Account account = Account(AbsDatabase.awDBConn!);
-    //Future result = 
+    //Future result =
     account.createRecovery(email: email, url: 'http://localhost/#/resetPasswordConfirm').catchError(
-        (error, stackTrace) =>
-            throw HycopUtils.getHycopException(error: error, defaultMessage: 'createRecovery failed !!!'));
+        (error, stackTrace) => throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'createRecovery failed !!!'));
   }
 
   @override
@@ -242,8 +266,9 @@ class AppwriteAccount extends AbsAccount {
     logger.finest('resetPassword(userId:$userId, secret:$secret, newPassword:$newPassword)');
     Account account = Account(AbsDatabase.awDBConn!);
     await account
-        .updateRecovery(userId: userId, secret: secret, password: newPassword, passwordAgain: newPassword)
-        .catchError((error, stackTrace) =>
-            throw HycopUtils.getHycopException(error: error, defaultMessage: 'createRecovery failed !!!'));
+        .updateRecovery(
+            userId: userId, secret: secret, password: newPassword, passwordAgain: newPassword)
+        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'createRecovery failed !!!'));
   }
 }

@@ -1,5 +1,3 @@
-
-
 import 'dart:typed_data';
 
 import 'package:hycop/hycop/hycop_factory.dart';
@@ -17,35 +15,29 @@ import 'package:appwrite/appwrite.dart';
 import 'package:dart_appwrite/dart_appwrite.dart' as aw_server;
 
 class AppwriteStorage extends AbsStorage {
-
-  late Storage _storage;
+  Storage? _storage;
   late aw_server.Storage _serverStorage;
-
-
 
   @override
   Future<void> initialize() async {
-    if(AbsStorage.awStorageConn == null) {
+    if (AbsStorage.awStorageConn == null) {
       HycopFactory.initAll();
       AbsStorage.setAppwriteApp(Client()
         ..setEndpoint(myConfig!.serverConfig!.storageConnInfo.storageURL)
         ..setProject(myConfig!.serverConfig!.storageConnInfo.projectId)
-        ..setSelfSigned(status: true)
-      );
-    
+        ..setSelfSigned(status: true));
+
       _serverStorage = aw_server.Storage(aw_server.Client()
         ..setEndpoint(myConfig!.serverConfig!.storageConnInfo.storageURL)
         ..setProject(myConfig!.serverConfig!.storageConnInfo.projectId)
-        ..setKey(myConfig!.serverConfig!.storageConnInfo.apiKey)
-      );
+        ..setKey(myConfig!.serverConfig!.storageConnInfo.apiKey));
     }
 
-    
     // ignore: prefer_conditional_assignment, unnecessary_null_comparison
-    if(_storage == null) {
+    if (_storage == null) {
       _storage = Storage(AbsStorage.awStorageConn!);
     }
-    
+
     // setBucketId("userId");
   }
 
@@ -53,13 +45,15 @@ class AppwriteStorage extends AbsStorage {
   Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes) async {
     await initialize();
 
-    String fileId = StorageUtils.cidToKey(StorageUtils.genCid(ContentsType.getContentTypes(fileType)));
+    String fileId =
+        StorageUtils.cidToKey(StorageUtils.genCid(ContentsType.getContentTypes(fileType)));
 
-    await _storage.createFile(
-      bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId,
-      fileId: fileId, 
-      file: InputFile(filename: fileName, contentType: fileType, bytes: fileBytes)
-    ).onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
+    await _storage!
+        .createFile(
+            bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId,
+            fileId: fileId,
+            file: InputFile(filename: fileName, contentType: fileType, bytes: fileBytes))
+        .onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
 
     return await getFileInfo(fileId);
   }
@@ -68,70 +62,88 @@ class AppwriteStorage extends AbsStorage {
   Future<Uint8List> downloadFile(String fileId) async {
     await initialize();
 
-    return await _storage.getFileDownload(
-      bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, 
-      fileId: fileId
-    ).onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
+    return await _storage!
+        .getFileDownload(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: fileId)
+        .onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
   }
 
   @override
   Future<void> deleteFile(String fileId) async {
     await initialize();
 
-    await _storage.deleteFile(
-      bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, 
-      fileId: fileId
-    ).onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
+    await _storage!
+        .deleteFile(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: fileId)
+        .onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
   }
 
   @override
   Future<FileModel> getFileInfo(String fileId) async {
     await initialize();
 
-    final res = await _storage.getFile(
-      bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, 
-      fileId: fileId
-    ).onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
+    final res = await _storage!
+        .getFile(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: fileId)
+        .onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
 
     return FileModel(
-      fileId: res.$id,
-      fileName: res.name,
-      fileView:  await _storage.getFileView(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: res.$id),
-      fileMd5: res.signature,
-      fileSize: res.sizeOriginal,
-      fileType: ContentsType.getContentTypes(res.mimeType)
-    );
+        fileId: res.$id,
+        fileName: res.name,
+        fileView: await _storage!.getFileView(
+            bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: res.$id),
+        fileMd5: res.signature,
+        fileSize: res.sizeOriginal,
+        fileType: ContentsType.getContentTypes(res.mimeType));
   }
 
   @override
-  Future<List<FileModel>> getFileInfoList({String? search, int? limit, int? offset, String? cursor, String? cursorDirection = "after", String? orderType = "DESC"}) async {
+  Future<List<FileModel>> getFileInfoList(
+      {String? search,
+      int? limit,
+      int? offset,
+      String? cursor,
+      String? cursorDirection = "after",
+      String? orderType = "DESC"}) async {
     List<FileModel> fileInfoList = [];
 
     await initialize();
 
-    final res = await _storage.listFiles(
+    List<String> queries = [];
+    if (limit != null) {
+      queries.add(Query.limit(limit));
+    }
+    if (offset != null) {
+      queries.add(Query.offset(offset));
+    }
+    if (cursor != null) {
+      queries
+          .add(cursorDirection == 'after' ? Query.cursorAfter(cursor) : Query.cursorBefore(cursor));
+    }
+    if (orderType != null) {
+      queries.add(
+          orderType == 'DESC' ? Query.orderDesc('\$updatedAt') : Query.orderAsc('\$updatedAt'));
+    }
+
+    final res = await _storage!.listFiles(
       bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId,
       search: search,
-      limit: limit,
-      offset: offset,
-      cursor: cursor,
-      cursorDirection: cursorDirection,
-      orderType: orderType
+      queries: queries,
+      //limit: limit,
+      //offset: offset,
+      //cursor: cursor,
+      //cursorDirection: cursorDirection,
+      //orderType: orderType
     );
 
-    for(var element in res.files) {
-
-      Uint8List fileData =
-        await _storage.getFileView(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: element.$id);
+    for (var element in res.files) {
+      Uint8List fileData = await _storage!.getFileView(
+          bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: element.$id);
 
       fileInfoList.add(FileModel(
-        fileId: element.$id,
-        fileName: element.name,
-        fileView: fileData, 
-        fileMd5: element.signature,
-        fileSize: element.sizeOriginal,
-        fileType: ContentsType.getContentTypes(element.mimeType))
-      );
+          fileId: element.$id,
+          fileName: element.name,
+          fileView: fileData,
+          fileMd5: element.signature,
+          fileSize: element.sizeOriginal,
+          fileType: ContentsType.getContentTypes(element.mimeType)));
     }
     return fileInfoList;
   }
@@ -139,35 +151,23 @@ class AppwriteStorage extends AbsStorage {
   @override
   Future<void> setBucketId(String userId) async {
     await initialize();
-    
+
     final res = await _serverStorage.listBuckets();
 
-    for(var element in res.buckets) {
-      if(element.name == userId) {
+    for (var element in res.buckets) {
+      if (element.name == userId) {
         myConfig!.serverConfig!.storageConnInfo.bucketId = element.$id;
-        return ;
+        return;
       }
     }
 
-     _serverStorage.createBucket(
-      bucketId: userId,
-      name: userId,
-      permission: 'bucket',
-      read: ['role:member'],
-      write: ['role:member']
-    );
+    _serverStorage.createBucket(
+        bucketId: userId,
+        name: userId,
+        permission: 'bucket',
+        read: ['role:member'],
+        write: ['role:member']);
 
     myConfig!.serverConfig!.storageConnInfo.bucketId = userId;
-    
   }
-
-
-
-
-
-
-
-
-
-
 }

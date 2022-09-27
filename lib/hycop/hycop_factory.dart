@@ -74,7 +74,6 @@ class HycopFactory {
     }
   }
 
-
   static void initAll() {
     if (myConfig != null) return;
     logger.info('initAll()');

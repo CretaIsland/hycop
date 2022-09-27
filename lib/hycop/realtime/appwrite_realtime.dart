@@ -26,7 +26,7 @@ class AppwriteRealtime extends AbsRealtime {
       return;
     }
     String dbId = myConfig!.serverConfig!.dbConnInfo.appId;
-    String ch = 'databases.$dbId.collections.hycop_delta.documents';
+    String ch = 'databases.$dbId.collections.creta_delta.documents';
     subscription = Realtime(AbsDatabase.awDBConn!).subscribe([ch]);
     realtimeListener = subscription!.stream.listen((event) {
       processEvent(event.payload);
@@ -50,15 +50,14 @@ class AppwriteRealtime extends AbsRealtime {
     await initialize();
     Map<String, dynamic> input = makeData(directive: directive, mid: mid, delta: delta);
     try {
-      final Map<String, dynamic> target =
-          await HycopFactory.dataBase!.getData('hycop_delta', mid);
+      final Map<String, dynamic> target = await HycopFactory.dataBase!.getData('creta_delta', mid);
       if (target.isEmpty) {
         logger.finest('createDelta = ${input.toString()}');
-        HycopFactory.dataBase!.createData('hycop_delta', mid, input);
+        HycopFactory.dataBase!.createData('creta_delta', mid, input);
         return true;
       }
       logger.finest('setDelta = ${input.toString()}');
-      HycopFactory.dataBase!.setData('hycop_delta', mid, input);
+      HycopFactory.dataBase!.setData('creta_delta', mid, input);
       return true;
     } catch (e) {
       logger.finest('database error $e');

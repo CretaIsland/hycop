@@ -46,3 +46,8 @@ flutter pub publish --dry-run
 # publish 방법 (릴리즈)
 flutter pub publish
 "# hycop" 
+
+## flutter run -d web-server --web-renderer html
+flutter run -d chrome --web-renderer html
+# or
+flutter run -d chrome --web-renderer canvaskit

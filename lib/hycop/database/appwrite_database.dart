@@ -14,6 +14,7 @@ class AppwriteDatabase extends AbsDatabase {
 
   @override
   Future<void> initialize() async {
+    logger.finest("initialize");
     if (AbsDatabase.awDBConn == null) {
       HycopFactory.initAll();
       AbsDatabase.setAppWriteApp(Client()
@@ -23,8 +24,7 @@ class AppwriteDatabase extends AbsDatabase {
     }
     // ignore: prefer_conditional_assignment
     if (database == null) {
-      database =
-          Databases(AbsDatabase.awDBConn!, databaseId: myConfig!.serverConfig!.dbConnInfo.appId);
+      database = Databases(AbsDatabase.awDBConn!);
     }
   }
 
@@ -37,6 +37,7 @@ class AppwriteDatabase extends AbsDatabase {
     String key = HycopUtils.midToKey(mid);
     try {
       final doc = await database!.getDocument(
+        databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
         collectionId: collectionId,
         documentId: key,
       );
@@ -58,7 +59,8 @@ class AppwriteDatabase extends AbsDatabase {
     await initialize();
 
     try {
-      final result = await database!.listDocuments(collectionId: collectionId);
+      final result = await database!.listDocuments(
+          databaseId: myConfig!.serverConfig!.dbConnInfo.appId, collectionId: collectionId);
       return result.documents.map((element) {
         return element.data;
       }).toList();
@@ -82,6 +84,7 @@ class AppwriteDatabase extends AbsDatabase {
       String key = HycopUtils.midToKey(mid);
       logger.finest('setData($key)');
       database!.updateDocument(
+        databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
         collectionId: collectionId,
         documentId: key,
         data: data as Map<String, dynamic>,
@@ -103,10 +106,11 @@ class AppwriteDatabase extends AbsDatabase {
     await initialize();
 
     try {
-      logger.finest('createData($mid)');
+      logger.finest('createData($mid),($collectionId)');
       String key = HycopUtils.midToKey(mid);
       logger.finest('createData($key)');
       database!.createDocument(
+        databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
         collectionId: collectionId,
         documentId: key,
         data: data,
@@ -130,12 +134,16 @@ class AppwriteDatabase extends AbsDatabase {
     await initialize();
 
     try {
-      String orderType = descending ? 'DESC' : 'ASC';
+      //String orderType = descending ? 'DESC' : 'ASC';
       final result = await database!.listDocuments(
+        databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
         collectionId: collectionId,
-        queries: [Query.equal(name, value)], // index 를 만들어줘야 함.
-        orderAttributes: [orderBy],
-        orderTypes: [orderType],
+        queries: [
+          Query.equal(name, value),
+          descending ? Query.orderDesc(orderBy) : Query.orderAsc(orderBy)
+        ], // index 를 만들어줘야 함.
+        //orderAttributes: [orderBy],
+        //orderTypes: [orderType],
       );
       return result.documents.map((element) {
         return element.data;
@@ -165,7 +173,7 @@ class AppwriteDatabase extends AbsDatabase {
     await initialize();
 
     try {
-      String orderType = descending ? 'DESC' : 'ASC';
+      //String orderType = descending ? 'DESC' : 'ASC';
 
       List<dynamic> queryList = [];
       where.map((mid, value) {
@@ -173,14 +181,28 @@ class AppwriteDatabase extends AbsDatabase {
         return MapEntry(mid, value);
       });
 
+      List<String> additional = [
+        descending ? Query.orderDesc(orderBy) : Query.orderAsc(orderBy),
+      ];
+      if (limit != null) {
+        additional.add(Query.limit(limit));
+      }
+      if (offset != null) {
+        additional.add(Query.offset(offset));
+      }
+
       final result = await database!.listDocuments(
-        collectionId: collectionId,
-        queries: queryList, // index 를 만들어줘야 함.
-        orderAttributes: [orderBy],
-        orderTypes: [orderType],
-        limit: limit,
-        offset: offset,
-      );
+          databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
+          collectionId: collectionId,
+          queries: [
+            ...queryList,
+            ...additional,
+          ] // index 를 만들어줘야 함.
+          //orderAttributes: [orderBy],
+          //orderTypes: [orderType],
+          //limit: limit,
+          //offset: offset,
+          );
       return result.documents.map((doc) {
         //logger.finest(doc.data.toString());
         return doc.data;
@@ -203,6 +225,7 @@ class AppwriteDatabase extends AbsDatabase {
     try {
       String key = HycopUtils.midToKey(mid);
       database!.deleteDocument(
+        databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
         collectionId: collectionId,
         documentId: key,
       );
