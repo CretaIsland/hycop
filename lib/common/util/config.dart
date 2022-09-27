@@ -90,11 +90,11 @@ class FirebaseConfig extends AbsServerConfig {
       dbConnInfo.messagingSenderId = "352118964959";
       dbConnInfo.appId = "1:352118964959:web:6b9d9378aad1b7c9261f6a";
 
-      storageConnInfo.apiKey = "AIzaSyCOmmEEjgWjgqcl2GFfsD4KP2G_WiThVn4";
-      storageConnInfo.appId = "1:93171668117:web:e0105cd1713392cf64f79c";
-      storageConnInfo.projectId = "creta-dev";
-      storageConnInfo.storageURL = "creta-dev.appspot.com";
-      storageConnInfo.messagingSenderId = "93171668117";
+      storageConnInfo.apiKey = "AIzaSyCq3Ap2QXjMfPptFyHLHNCyVTeQl9G2PoY";
+      storageConnInfo.appId = "1:352118964959:web:6b9d9378aad1b7c9261f6a";
+      storageConnInfo.projectId = "creta02-1a520";
+      storageConnInfo.storageURL = "creta02-1a520.appspot.com";
+      storageConnInfo.messagingSenderId = "352118964959";
 
       socketConnInfo.serverUrl = "ws://127.0.0.1";
       socketConnInfo.serverPort = "4432";
@@ -126,11 +126,11 @@ class FirebaseConfig extends AbsServerConfig {
       dbConnInfo.messagingSenderId = "352118964959";
       dbConnInfo.appId = "1:352118964959:web:6b9d9378aad1b7c9261f6a";
 
-      storageConnInfo.apiKey = "AIzaSyCOmmEEjgWjgqcl2GFfsD4KP2G_WiThVn4";
-      storageConnInfo.appId = "1:93171668117:web:e0105cd1713392cf64f79c";
-      storageConnInfo.projectId = "creta-dev";
-      storageConnInfo.storageURL = "creta-dev.appspot.com";
-      storageConnInfo.messagingSenderId = "93171668117";
+      storageConnInfo.apiKey = "AIzaSyCq3Ap2QXjMfPptFyHLHNCyVTeQl9G2PoY";
+      storageConnInfo.appId = "1:352118964959:web:6b9d9378aad1b7c9261f6a";
+      storageConnInfo.projectId = "creta02-1a520";
+      storageConnInfo.storageURL = "creta02-1a520.appspot.com";
+      storageConnInfo.messagingSenderId = "352118964959";
 
       socketConnInfo.serverUrl = "ws://127.0.0.1";
       socketConnInfo.serverPort = "4432";

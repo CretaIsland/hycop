@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hycop/hycop/account/account_manager.dart';
+import 'package:hycop/hycop/hycop_factory.dart';
 import 'package:routemaster/routemaster.dart';
 // import '../hycop/database/db_utils.dart';
 import 'navigation/routes.dart';
@@ -58,6 +59,7 @@ class _LoginFormState extends ConsumerState<_LoginForm> {
 
     AccountManager.login(email, password)
       .then((value) {
+        HycopFactory.setBucketId();
         Routemaster.of(context).push(AppRoutes.userinfo);
       }).onError((error, stackTrace) {
         if (error is HycopException) {
