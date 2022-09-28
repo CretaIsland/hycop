@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:hycop/common/util/logger.dart';
+import 'package:hycop/hycop/account/account_manager.dart';
 // import 'package:logging/logging.dart';
 
 import '../../common/util/config.dart';
@@ -14,6 +15,8 @@ import '../model/file_model.dart';
 import 'package:firebase_core/firebase_core.dart';
 // ignore: depend_on_referenced_packages
 import 'package:firebase_storage/firebase_storage.dart';
+
+import '../utils/hycop_utils.dart';
 
 
 class FirebaseAppStorage extends AbsStorage {
@@ -57,7 +60,7 @@ class FirebaseAppStorage extends AbsStorage {
     final uploadFile = _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
 
     try {
-      final res = await getFileInfo(uploadFile.fullPath);
+      await getFileInfo(uploadFile.fullPath);
     } catch (e) {
       await uploadFile.putData(fileBytes).onError((error, stackTrace) {
         throw HycopException(message: stackTrace.toString());
@@ -67,7 +70,7 @@ class FirebaseAppStorage extends AbsStorage {
       });
       return await getFileInfo("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
     }
-	return null;
+	  return null;
   }
 
   @override
@@ -134,9 +137,9 @@ class FirebaseAppStorage extends AbsStorage {
   }
 
   @override
-  Future<void> setBucketId(String userId) async {
+  Future<void> setBucketId() async {
     await initialize();
-    myConfig!.serverConfig!.storageConnInfo.bucketId = "$userId/";
+    myConfig!.serverConfig!.storageConnInfo.bucketId = "${HycopUtils.genBucketId(AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId)}/";
   }
 
 
