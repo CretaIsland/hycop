@@ -100,4 +100,12 @@ class HycopUtils {
 
   static String stringToSha1(String str) => sha1.convert(utf8.encode(str)).toString();
   // -->
+
+
+  // 사용자의 email과 userId를 토대로 bucketId 생성
+  static String genBucketId(String email, String userId) {
+    String replaceEmail = email.replaceAll(RegExp(r'[!@#$%^&*(),.?":{}|<>]'), "-");
+    return "$replaceEmail.${userId.substring(0, 35-replaceEmail.length)}";
+  }
+
 }
