@@ -6,7 +6,7 @@ import '../model/book_model.dart';
 BookManager? bookManagerHolder;
 
 class BookManager extends AbsExModelManager {
-  BookManager() : super('creta_book');
+  BookManager() : super('hycop_book');
   @override
   AbsExModel newModel() => BookModel();
 

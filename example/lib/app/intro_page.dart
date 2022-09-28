@@ -302,7 +302,7 @@ class _IntroPageState extends State<IntroPage> {
       HycopFactory.enterprise = 'Demo';
     }
 
-    HycopFactory.initAll();
+    HycopFactory.initAll(force: true);
     //myConfig = HycopConfig(enterprise: HycopFactory.enterprise, serverType: _serverType);
     // myConfig = HycopConfig();
     // HycopFactory.selectDatabase();

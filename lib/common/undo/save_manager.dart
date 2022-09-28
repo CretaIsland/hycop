@@ -3,9 +3,11 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
+import 'package:hycop/hycop/utils/hycop_utils.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../hycop/absModel/abs_ex_model.dart';
+import '../../hycop/absModel/abs_ex_model_manager.dart';
 import '../util/config.dart';
 import '../util/logger.dart';
 
@@ -18,6 +20,18 @@ class SaveManager extends ChangeNotifier {
 
   final Queue<String> _dataChangedQue = Queue<String>();
   final Queue<AbsExModel> _dataCreatedQue = Queue<AbsExModel>();
+
+  final Map<String, AbsExModelManager> _managerMap = {};
+
+  void registerManager(String className, AbsExModelManager manager) {
+    _managerMap[className] = manager;
+  }
+
+  AbsExModelManager? getManager(String mid) {
+    String className = HycopUtils.getClassName(mid);
+    logger.fine('getManager($className)');
+    return _managerMap[className];
+  }
 
   Timer? _saveTimer;
 
@@ -39,7 +53,7 @@ class SaveManager extends ChangeNotifier {
   Future<void> pushChanged(String mid, String hint, {bool dontChangeBookTime = false}) async {
     await _datalock.synchronized(() async {
       if (!_dataChangedQue.contains(mid)) {
-        logger.finest('changed:$mid, via $hint');
+        logger.severe('changed:$mid, via $hint');
         _dataChangedQue.add(mid);
         notifyListeners();
         if (dontChangeBookTime == false) {
@@ -59,12 +73,13 @@ class SaveManager extends ChangeNotifier {
   }
 
   Future<void> runSaveTimer() async {
-    _saveTimer = Timer.periodic(Duration(seconds: myConfig!.config.savePeriod), (timer) async {
+    _saveTimer = Timer.periodic(Duration(milliseconds: myConfig!.config.savePeriod), (timer) async {
       await _datalock.synchronized(() async {
         if (_dataChangedQue.isNotEmpty) {
           while (_dataChangedQue.isNotEmpty) {
             final mid = _dataChangedQue.first;
             // Save here !!!!
+            getManager(mid)?.setToDBByMid(mid);
             logger.finest('$mid saved');
             _dataChangedQue.removeFirst();
           }
@@ -78,6 +93,7 @@ class SaveManager extends ChangeNotifier {
           while (_dataCreatedQue.isNotEmpty) {
             final model = _dataCreatedQue.first;
             // Save here !!!!
+            getManager(model.mid)?.createToDB(model);
             logger.finest('${model.mid} saved');
             _dataCreatedQue.removeFirst();
           }

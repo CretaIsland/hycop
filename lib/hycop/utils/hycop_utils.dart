@@ -19,10 +19,16 @@ class HycopUtils {
     return mid;
   }
 
-  static String collectionFromMid(String mid) {
+  static String getClassName(String mid) {
     int pos = mid.indexOf('=');
-    if (pos >= 0 && pos < mid.length - 1) return 'creta_${mid.substring(0, pos)}';
-    return 'creta_unknown';
+    if (pos > 0 && pos < mid.length - 1) return mid.substring(0, pos);
+    return mid;
+  }
+
+  static String collectionFromMid(String mid, String prefix) {
+    int pos = mid.indexOf('=');
+    if (pos >= 0 && pos < mid.length - 1) return '${prefix}_${mid.substring(0, pos)}';
+    return '${prefix}_unknown';
   }
 
   static String genMid(ExModelType type) {

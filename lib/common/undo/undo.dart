@@ -39,6 +39,7 @@ class UndoAble<T> {
     if (noUndo) {
       _value = val;
       if (save && saveManagerHolder != null && _mid.isNotEmpty) {
+        logger.finest('pushChanged');
         saveManagerHolder!.pushChanged(_mid, 'execute', dontChangeBookTime: dontChangeBookTime);
       }
       return;
