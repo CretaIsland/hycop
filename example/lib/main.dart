@@ -17,5 +17,9 @@ void main() {
   // HycopFactory.selectDatabase();
   // HycopFactory.selectRealTime();
   // HycopFactory.selectFunction();
+
+  const String testValue = String.fromEnvironment('USERNAME', defaultValue: 'unknown');
+  logger.info("-------------------------------$testValue");
+
   runApp(const ProviderScope(child: HycopExampleApp()));
 }
