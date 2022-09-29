@@ -551,7 +551,7 @@ class _IntroPageState extends State<IntroPage> {
                   text: 'Sign up now !',
                   mouseCursor: SystemMouseCursors.click,
                   style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w800),
-                  recognizer: TapGestureRecognizer()..onTap = () => Routemaster.of(context).push(AppRoutes.register),
+                  recognizer: TapGestureRecognizer()..onTap = () => flip(IntroPageType.signup),
                 )
               ],
             ),
@@ -792,7 +792,8 @@ class _IntroPageState extends State<IntroPage> {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(150.0, 0.0, 150.0, 0.0),
-            child: TextFormField(controller: _resetPasswordConfirmSecretTextEditingController),
+            child: TextFormField(decoration: const InputDecoration(hintText: 'Secret'),
+                controller: _resetPasswordConfirmSecretTextEditingController),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(150.0, 0.0, 150.0, 0.0),
