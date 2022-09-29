@@ -6,7 +6,7 @@ import '../model/frame_model.dart';
 FrameManager? frameManagerHolder;
 
 class FrameManager extends AbsExModelManager {
-  FrameManager() : super('creta_frame');
+  FrameManager() : super('hycop_frame');
   @override
   AbsExModel newModel() => FrameModel();
 

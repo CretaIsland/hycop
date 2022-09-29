@@ -19,10 +19,16 @@ class HycopUtils {
     return mid;
   }
 
-  static String collectionFromMid(String mid) {
+  static String getClassName(String mid) {
     int pos = mid.indexOf('=');
-    if (pos >= 0 && pos < mid.length - 1) return 'creta_${mid.substring(0, pos)}';
-    return 'creta_unknown';
+    if (pos > 0 && pos < mid.length - 1) return mid.substring(0, pos);
+    return mid;
+  }
+
+  static String collectionFromMid(String mid, String prefix) {
+    int pos = mid.indexOf('=');
+    if (pos >= 0 && pos < mid.length - 1) return '${prefix}_${mid.substring(0, pos)}';
+    return '${prefix}_unknown';
   }
 
   static String genMid(ExModelType type) {
@@ -94,4 +100,12 @@ class HycopUtils {
 
   static String stringToSha1(String str) => sha1.convert(utf8.encode(str)).toString();
   // -->
+
+
+  // 사용자의 email과 userId를 토대로 bucketId 생성
+  static String genBucketId(String email, String userId) {
+    String replaceEmail = email.replaceAll(RegExp(r'[!@#$%^&*(),.?":{}|<>]'), "-");
+    return "$replaceEmail.${userId.substring(0, 35-replaceEmail.length)}";
+  }
+
 }

@@ -6,6 +6,26 @@ import 'package:flutter/material.dart';
 import '../../hycop/hycop_factory.dart';
 import 'logger.dart';
 
+/*
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBiPFiDRpywm06KftPPDu0T7d1eowrHYEE",
+  authDomain: "hycop-example.firebaseapp.com",
+  projectId: "hycop-example",
+  storageBucket: "hycop-example.appspot.com",
+  messagingSenderId: "724689601871",
+  appId: "1:724689601871:web:2cc3542344ad1feba1b13a",
+  databaseURL : "https://hycop-example-default-rtdb.firebaseio.com/",
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+*/
+
 enum ServerType {
   none,
   firebase,
@@ -118,19 +138,41 @@ class FirebaseConfig extends AbsServerConfig {
       // rtConnInfo.messagingSenderId = "352118964959";
       // rtConnInfo.appId = "1:352118964959:web:6b9d9378aad1b7c9261f6a";
 
-      dbConnInfo.apiKey = "AIzaSyCq3Ap2QXjMfPptFyHLHNCyVTeQl9G2PoY";
-      dbConnInfo.authDomain = "creta02-1a520.firebaseapp.com";
-      dbConnInfo.databaseURL = "https://creta02-1a520-default-rtdb.firebaseio.com";
-      dbConnInfo.projectId = "creta02-1a520";
-      dbConnInfo.storageBucket = "creta02-1a520.appspot.com";
-      dbConnInfo.messagingSenderId = "352118964959";
-      dbConnInfo.appId = "1:352118964959:web:6b9d9378aad1b7c9261f6a";
+// apiKey: "AIzaSyBiPFiDRpywm06KftPPDu0T7d1eowrHYEE",
+//   authDomain: "hycop-example.firebaseapp.com",
+//   projectId: "hycop-example",
+//   storageBucket: "hycop-example.appspot.com",
+//   messagingSenderId: "724689601871",
+//   appId: "1:724689601871:web:2cc3542344ad1feba1b13a",
+//   databaseURL : "https://hycop-example-default-rtdb.firebaseio.com/",
 
-      storageConnInfo.apiKey = "AIzaSyCq3Ap2QXjMfPptFyHLHNCyVTeQl9G2PoY";
-      storageConnInfo.appId = "1:352118964959:web:6b9d9378aad1b7c9261f6a";
-      storageConnInfo.projectId = "creta02-1a520";
-      storageConnInfo.storageURL = "creta02-1a520.appspot.com";
-      storageConnInfo.messagingSenderId = "352118964959";
+      dbConnInfo.apiKey = "AIzaSyBiPFiDRpywm06KftPPDu0T7d1eowrHYEE";
+      dbConnInfo.authDomain = "hycop-example.firebaseapp.com";
+      dbConnInfo.databaseURL = "https://hycop-example-default-rtdb.firebaseio.com";
+      dbConnInfo.projectId = "hycop-example";
+      dbConnInfo.storageBucket = "hycop-example.appspot.com";
+      dbConnInfo.messagingSenderId = "724689601871";
+      dbConnInfo.appId = "1:724689601871:web:2cc3542344ad1feba1b13a";
+
+      storageConnInfo.apiKey = "AIzaSyBiPFiDRpywm06KftPPDu0T7d1eowrHYEE";
+      storageConnInfo.appId = "1:724689601871:web:2cc3542344ad1feba1b13a";
+      storageConnInfo.projectId = "hycop-example";
+      storageConnInfo.storageURL = "hycop-example.appspot.com";
+      storageConnInfo.messagingSenderId = "724689601871";
+
+      // dbConnInfo.apiKey = "AIzaSyCq3Ap2QXjMfPptFyHLHNCyVTeQl9G2PoY";
+      // dbConnInfo.authDomain = "creta02-1a520.firebaseapp.com";
+      // dbConnInfo.databaseURL = "https://creta02-1a520-default-rtdb.firebaseio.com";
+      // dbConnInfo.projectId = "creta02-1a520";
+      // dbConnInfo.storageBucket = "creta02-1a520.appspot.com";
+      // dbConnInfo.messagingSenderId = "352118964959";
+      // dbConnInfo.appId = "1:352118964959:web:6b9d9378aad1b7c9261f6a";
+
+      // storageConnInfo.apiKey = "AIzaSyCq3Ap2QXjMfPptFyHLHNCyVTeQl9G2PoY";
+      // storageConnInfo.appId = "1:352118964959:web:6b9d9378aad1b7c9261f6a";
+      // storageConnInfo.projectId = "creta02-1a520";
+      // storageConnInfo.storageURL = "creta02-1a520.appspot.com";
+      // storageConnInfo.messagingSenderId = "352118964959";
 
       socketConnInfo.serverUrl = "ws://127.0.0.1";
       socketConnInfo.serverPort = "4432";
@@ -186,9 +228,9 @@ class AssetConfig {
       jsonString =
           await DefaultAssetBundle.of(context).loadString('assets/${enterprise}_config.json');
     } catch (e) {
-      logger.info('assets/${enterprise}_config.json not exist, creta_config.json will be used');
+      logger.info('assets/${enterprise}_config.json not exist, hycop_config.json will be used');
       try {
-        jsonString = await DefaultAssetBundle.of(context).loadString('assets/creta_config.json');
+        jsonString = await DefaultAssetBundle.of(context).loadString('assets/hycop_config.json');
       } catch (e) {
         logger.severe('load assets/${enterprise}_config.json failed', e);
         return;

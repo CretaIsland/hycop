@@ -65,15 +65,16 @@ class HycopFactory {
     storage!.initialize();
     return;
   }
+
   static void setBucketId() {
-    if(AccountManager.currentLoginUser.isLoginedUser) {
-      storage!.setBucketId(AccountManager.currentLoginUser.email);
+    if (AccountManager.currentLoginUser.isLoginedUser) {
+      storage!.setBucketId();
     }
   }
 
   static AbsAccount? account; // = null;
   static void selectAccount() {
-    if (account != null) return;
+    //if (account != null) return;
     if (HycopFactory.serverType == ServerType.appwrite) {
       account = AppwriteAccount();
     } else {
@@ -81,8 +82,8 @@ class HycopFactory {
     }
   }
 
-  static void initAll() {
-    if (myConfig != null) return;
+  static void initAll({bool force = false}) {
+    if (myConfig != null && force == false) return;
     logger.info('initAll()');
     myConfig = HycopConfig();
     HycopFactory.selectDatabase();

@@ -49,7 +49,7 @@ class FirebaseRealtime extends AbsRealtime {
         logger.finest('listener restart $lastUpdateTime');
         _deltaStream?.cancel();
         _deltaStream = _db!
-            .child('creta_delta')
+            .child('hycop_delta')
             .orderByChild('updateTime')
             .startAfter(lastUpdateTime)
             .onValue
@@ -95,11 +95,11 @@ class FirebaseRealtime extends AbsRealtime {
     logger.finest('setDelta = ${input.toString()}');
 
     try {
-      await _db!.child('creta_delta').child(mid).set(input);
-      logger.finest("CRETA_DELTA sample data created");
+      await _db!.child('hycop_delta').child(mid).set(input);
+      logger.finest("hycop_delta sample data created");
       return true;
     } catch (e) {
-      logger.severe("CRETA_DELTA SET DB ERROR : $e");
+      logger.severe("hycop_delta SET DB ERROR : $e");
       return false;
     }
   }

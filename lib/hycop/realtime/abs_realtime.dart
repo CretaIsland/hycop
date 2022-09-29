@@ -48,7 +48,7 @@ abstract class AbsRealtime {
   }) {
     Map<String, dynamic> input = {};
     input['directive'] = directive;
-    input['collectionId'] = HycopUtils.collectionFromMid(mid);
+    input['collectionId'] = HycopUtils.collectionFromMid(mid, 'hycop');
     input['mid'] = mid; //'book=3ecb527f-4f5e-4350-8705-d5742781451b';
     input['userId'] = AccountManager.currentLoginUser.email;
     input['deviceId'] = DeviceInfo.deviceId;

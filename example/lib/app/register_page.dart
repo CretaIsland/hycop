@@ -138,6 +138,9 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
 
   @override
   Widget build(BuildContext context) {
+    if (_errMsg.isNotEmpty) {
+      logger.severe(_errMsg);
+    }
     return ConstrainedBox(
       constraints: BoxConstraints.loose(const Size.fromWidth(320)),
       child: Padding(

@@ -118,14 +118,14 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
   assets:
     - assets/
-    - assets/creta_config.json
+    - assets/hycop_config.json
     - assets/icons/
     - assets/hycop_intro.jpg
     - assets/logo_en.png
     - assets/logo.png
     - assets/publish.png
     - assets/grid.png
-    - assets/creta_default.png
+    - assets/hycop_default.png
     - assets/no_image.png
     - assets/firebase_logo.png
     - assets/appwrite_logo.png

@@ -2,6 +2,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:hycop/common/undo/save_manager.dart';
+import 'package:hycop/common/util/config.dart';
 import 'package:provider/provider.dart';
 import 'package:routemaster/routemaster.dart';
 
@@ -34,7 +36,14 @@ class _RealTimeExamplePageState extends State<RealTimeExamplePage> {
   void initState() {
     super.initState();
     frameManagerHolder = FrameManager();
-    HycopFactory.realtime!.addListener("creta_frame", frameManagerHolder!.realTimeCallback);
+    if (HycopFactory.serverType == ServerType.appwrite) {
+      if (saveManagerHolder == null) {
+        saveManagerHolder = SaveManager();
+        saveManagerHolder!.registerManager('frame', frameManagerHolder!);
+        saveManagerHolder!.runSaveTimer();
+      }
+    }
+    HycopFactory.realtime!.addListener("hycop_frame", frameManagerHolder!.realTimeCallback);
     HycopFactory.realtime!.start();
   }
 
@@ -119,12 +128,16 @@ class _RealTimeExamplePageState extends State<RealTimeExamplePage> {
     for (var item in frameManager.modelList) {
       if (item.mid != mid) continue;
       FrameModel model = item as FrameModel;
-      model.angle.set(update.angle);
-      model.posX.set(update.position.dx);
-      model.posY.set(update.position.dy);
-      model.width.set(update.size.width);
-      model.height.set(update.size.height);
-      await frameManager.setToDB(model);
+      model.angle.set(update.angle, save: false, noUndo: true);
+      model.posX.set(update.position.dx, save: false, noUndo: true);
+      model.posY.set(update.position.dy, save: false, noUndo: true);
+      model.width.set(update.size.width, save: false, noUndo: true);
+      model.height.set(update.size.height, save: false, noUndo: true);
+      if (HycopFactory.serverType == ServerType.appwrite) {
+        model.save();
+      } else {
+        await frameManager.setToDB(model);
+      }
     }
   }
 

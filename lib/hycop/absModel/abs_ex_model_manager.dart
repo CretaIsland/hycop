@@ -109,6 +109,21 @@ abstract class AbsExModelManager extends ChangeNotifier {
     }
   }
 
+  Future<void> setToDBByMid(String mid) async {
+    try {
+      //await HycopFactory.dataBase!.setData(collectionId, model.mid, model.toMap());
+      AbsExModel? model = getModel(mid);
+      if (model != null) {
+        await HycopFactory.dataBase!.setModel(collectionId, model);
+      } else {
+        logger.severe('model not found($mid)');
+      }
+    } catch (e) {
+      logger.severe('databaseError', e);
+      throw HycopException(message: 'databaseError', exception: e as Exception);
+    }
+  }
+
   Future<void> removeToDB(String mid) async {
     try {
       //await HycopFactory.dataBase!.removeData(collectionId, mid);
@@ -117,5 +132,14 @@ abstract class AbsExModelManager extends ChangeNotifier {
       logger.severe('databaseError', e);
       throw HycopException(message: 'databaseError', exception: e as Exception);
     }
+  }
+
+  AbsExModel? getModel(String mid) {
+    for (AbsExModel model in modelList) {
+      if (model.mid == mid) {
+        return model;
+      }
+    }
+    return null;
   }
 }

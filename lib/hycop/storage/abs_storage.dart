@@ -46,7 +46,7 @@ abstract class AbsStorage {
     }
   );
 
-  Future<void> setBucketId(String userId);
+  Future<void> setBucketId();
    
 
 
