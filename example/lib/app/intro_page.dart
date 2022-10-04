@@ -19,7 +19,6 @@ import 'package:hycop/hycop/account/account_manager.dart';
 import 'package:hycop/hycop/utils/hycop_exceptions.dart';
 import 'package:hycop/hycop/enum/model_enums.dart';
 
-
 enum IntroPageType {
   none,
   dbSelect,
@@ -34,9 +33,9 @@ enum IntroPageType {
     if (val <= none.index) return (none.index + 1);
     return val;
   }
+
   static IntroPageType fromInt(int val) => IntroPageType.values[validCheck(val)];
 }
-
 
 class IntroPage extends StatefulWidget {
   const IntroPage({Key? key}) : super(key: key);
@@ -139,14 +138,14 @@ class _IntroPageState extends State<IntroPage> {
       case IntroPageType.login:
         return loginPage();
 
-    case IntroPageType.signup:
-      return signupPage();
+      case IntroPageType.signup:
+        return signupPage();
 
       case IntroPageType.resetPassword:
-        return resetPasswordPage();////////////////////////
+        return resetPasswordPage(); ////////////////////////
 
-    case IntroPageType.resetPasswordConfirm:
-      return resetPasswordConfirmPage();///////////////////////////
+      case IntroPageType.resetPasswordConfirm:
+        return resetPasswordConfirmPage(); ///////////////////////////
 
       case IntroPageType.dbSelect:
       default:
@@ -461,7 +460,6 @@ class _IntroPageState extends State<IntroPage> {
       showSnackBar(context, _errMsg);
       setState(() {});
     });
-
   }
 
   Widget loginPage() {
@@ -570,7 +568,7 @@ class _IntroPageState extends State<IntroPage> {
                 onPressed: () {
                   //setState(() {
                   //   _isFlip = !_isFlip;
-                      flip(IntroPageType.dbSelect);
+                  flip(IntroPageType.dbSelect);
                   // });
                 },
                 text: 'Prev',
@@ -638,20 +636,20 @@ class _IntroPageState extends State<IntroPage> {
           ),
           _errMsg.isNotEmpty
               ? SizedBox(
-              height: 40,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    _errMsg,
-                    style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w800),
-                  )
-                ],
-              ))
+                  height: 40,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        _errMsg,
+                        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w800),
+                      )
+                    ],
+                  ))
               : const SizedBox(
-            height: 40,
-          ),
+                  height: 40,
+                ),
           Text.rich(
             TextSpan(
               text: 'Already have an account? ',
@@ -730,20 +728,20 @@ class _IntroPageState extends State<IntroPage> {
           ),
           _errMsg.isNotEmpty
               ? SizedBox(
-              height: 40,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    _errMsg,
-                    style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w800),
-                  )
-                ],
-              ))
+                  height: 40,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        _errMsg,
+                        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w800),
+                      )
+                    ],
+                  ))
               : const SizedBox(
-            height: 40,
-          ),
+                  height: 40,
+                ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -792,12 +790,14 @@ class _IntroPageState extends State<IntroPage> {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(150.0, 0.0, 150.0, 0.0),
-            child: TextFormField(decoration: const InputDecoration(hintText: 'Secret'),
+            child: TextFormField(
+                decoration: const InputDecoration(hintText: 'Secret'),
                 controller: _resetPasswordConfirmSecretTextEditingController),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(150.0, 0.0, 150.0, 0.0),
-            child: PasswordTextField(controller: _resetPasswordConfirmNewPasswordTextEditingController),
+            child: PasswordTextField(
+                controller: _resetPasswordConfirmNewPasswordTextEditingController),
           ),
           const SizedBox(
             height: 20,
@@ -814,20 +814,20 @@ class _IntroPageState extends State<IntroPage> {
           ),
           _errMsg.isNotEmpty
               ? SizedBox(
-              height: 40,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    _errMsg,
-                    style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w800),
-                  )
-                ],
-              ))
+                  height: 40,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        _errMsg,
+                        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w800),
+                      )
+                    ],
+                  ))
               : const SizedBox(
-            height: 40,
-          ),
+                  height: 40,
+                ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -866,7 +866,7 @@ class _IntroPageState extends State<IntroPage> {
       HycopFactory.enterprise = 'Demo';
     }
 
-    HycopFactory.initAll(force: true);
+    await HycopFactory.initAll(force: true);
     //myConfig = HycopConfig(enterprise: HycopFactory.enterprise, serverType: _serverType);
     // myConfig = HycopConfig();
     // HycopFactory.selectDatabase();

@@ -23,7 +23,7 @@ class AppwriteStorage extends AbsStorage {
   @override
   Future<void> initialize() async {
     if (AbsStorage.awStorageConn == null) {
-      HycopFactory.initAll();
+      await HycopFactory.initAll();
       AbsStorage.setAppwriteApp(Client()
         ..setEndpoint(myConfig!.serverConfig!.storageConnInfo.storageURL)
         ..setProject(myConfig!.serverConfig!.storageConnInfo.projectId)
@@ -154,7 +154,8 @@ class AppwriteStorage extends AbsStorage {
   Future<void> setBucketId() async {
     await initialize();
 
-    String bucketId = HycopUtils.genBucketId(AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId);
+    String bucketId = HycopUtils.genBucketId(
+        AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId);
     final res = await _serverStorage.listBuckets();
 
     for (var element in res.buckets) {

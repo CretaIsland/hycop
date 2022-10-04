@@ -12,7 +12,7 @@ class FirebaseDatabase extends AbsDatabase {
   @override
   Future<void> initialize() async {
     if (AbsDatabase.fbDBApp == null) {
-      HycopFactory.initAll();
+      await HycopFactory.initAll();
       logger.info('initialize');
       AbsDatabase.setFirebaseApp(await Firebase.initializeApp(
           name: 'database',

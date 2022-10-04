@@ -16,7 +16,7 @@ class AppwriteFunction extends AbsFunction {
   Future<void> initialize() async {
     // ignore: prefer_conditional_assignment
     if (functions == null) {
-      HycopFactory.initAll();
+      await HycopFactory.initAll();
       functions = Functions(AbsDatabase.awDBConn!);
     }
   }

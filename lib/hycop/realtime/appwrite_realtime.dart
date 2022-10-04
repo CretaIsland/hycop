@@ -15,7 +15,7 @@ class AppwriteRealtime extends AbsRealtime {
 
   @override
   Future<void> initialize() async {
-    HycopFactory.initAll();
+    await HycopFactory.initAll();
     // 일반 reealTime DB 사용의 경우.
   }
 

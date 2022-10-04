@@ -1,7 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 
 import 'package:flutter/material.dart';
-import 'package:hycop/common/util/config.dart';
 import 'package:routemaster/routemaster.dart';
 
 import '../widgets/glowing_button.dart';
@@ -20,7 +19,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   @override
   void initState() {
-    myConfig?.config.loadAsset(context);
+    //await myConfig?.config.loadAsset(/*context*/);
     super.initState();
   }
 
