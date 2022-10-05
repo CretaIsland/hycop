@@ -337,7 +337,7 @@ class _IntroPageState extends State<IntroPage> {
     String name = _signinNameTextEditingController.text;
     String email = _signinEmailTextEditingController.text;
     String password = _signinPasswordTextEditingController.text;
-
+    logger.finest('isExistAccount');
     AccountManager.isExistAccount(email).then((value) {
       Map<String, dynamic> userData = {};
       userData['name'] = name;

@@ -33,9 +33,6 @@ class DBConnInfo {
     apiKey = json['apiKey'] ?? '';
     authDomain = json['authDomain'] ?? '';
     databaseURL = json['databaseURL'] ?? '';
-
-    logger.severe('databaseURL=$databaseURL-------------');
-
     projectId = json['projectId'] ?? '';
     storageBucket = json['storageBucket'] ?? '';
     messagingSenderId = json['messagingSenderId'] ?? '';
@@ -123,7 +120,7 @@ class AppwriteConfig extends AbsServerConfig {
   @override
   Future<void> loadAsset(/*BuildContext context*/) async {
     await super.loadAsset(/*context*/);
-    final dynamic configMap = jsonMap['FirebaseConfig'];
+    final dynamic configMap = jsonMap['AppwriteConfig'];
     dbConnInfo.fromJson(configMap['dbConnInfo']);
     storageConnInfo.fromJson(configMap['storageConnInfo']);
     socketConnInfo.fromJson(configMap['socketConnInfo']);

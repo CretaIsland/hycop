@@ -41,9 +41,12 @@ class AccountManager {
 
   static Future<bool> isExistAccount(String email) async {
     await initialize();
-    return HycopFactory.account!.isExistAccount(email).catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'AccountManager.isExistAccount Failed !!!'));
+    logger.finest('isExistAccount');
+    return HycopFactory.account!.isExistAccount(email).catchError((error, stackTrace) {
+      logger.severe('isExistAccount failed');
+      throw HycopUtils.getHycopException(
+          error: error, defaultMessage: 'AccountManager.isExistAccount Failed !!!');
+    });
   }
 
   static Future<void> updateAccountInfo(Map<String, dynamic> updateUserData) async {

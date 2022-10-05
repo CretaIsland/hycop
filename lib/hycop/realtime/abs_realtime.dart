@@ -23,6 +23,7 @@ abstract class AbsRealtime {
   Future<void> start();
   void stop();
   void clearListener() {
+    logger.fine('clearListener()');
     listenerMap.clear();
   }
 
