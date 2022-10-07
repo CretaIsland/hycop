@@ -15,8 +15,8 @@ class AppwriteDatabase extends AbsDatabase {
   @override
   Future<void> initialize() async {
     if (AbsDatabase.awDBConn == null) {
-      logger.finest(
-          "AppwriteDatabase initialize ${myConfig!.serverConfig!.dbConnInfo.databaseURL}, ${myConfig!.serverConfig!.dbConnInfo.projectId}");
+      //logger.finest(
+      //    "AppwriteDatabase initialize ${myConfig!.serverConfig!.dbConnInfo.databaseURL}, ${myConfig!.serverConfig!.dbConnInfo.projectId}");
       await HycopFactory.initAll();
       AbsDatabase.setAppWriteApp(Client()
         ..setProject(myConfig!.serverConfig!.dbConnInfo.projectId)

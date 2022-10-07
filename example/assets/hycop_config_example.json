@@ -1,0 +1,44 @@
+{
+    "FirebaseConfig" : {
+        "dbConnInfo" : {
+            "apiKey" : "<PUT YOUR API KEY FOR FIRESTORE HERE>",
+            "authDomain" :"<PUT YOUR AUTHDomain FOR FIRESTORE HERE>",
+            "databaseURL" : "<PUT YOUR FIREBASE DATABSE(REALTIME) URL HERE>",,
+            "projectId" : "<PUT YOUR PROJECT ID HERE>",
+            "storageBucket" : "<PUT YOUR storageBucket ID HERE>",
+            "messagingSenderId" : "<PUT YOUR messagingSenderId ID HERE>",
+            "appId" : "<PUT YOUR APP ID HERE>"           
+        },
+        "storageConnInfo" : {
+            "apiKey" : "<PUT YOUR API KEY FOR FIRESTORE HERE>",
+            "appId" : "<PUT YOUR APP ID HERE>",
+            "projectId" : "<PUT YOUR PROJECT ID HERE>",
+            "storageURL" : "<PUT YOUR  storage URL HERE>",
+            "messagingSenderId" : "<PUT YOUR messagingSenderId ID HERE>"
+        },
+        "socketConnInfo" : {
+            "serverUrl" : "ws://127.0.0.1",
+            "serverPort" : "4432"
+        }
+    },
+    "AppwriteConfig" : {
+        "dbConnInfo" : {
+            "apiKey" : "<PUT YOUR APPWRITE DATABASE API KEY HERE>",
+            "databaseURL" : "<PUT YOUR APPWRITE DATABASE ENDPOINT HERE>",
+            "projectId" : "<PUT YOUR APPWRITE PROJECT ID HERE>",
+            "appId" : "<PUT YOUR APPWRITE DATABASE ID HERE>" 
+        },
+        "storageConnInfo" : {
+            "storageURL" : "<PUT YOUR APPWRITE STORAGE ENDPOINT HERE>",
+            "projectId" : "<PUT YOUR APPWRITE PROJECT ID HERE>",
+            "apiKey" : "<PUT YOUR APPWRITE STORAGE API KEY HERE>"
+        },
+        "socketConnInfo" : {
+            "serverUrl" : "ws://127.0.0.1",
+            "serverPort" : "4432"
+        }
+    },
+    "AssetConfig" : {
+        "savePeriod" : 1000
+    }
+}

@@ -43,7 +43,7 @@ class AccountManager {
     await initialize();
     logger.finest('isExistAccount');
     return HycopFactory.account!.isExistAccount(email).catchError((error, stackTrace) {
-      logger.severe('isExistAccount failed');
+      logger.severe('isExistAccount failed (${error.toString()})');
       throw HycopUtils.getHycopException(
           error: error, defaultMessage: 'AccountManager.isExistAccount Failed !!!');
     });

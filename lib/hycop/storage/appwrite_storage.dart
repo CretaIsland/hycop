@@ -1,10 +1,12 @@
 import 'dart:typed_data';
 
+import 'package:dart_appwrite/models.dart';
 import 'package:hycop/hycop/account/account_manager.dart';
 import 'package:hycop/hycop/hycop_factory.dart';
 import 'package:hycop/hycop/utils/hycop_utils.dart';
 
 import '../../common/util/config.dart';
+import '../../common/util/logger.dart';
 import '../../hycop/utils/hycop_exceptions.dart';
 import '../enum/model_enums.dart';
 import '../../hycop/storage/abs_storage.dart';
@@ -153,7 +155,7 @@ class AppwriteStorage extends AbsStorage {
   @override
   Future<void> setBucketId() async {
     await initialize();
-
+    logger.info('-----setBucketId()');
     String bucketId = HycopUtils.genBucketId(
         AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId);
     final res = await _serverStorage.listBuckets();
@@ -164,13 +166,15 @@ class AppwriteStorage extends AbsStorage {
         return;
       }
     }
-
-    _serverStorage.createBucket(
+    logger.info('-----try to create bucket=$bucketId');
+    Bucket bucket = await _serverStorage.createBucket(
         bucketId: bucketId,
         name: bucketId,
         permission: 'bucket',
         read: ['role:member'],
         write: ['role:member']);
+
+    logger.info('-----bucket newly created=${bucket.$id}');
 
     myConfig!.serverConfig!.storageConnInfo.bucketId = bucketId;
   }

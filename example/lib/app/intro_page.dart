@@ -119,7 +119,7 @@ class _IntroPageState extends State<IntroPage> {
       body: Container(
         decoration: const BoxDecoration(
             image: DecorationImage(
-          image: AssetImage('hycop_intro.jpg'),
+          image: AssetImage('assets/hycop_intro.jpg'),
           fit: BoxFit.cover,
         )),
         child: Center(
