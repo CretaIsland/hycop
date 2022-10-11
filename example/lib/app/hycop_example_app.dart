@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'navigation/routes.dart';
 import 'package:routemaster/routemaster.dart';
-import 'package:hycop/common/util/config.dart';
 
 class HycopExampleApp extends ConsumerStatefulWidget {
   const HycopExampleApp({Key? key}) : super(key: key);
@@ -16,7 +15,6 @@ class HycopExampleApp extends ConsumerStatefulWidget {
 class _HycopExampleAppState extends ConsumerState<HycopExampleApp> {
   @override
   Widget build(BuildContext context) {
-    myConfig?.config.loadAsset(context);
     return MaterialApp.router(
       title: 'Welcome to hycop world',
       debugShowCheckedModeBanner: false,

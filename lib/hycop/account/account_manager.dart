@@ -17,7 +17,7 @@ class AccountManager {
   // // static
   // static AbsAccount? HycopFactory.account; // = null;
   //
-  static void initialize() {
+  static Future<void> initialize() async {
     // if (HycopFactory.account != null) return;
     // if (HycopFactory.serverType == ServerType.appwrite) {
     //   HycopFactory.account = AppwriteAccount();
@@ -25,11 +25,11 @@ class AccountManager {
     //   HycopFactory.account = FirebaseAccount();
     // }
     // //HycopFactory.account!.initialize();
-    HycopFactory.initAll();
+    await HycopFactory.initAll();
   }
 
   static Future<void> createAccount(Map<String, dynamic> userData) async {
-    initialize();
+    await initialize();
     logger.finest('createAccount start');
     await HycopFactory.account!.createAccount(userData).onError((error, stackTrace) =>
         throw HycopUtils.getHycopException(
@@ -39,11 +39,14 @@ class AccountManager {
     logger.finest('createAccount set');
   }
 
-  static Future<bool> isExistAccount(String email) {
-    initialize();
-    return HycopFactory.account!.isExistAccount(email).catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'AccountManager.isExistAccount Failed !!!'));
+  static Future<bool> isExistAccount(String email) async {
+    await initialize();
+    logger.finest('isExistAccount');
+    return HycopFactory.account!.isExistAccount(email).catchError((error, stackTrace) {
+      logger.severe('isExistAccount failed (${error.toString()})');
+      throw HycopUtils.getHycopException(
+          error: error, defaultMessage: 'AccountManager.isExistAccount Failed !!!');
+    });
   }
 
   static Future<void> updateAccountInfo(Map<String, dynamic> updateUserData) async {
@@ -51,7 +54,7 @@ class AccountManager {
       // not login !!!
       throw HycopUtils.getHycopException(defaultMessage: 'not login !!!');
     }
-    initialize();
+    await initialize();
     Map<String, dynamic> newUserData = {};
     newUserData.addAll(_currentLoginUser.getValueMap);
     newUserData.addAll(updateUserData);
@@ -70,8 +73,8 @@ class AccountManager {
     Map<String, dynamic> newUserData = {};
     newUserData.addAll(_currentLoginUser.getValueMap);
     newUserData['password'] = HycopUtils.stringToSha1(newPassword);
-    await HycopFactory.account!.updateAccountPassword(newPassword, oldPassword).onError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(
+    await HycopFactory.account!.updateAccountPassword(newPassword, oldPassword).onError(
+        (error, stackTrace) => throw HycopUtils.getHycopException(
             error: error, defaultMessage: 'AccountManager.updateAccount Failed !!!'));
     _currentLoginUser = UserModel(userData: newUserData);
   }
@@ -81,10 +84,10 @@ class AccountManager {
       // already login !!!
       throw HycopUtils.getHycopException(defaultMessage: 'already logined !!!');
     }
-    initialize();
+    await initialize();
     Map<String, dynamic> userData = {};
-    await HycopFactory.account!.login(email, password, returnUserData: userData).onError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(
+    await HycopFactory.account!.login(email, password, returnUserData: userData).onError(
+        (error, stackTrace) => throw HycopUtils.getHycopException(
             error: error, defaultMessage: 'AccountManager.loginByEmail Failed !!!'));
     _currentLoginUser = UserModel(userData: userData);
   }
@@ -94,7 +97,7 @@ class AccountManager {
       // already login !!!
       throw HycopUtils.getHycopException(defaultMessage: 'already logined !!!');
     }
-    initialize();
+    await initialize();
     Map<String, dynamic> userData = {};
     await HycopFactory.account!
         .login(email, email, returnUserData: userData, accountSignUpType: accountSignUpType)
@@ -108,7 +111,7 @@ class AccountManager {
       // already logout !!!
       throw HycopUtils.getHycopException(defaultMessage: 'not login !!!');
     }
-    initialize();
+    await initialize();
     await HycopFactory.account!.deleteAccount().onError((error, stackTrace) =>
         throw HycopUtils.getHycopException(
             error: error, defaultMessage: 'AccountManager.deleteAccount Failed !!!'));
@@ -120,32 +123,33 @@ class AccountManager {
       // already logout !!!
       return;
     }
-    initialize();
+    await initialize();
     logger.finest('logout start');
-    await HycopFactory.account!.logout().onError((error, stackTrace) => throw HycopUtils.getHycopException(
-        error: error, defaultMessage: 'AccountManager.logout Failed !!!'));
+    await HycopFactory.account!.logout().onError((error, stackTrace) =>
+        throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'AccountManager.logout Failed !!!'));
     logger.finest('logout end');
     _currentLoginUser = UserModel(logout: true);
     logger.finest('logout set');
   }
 
   static Future<void> resetPassword(String email) async {
-    initialize();
+    await initialize();
     await HycopFactory.account!.resetPassword(email).onError((error, stackTrace) =>
         throw HycopUtils.getHycopException(
             error: error, defaultMessage: 'AccountManager.resetPassword Failed !!!'));
   }
 
   static Future<void> resetPasswordConfirm(String userId, String secret, String newPassword) async {
-    initialize();
-    await HycopFactory.account!.resetPasswordConfirm(HycopUtils.midToKey(userId), secret, newPassword).onError(
-        (error, stackTrace) => throw HycopUtils.getHycopException(
+    await initialize();
+    await HycopFactory.account!
+        .resetPasswordConfirm(HycopUtils.midToKey(userId), secret, newPassword)
+        .onError((error, stackTrace) => throw HycopUtils.getHycopException(
             error: error, defaultMessage: 'AccountManager.resetPassword Failed !!!'));
   }
 
   static UserModel _currentLoginUser = UserModel(logout: true);
   static UserModel get currentLoginUser => _currentLoginUser;
-
 }
 
 //

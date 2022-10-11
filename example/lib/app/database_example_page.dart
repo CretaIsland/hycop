@@ -29,7 +29,7 @@ class DatabaseExamplePage extends StatefulWidget {
 }
 
 class _DatabaseExamplePageState extends State<DatabaseExamplePage> {
-  final listKey = GlobalKey<AnimatedListState>();
+  GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
   String _bookModelStr = '';
   int counter = 0;
   final Random random = Random();
@@ -39,7 +39,7 @@ class _DatabaseExamplePageState extends State<DatabaseExamplePage> {
     super.initState();
     bookManagerHolder = BookManager();
     logger.info('initState');
-    HycopFactory.initAll();
+    //HycopFactory.initAll();
     HycopFactory.realtime!.addListener("hycop_book", bookManagerHolder!.realTimeCallback);
   }
 
@@ -104,6 +104,7 @@ class _DatabaseExamplePageState extends State<DatabaseExamplePage> {
                 //   return const Center(child: Text('no book founded'));
                 // }
                 return Consumer<BookManager>(builder: (context, bookManager, child) {
+                  listKey = GlobalKey<AnimatedListState>();
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

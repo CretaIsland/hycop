@@ -28,3 +28,12 @@ migrate_working_dir/
 .dart_tool/
 .packages
 build/
+*.cc
+*.h
+*.make
+*.swift
+.flutter-plugins*
+lib/common/util/config.dart
+
+
+

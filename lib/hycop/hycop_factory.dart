@@ -23,46 +23,46 @@ class HycopFactory {
   static String enterprise = 'Demo';
   static ServerType serverType = ServerType.firebase;
   static AbsDatabase? dataBase;
-  static void selectDatabase() {
+  static Future<void> selectDatabase() async {
     if (HycopFactory.serverType == ServerType.appwrite) {
       dataBase = AppwriteDatabase();
     } else {
       dataBase = FirebaseDatabase();
     }
-    dataBase!.initialize();
+    await dataBase!.initialize();
     return;
   }
 
   static AbsRealtime? realtime;
-  static void selectRealTime() {
+  static Future<void> selectRealTime() async {
     if (HycopFactory.serverType == ServerType.appwrite) {
       realtime = AppwriteRealtime();
     } else {
       realtime = FirebaseRealtime();
     }
-    realtime!.initialize();
+    await realtime!.initialize();
     return;
   }
 
   static AbsFunction? function;
-  static void selectFunction() {
+  static Future<void> selectFunction() async {
     if (HycopFactory.serverType == ServerType.appwrite) {
       function = AppwriteFunction();
     } else {
       function = FirebaseFunction();
     }
-    function!.initialize();
+    await function!.initialize();
     return;
   }
 
   static AbsStorage? storage;
-  static void selectStorage() {
+  static Future<void> selectStorage() async {
     if (HycopFactory.serverType == ServerType.appwrite) {
       storage = AppwriteStorage();
     } else {
       storage = FirebaseAppStorage();
     }
-    storage!.initialize();
+    await storage!.initialize();
     return;
   }
 
@@ -82,14 +82,16 @@ class HycopFactory {
     }
   }
 
-  static void initAll({bool force = false}) {
+  static Future<void> initAll({bool force = false}) async {
     if (myConfig != null && force == false) return;
     logger.info('initAll()');
     myConfig = HycopConfig();
-    HycopFactory.selectDatabase();
-    HycopFactory.selectRealTime();
-    HycopFactory.selectFunction();
-    HycopFactory.selectStorage();
+    await myConfig!.serverConfig!.loadAsset();
+    //await myConfig!.load
+    await HycopFactory.selectDatabase();
+    await HycopFactory.selectRealTime();
+    await HycopFactory.selectFunction();
+    await HycopFactory.selectStorage();
     HycopFactory.selectAccount();
   }
 }
