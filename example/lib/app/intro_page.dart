@@ -296,7 +296,7 @@ class _IntroPageState extends State<IntroPage> {
 
     AccountManager.login(email, password).then((value) {
       HycopFactory.setBucketId();
-      Routemaster.of(context).push(AppRoutes.userinfo);
+      Routemaster.of(context).push(AppRoutes.main);
     }).onError((error, stackTrace) {
       if (error is HycopException) {
         HycopException ex = error;
@@ -318,7 +318,7 @@ class _IntroPageState extends State<IntroPage> {
     // String password = _passwordTextEditingController.text;
 
     AccountManager.loginByService(email, AccountSignUpType.google).then((value) {
-      Routemaster.of(context).push(AppRoutes.userinfo);
+      Routemaster.of(context).push(AppRoutes.main);
     }).onError((error, stackTrace) {
       if (error is HycopException) {
         HycopException ex = error;
@@ -347,7 +347,7 @@ class _IntroPageState extends State<IntroPage> {
       logger.finest('register start');
       AccountManager.createAccount(userData).then((value) {
         logger.finest('register end');
-        Routemaster.of(context).push(AppRoutes.userinfo);
+        Routemaster.of(context).push(AppRoutes.main);
         logger.finest('goto user-info-page');
       }).onError((error, stackTrace) {
         if (error is HycopException) {
@@ -403,7 +403,7 @@ class _IntroPageState extends State<IntroPage> {
     userData['password'] = email;
     userData['accountSignUpType'] = AccountSignUpType.google.index;
     AccountManager.createAccount(userData).then((value) {
-      Routemaster.of(context).push(AppRoutes.userinfo);
+      Routemaster.of(context).push(AppRoutes.main);
     }).onError((error, stackTrace) {
       if (error is HycopException) {
         HycopException ex = error;
@@ -603,7 +603,7 @@ class _IntroPageState extends State<IntroPage> {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(150.0, 0.0, 150.0, 0.0),
-            child: SimpleNameTextField(controller: _signinNameTextEditingController),
+            child: SimpleTextField(hintText: 'Name', controller: _signinNameTextEditingController),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(150.0, 0.0, 150.0, 0.0),
