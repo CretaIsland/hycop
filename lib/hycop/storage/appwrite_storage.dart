@@ -30,11 +30,12 @@ class AppwriteStorage extends AbsStorage {
         ..setEndpoint(myConfig!.serverConfig!.storageConnInfo.storageURL)
         ..setProject(myConfig!.serverConfig!.storageConnInfo.projectId)
         ..setSelfSigned(status: true));
-
+      logger.info('aw_server storage initialize start--------------------');
       _serverStorage = aw_server.Storage(aw_server.Client()
         ..setEndpoint(myConfig!.serverConfig!.storageConnInfo.storageURL)
         ..setProject(myConfig!.serverConfig!.storageConnInfo.projectId)
         ..setKey(myConfig!.serverConfig!.storageConnInfo.apiKey));
+      logger.info('aw_server storage initialize end--------------------');
     }
 
     // ignore: prefer_conditional_assignment, unnecessary_null_comparison

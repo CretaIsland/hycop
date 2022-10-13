@@ -1,0 +1,73 @@
+# ############################
+# Run
+# ############################
+
+flutter run -d chrome --web-renderer html
+# or
+flutter run -d chrome --web-renderer canvaskit
+
+# ############################
+# build
+# ############################
+
+# 초기에 한번, 빌드 위치를 잡아준다.  이미 잡았다면, 기존 빌드 폴더가 무효가 되므로 주의한다.
+cd example
+flutter config --build-dir=../release/hycop_demo_v1  
+# 그리고 VCode 를 다시 시작해야 한다.
+# 이후, build 는 다음과 같다.
+
+flutter build web --web-renderer html --release --base-href="/hycop_demo_v1/"
+# or
+flutter build web --web-renderer canvaskit --release --base-href="/hycop_demo_v1/"
+
+# ############################
+# Release
+# ############################
+# GitHub에 릴리즈하기
+# 먼저 GitHub page 에서 repository 를 만든다.  반드시 public 으로 만들어야 한다.
+# hycop_demo_v1 로 repository 를 만든것을 가정한다.
+
+cd ../release/hycop_demo_v1/web
+git init
+git add .
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/CretaIsland/hycop_demo_v1.git
+git push -u origin main
+
+# GitHub repository 에서  Settings - 좌측 세로 메뉴에서 Pages
+# 화면 중간에 Branch 를 main 으로 하고 Save 
+# 한 5분 정도 기다린 다음 page 를 refresh 하면 아래와 같은 페이지 주소가 나온다.
+# 릴리즈 된것이다.
+
+https://cretaisland.github.io/hycop_demo_v1/
+
+# ############################
+# Packaging
+# ############################
+
+# create package
+# 한칸 위에 hycop_web 이란 이름으로 패키지를 만든다.
+flutter create --org com.sqisoft.hycop --template=plugin ../hycop_web
+
+# add web platform
+flutter create -t plugin --platforms web ../hycop_web
+
+
+# ############################
+# Publishing
+# ############################
+
+# 사전 점검
+cd ../hycop_web
+flutter pub publish --dry-run
+
+# pubspec.yaml 에 다음을 추가함.
+flutter_web_plugins:
+    sdk: flutter
+ Homepage : 에 hycop Repository https://github.com/CretaIsland/hycop.git 정보를 추가해준다.
+
+
+# 릴리즈
+flutter pub publish
+"# hycop" 
