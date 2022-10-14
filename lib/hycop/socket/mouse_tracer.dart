@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
 
-
 MouseTracer? mouseTracerHolder;
 
 class MouseTracer extends ChangeNotifier {
 
   List<MouseModel> mouseModelList = [];
+  List<Map<String, String>> focusFrameList = [];
+
 
   void joinUser(List<dynamic> userList) {
     for(var element in userList) {
@@ -23,6 +24,16 @@ class MouseTracer extends ChangeNotifier {
   void changePosition(int index, double dx, double dy) {
     mouseModelList[index].cursorX = dx;
     mouseModelList[index].cursorY = dy;
+    notifyListeners();
+  }
+
+  void focusFrame(String userID, String frameID) {
+    focusFrameList.add({"userID" : userID, "frameID" : frameID});
+    notifyListeners();
+  }
+
+  void unFocusFrame(String userID) {
+    focusFrameList.removeWhere((element) => element["userID"] == userID);
     notifyListeners();
   }
 

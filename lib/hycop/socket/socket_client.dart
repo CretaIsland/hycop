@@ -1,7 +1,5 @@
 
 import 'package:hycop/hycop/account/account_manager.dart';
-
-import '../../common/util/config.dart';
 import '../../hycop/utils/hycop_exceptions.dart';
 import '../../common/util/logger.dart';
 import 'mouse_tracer.dart';
@@ -18,7 +16,9 @@ class SocketClient {
   
   void initialize() {
     socket = io(
-      myConfig!.serverConfig!.socketConnInfo.serverUrl + myConfig!.serverConfig!.socketConnInfo.serverPort.toString(),  // url:port
+      "ws:/ec2-3-35-0-0.ap-northeast-2.compute.amazonaws.com:4432",
+      //"ws://127.0.0.1:4432",
+      //myConfig!.serverConfig!.socketConnInfo.serverUrl + myConfig!.serverConfig!.socketConnInfo.serverPort.toString(),  // url:port
       <String, dynamic> {
         "transports" : ["websocket"],
         "autoConnect" : false
@@ -35,7 +35,7 @@ class SocketClient {
       throw HycopException(message: err.toString())
     );
 
-    socket.emit("join", {"roomID" : roomID, "userID" : "test@gmail.com"});
+    socket.emit("join", {"roomID" : roomID, "userID" : AccountManager.currentLoginUser.email});
 
 
     socket.on("connect", (data) {
@@ -46,6 +46,7 @@ class SocketClient {
       disconnect();
     });
     socket.on("joinUser", (data) {
+      logger.info('(join) socket listen 이벤트 호출');
       joinUser(data);
     });
     socket.on("leaveUser", (data) {
@@ -57,7 +58,14 @@ class SocketClient {
     socket.on("changeCursor", (data) {
       changeCursor(data);
     });
-
+    socket.on("focusFrameData", (data) {
+      logger.info('socket listen 이벤트 호출');
+      mouseTracerHolder!.focusFrame(data["userID"], data["frameID"]);
+    });
+    socket.on("unFocusFrameData", (data) {
+      mouseTracerHolder!.unFocusFrame(data["userID"]);
+    });
+    
   }
 
 
@@ -97,6 +105,24 @@ class SocketClient {
       data["cursor_x"],
       data["cursor_y"]
     );
+  }
+
+  void focusFrame(String frameID) {
+    mouseTracerHolder!.focusFrame(AccountManager.currentLoginUser.email, frameID);
+    socket.emit("focusFrame", {
+      "roomID" : roomID,
+      "userID" : AccountManager.currentLoginUser.email,
+      "frameID" : frameID,
+      "changeDate" : DateTime.now().toString().substring(0, 16)
+    });
+  }
+
+  void unFocusFrame() {
+    mouseTracerHolder!.unFocusFrame(AccountManager.currentLoginUser.email);
+    socket.emit("unFocusFrame", {
+      "roomID" : roomID,
+      "userID" : AccountManager.currentLoginUser.email
+    });
   }
 
   void disconnect() {
