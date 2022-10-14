@@ -11,7 +11,7 @@ class MouseTracer extends ChangeNotifier {
 
   void joinUser(List<dynamic> userList) {
     for(var element in userList) {
-      mouseModelList.add(MouseModel(element["userID"], 0.0, 0.0));
+      mouseModelList.add(MouseModel(element["userID"], element["userName"], 0.0, 0.0));
     }
     notifyListeners();
   }
@@ -45,10 +45,11 @@ class MouseTracer extends ChangeNotifier {
 
 class MouseModel {
   String userID = "";
+  String userName = "";
   double cursorX = 0.0;
   double cursorY = 0.0;
 
-  MouseModel(this.userID, this.cursorX, this.cursorY);
+  MouseModel(this.userID, this.userName, this.cursorX, this.cursorY);
 
   void changePosition(double dx, double dy) {
     cursorX = dx;

@@ -16,8 +16,7 @@ class SocketClient {
   
   void initialize() {
     socket = io(
-      "ws:/ec2-3-35-0-0.ap-northeast-2.compute.amazonaws.com:4432",
-      //"ws://127.0.0.1:4432",
+      "ws://ec2-3-35-0-0.ap-northeast-2.compute.amazonaws.com:4432",
       //myConfig!.serverConfig!.socketConnInfo.serverUrl + myConfig!.serverConfig!.socketConnInfo.serverPort.toString(),  // url:port
       <String, dynamic> {
         "transports" : ["websocket"],
@@ -35,7 +34,11 @@ class SocketClient {
       throw HycopException(message: err.toString())
     );
 
-    socket.emit("join", {"roomID" : roomID, "userID" : AccountManager.currentLoginUser.email});
+    socket.emit("join", {
+      "roomID" : roomID, 
+      "userID" : AccountManager.currentLoginUser.email, 
+      "userName" : AccountManager.currentLoginUser.name
+    });
 
 
     socket.on("connect", (data) {
@@ -43,10 +46,9 @@ class SocketClient {
     });
     socket.on("disconnect", (data) {
       logger.finest("disconnect");
-      disconnect();
+      disconnect(data);
     });
     socket.on("joinUser", (data) {
-      logger.info('(join) socket listen 이벤트 호출');
       joinUser(data);
     });
     socket.on("leaveUser", (data) {
@@ -59,7 +61,6 @@ class SocketClient {
       changeCursor(data);
     });
     socket.on("focusFrameData", (data) {
-      logger.info('socket listen 이벤트 호출');
       mouseTracerHolder!.focusFrame(data["userID"], data["frameID"]);
     });
     socket.on("unFocusFrameData", (data) {
@@ -74,6 +75,7 @@ class SocketClient {
   }
 
   void leaveUser(Map<String, dynamic> data) {
+    mouseTracerHolder!.unFocusFrame(data["userID"]);
     mouseTracerHolder!.leaveUser(data["userID"]);
   }
 
@@ -125,7 +127,7 @@ class SocketClient {
     });
   }
 
-  void disconnect() {
+  void disconnect(Map<String, dynamic> data) {
     socket.disconnect().onError((err) {
       throw HycopException(message: err.toString());
     });
