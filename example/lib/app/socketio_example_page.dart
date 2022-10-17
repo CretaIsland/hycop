@@ -165,6 +165,7 @@ class _SocketIOExamplePageState extends State<SocketIOExamplePage> {
             size: 30,
             color: userColorList[index < 5 ? index : (index % 5) + 1],
           ),
+          index == 0 ? Container() :
           Container(
             width: mouseTracerManager.mouseModelList[index].userName.length * 10,
             height: 20,

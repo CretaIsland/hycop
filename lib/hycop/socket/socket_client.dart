@@ -16,6 +16,8 @@ class SocketClient {
   
   void initialize() {
     socket = io(
+      //"ws://localhost:4432",
+      //"wss://devcreta.tk:4432",
       "ws://ec2-3-35-0-0.ap-northeast-2.compute.amazonaws.com:4432",
       //myConfig!.serverConfig!.socketConnInfo.serverUrl + myConfig!.serverConfig!.socketConnInfo.serverPort.toString(),  // url:port
       <String, dynamic> {
