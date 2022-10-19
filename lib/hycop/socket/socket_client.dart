@@ -1,7 +1,5 @@
 
 import 'package:hycop/hycop/account/account_manager.dart';
-
-import '../../common/util/config.dart';
 import '../../hycop/utils/hycop_exceptions.dart';
 import '../../common/util/logger.dart';
 import 'mouse_tracer.dart';
@@ -18,9 +16,11 @@ class SocketClient {
   
   void initialize() {
     socket = io(
-      myConfig!.serverConfig!.socketConnInfo.serverUrl + myConfig!.serverConfig!.socketConnInfo.serverPort.toString(),  // url:port
+      //"ws://localhost:4432",
+      "https://hycop-socket.tk:443",
+      //myConfig!.serverConfig!.socketConnInfo.serverUrl + myConfig!.serverConfig!.socketConnInfo.serverPort.toString(),  // url:port
       <String, dynamic> {
-        "transports" : ["websocket"],
+        "transports" : ['websocket'],
         "autoConnect" : false
       }
     );
@@ -35,7 +35,11 @@ class SocketClient {
       throw HycopException(message: err.toString())
     );
 
-    socket.emit("join", {"roomID" : roomID, "userID" : "test@gmail.com"});
+    socket.emit("join", {
+      "roomID" : roomID, 
+      "userID" : AccountManager.currentLoginUser.email, 
+      "userName" : AccountManager.currentLoginUser.name
+    });
 
 
     socket.on("connect", (data) {
@@ -43,7 +47,7 @@ class SocketClient {
     });
     socket.on("disconnect", (data) {
       logger.finest("disconnect");
-      disconnect();
+      disconnect(data);
     });
     socket.on("joinUser", (data) {
       joinUser(data);
@@ -57,7 +61,13 @@ class SocketClient {
     socket.on("changeCursor", (data) {
       changeCursor(data);
     });
-
+    socket.on("focusFrameData", (data) {
+      mouseTracerHolder!.focusFrame(data["userID"], data["frameID"]);
+    });
+    socket.on("unFocusFrameData", (data) {
+      mouseTracerHolder!.unFocusFrame(data["userID"]);
+    });
+    
   }
 
 
@@ -66,6 +76,7 @@ class SocketClient {
   }
 
   void leaveUser(Map<String, dynamic> data) {
+    mouseTracerHolder!.unFocusFrame(data["userID"]);
     mouseTracerHolder!.leaveUser(data["userID"]);
   }
 
@@ -99,7 +110,25 @@ class SocketClient {
     );
   }
 
-  void disconnect() {
+  void focusFrame(String frameID) {
+    mouseTracerHolder!.focusFrame(AccountManager.currentLoginUser.email, frameID);
+    socket.emit("focusFrame", {
+      "roomID" : roomID,
+      "userID" : AccountManager.currentLoginUser.email,
+      "frameID" : frameID,
+      "changeDate" : DateTime.now().toString().substring(0, 16)
+    });
+  }
+
+  void unFocusFrame() {
+    mouseTracerHolder!.unFocusFrame(AccountManager.currentLoginUser.email);
+    socket.emit("unFocusFrame", {
+      "roomID" : roomID,
+      "userID" : AccountManager.currentLoginUser.email
+    });
+  }
+
+  void disconnect(Map<String, dynamic> data) {
     socket.disconnect().onError((err) {
       throw HycopException(message: err.toString());
     });

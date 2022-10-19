@@ -5,12 +5,13 @@ import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../../common/util/device_info.dart';
 import '../../common/util/logger.dart';
 import '../utils/hycop_utils.dart';
 import '../account/account_manager.dart';
+import 'package:uuid/uuid.dart';
 
 abstract class AbsRealtime {
+  static String deviceId = const Uuid().v4();
   //connection info
   static FirebaseApp? _fbRTApp; // firebase only RealTime connetion
   static FirebaseApp? get fbRTApp => _fbRTApp;
@@ -52,7 +53,7 @@ abstract class AbsRealtime {
     input['collectionId'] = HycopUtils.collectionFromMid(mid, 'hycop');
     input['mid'] = mid; //'book=3ecb527f-4f5e-4350-8705-d5742781451b';
     input['userId'] = AccountManager.currentLoginUser.email;
-    input['deviceId'] = DeviceInfo.deviceId;
+    input['deviceId'] = deviceId;
     input['updateTime'] = HycopUtils.dateTimeToDB(DateTime.now());
     input['delta'] = delta != null ? json.encode(delta) : '';
 
@@ -64,7 +65,7 @@ abstract class AbsRealtime {
     lastUpdateTime = mapValue["updateTime"] ?? '';
 
     String deviceId = mapValue["deviceId"] ?? '';
-    if (deviceId == DeviceInfo.deviceId) {
+    if (deviceId == deviceId) {
       return;
     }
     String directive = mapValue["directive"] ?? '';

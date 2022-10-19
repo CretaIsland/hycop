@@ -33,7 +33,3 @@ build/
 *.make
 *.swift
 .flutter-plugins*
-lib/common/util/config.dart
-
-
-

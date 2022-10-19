@@ -1,7 +1,7 @@
 name: hycop
 description: Hycop Framework
-version: 0.0.1
-homepage: https://github.com/CretaIsland/hycop
+version: 0.0.3
+homepage: http://www.sqisoft.com
 
 environment:
   sdk: ">=2.17.6 <3.0.0"

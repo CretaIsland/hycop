@@ -1,6 +1,9 @@
 // ignore_for_file: depend_on_referenced_packages
-
 import 'package:flutter/material.dart';
+import 'package:hycop/hycop/account/account_manager.dart';
+import 'package:hycop/hycop/socket/mouse_tracer.dart';
+import 'package:hycop/hycop/socket/socket_client.dart';
+import 'package:provider/provider.dart';
 import 'package:routemaster/routemaster.dart';
 import '../widgets/widget_snippets.dart';
 import 'drawer_menu_widget.dart';
@@ -8,40 +11,176 @@ import 'navigation/routes.dart';
 
 class SocketIOExamplePage extends StatefulWidget {
   final VoidCallback? openDrawer;
-
   const SocketIOExamplePage({Key? key, this.openDrawer}) : super(key: key);
-
   @override
   State<SocketIOExamplePage> createState() => _SocketIOExamplePageState();
 }
 
+
 class _SocketIOExamplePageState extends State<SocketIOExamplePage> {
+
+  SocketClient client = SocketClient();
+  List<Color> userColorList = [Colors.red, Colors.blue, Colors.green, Colors.yellow, Colors.purple];
+
+
   @override
   void initState() {
     super.initState();
+    mouseTracerHolder = MouseTracer();
+    mouseTracerHolder!.joinUser([{"userID" : AccountManager.currentLoginUser.email, "userName" : AccountManager.currentLoginUser.name}]);
+
+    client.initialize();
+    client.connectServer("contentBookID");
   }
 
   @override
   Widget build(BuildContext context) {
-    //Size screenSize = MediaQuery.of(context).size;
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: const Icon(Icons.add),
-      ),
-      appBar: AppBar(
-        actions: WidgetSnippets.hyAppBarActions(context),
-        backgroundColor: Colors.orange,
-        title: const Text('Socket IO Example'),
-        leading: DrawerMenuWidget(onClicked: () {
-          if (widget.openDrawer != null) {
-            widget.openDrawer!();
-          } else {
-            Routemaster.of(context).push(AppRoutes.main);
-          }
-        }),
-      ),
-      body: Container(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<MouseTracer>.value(value: mouseTracerHolder!)
+      ],
+      child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {},
+          child: const Icon(Icons.add),
+        ),
+        appBar: AppBar(
+          actions: WidgetSnippets.hyAppBarActions(context),
+          backgroundColor: Colors.orange,
+          title: const Text('Socket IO Example'),
+          leading: DrawerMenuWidget(onClicked: () {
+            if (widget.openDrawer != null) {
+              widget.openDrawer!();
+            } else {
+              Routemaster.of(context).push(AppRoutes.main);
+            }
+          }),
+        ),
+        body: Consumer<MouseTracer>(builder: (context, mouseTracerManager, child) {
+          return MouseRegion(
+            onHover: (pointerEvent) {
+              mouseTracerManager.changePosition(0, pointerEvent.position.dx, pointerEvent.position.dy);
+              client.moveCursor(pointerEvent.position.dx, pointerEvent.position.dy);
+            },
+            child: Stack(
+              children: [
+                GestureDetector(
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height - 50,
+                    color: Colors.grey[300]
+                  ),
+                  onTap: () {
+                    client.unFocusFrame();
+                  },
+                ),
+                Center(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        child: Container(
+                          width: 150,
+                          height: 150,
+                          decoration: BoxDecoration(
+                            border: getBorder("frameID_1", mouseTracerManager),
+                            borderRadius: BorderRadius.circular(150),
+                            color: const Color.fromARGB(255, 233, 163, 186)
+                          ),
+                        ),
+                        onTap: () {
+                          client.unFocusFrame();
+                          client.focusFrame("frameID_1");
+                        },
+                      ),
+                      const SizedBox(
+                        width: 50,
+                      ),
+                      GestureDetector(
+                        child: Container(
+                          width: 150,
+                          height: 150,
+                          decoration: BoxDecoration(
+                            border: getBorder("frameID_2", mouseTracerManager),
+                            color:const Color.fromARGB(255, 108, 182, 120)
+                          ),
+                        ),
+                        onTap: () {
+                          client.unFocusFrame();
+                          client.focusFrame("frameID_2");
+                        },
+                      ),
+                      const SizedBox(
+                        width: 50,
+                      ),
+                      GestureDetector(
+                        child: Container(
+                          width: 150,
+                          height: 150,
+                          decoration: BoxDecoration(
+                            border: getBorder("frameID_3", mouseTracerManager),
+                            borderRadius: BorderRadius.circular(50),
+                            color: const Color.fromARGB(255, 130, 175, 233)
+                          ),
+                        ),
+                        onTap: () {
+                          client.unFocusFrame();
+                          client.focusFrame("frameID_3");
+                        },
+                      )
+                    ],
+                  ),
+                ),
+                cursorWidget(0, mouseTracerManager),
+                for(int i=1; i<mouseTracerManager.mouseModelList.length; i++)
+                  cursorWidget(i, mouseTracerManager)
+              ]
+            ),
+          );
+        })
+      )
     );
   }
+
+  Border getBorder(String frameID, MouseTracer mouseTracerManager) {
+    Border border = Border.all();
+    for(var element in mouseTracerManager.focusFrameList) {
+      if(element["frameID"] == frameID) {
+        border = Border.all(color: userColorList[mouseTracerHolder!.getIndex(element["userID"]!) % 5], width: 3);
+      }
+    }
+    return border;
+  }
+
+  Widget cursorWidget(int index, MouseTracer mouseTracerManager) {
+    return Positioned(
+      left: mouseTracerManager.mouseModelList[index].cursorX,
+      top: mouseTracerManager.mouseModelList[index].cursorY-30,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children : [
+          Icon(
+            Icons.pan_tool_alt,
+            size: 30,
+            color: userColorList[index < 5 ? index : (index % 5) + 1],
+          ),
+          index == 0 ? Container() :
+          Container(
+            width: mouseTracerManager.mouseModelList[index].userName.length * 10,
+            height: 20,
+            decoration: BoxDecoration(
+              color: userColorList[index < 5 ? index : (index % 5) + 1],
+              borderRadius: BorderRadius.circular(20)
+            ),
+            child: Text(mouseTracerManager.mouseModelList[index].userName, style: const TextStyle(color: Colors.white), textAlign: TextAlign.center),
+          )
+        ]
+      )
+    );
+  }
+
+  
+
+
 }
