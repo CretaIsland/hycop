@@ -6,16 +6,16 @@ import '../database_example_page.dart';
 //import '../drawer_menu_page.dart';
 import '../function_example_page.dart';
 import '../intro_page.dart';
-import '../login_page.dart';
+//import '../login_page.dart';
 import '../realtime_example_page.dart';
-import '../register_page.dart';
+//import '../register_page.dart';
 import '../main_page.dart';
 import '../socketio_example_page.dart';
 import '../storage_example_page.dart';
 import '../user_example_page.dart';
 //import '../../common/util/logger.dart';
-import '../user_info_page.dart';
-import '../reset_password_confirm_page.dart';
+//import '../user_info_page.dart';
+//import '../reset_password_confirm_page.dart';
 
 abstract class AppRoutes {
   //static const String menu = '/menu';
@@ -31,7 +31,7 @@ abstract class AppRoutes {
   static const String intro = '/intro';
   static const String register = '/register';
 
-  static const String userinfo  = '/userinfo';
+  //static const String userinfo  = '/userinfo';
   static const String resetPasswordConfirm  = '/resetPasswordConfirm';
 }
 
@@ -41,14 +41,14 @@ abstract class AppRoutes {
 final routesLoggedOut = RouteMap(
   onUnknownRoute: (_) => const Redirect(AppRoutes.intro),
   routes: {
-    AppRoutes.login: (_) => const TransitionPage(
-          child: LoginPage(),
-          pushTransition: PageTransition.fadeUpwards,
-        ),
-    AppRoutes.register: (_) => const TransitionPage(
-          child: RegisterPage(),
-          pushTransition: PageTransition.fadeUpwards,
-        ),
+    // AppRoutes.login: (_) => const TransitionPage(
+    //       child: LoginPage(),
+    //       pushTransition: PageTransition.fadeUpwards,
+    //     ),
+    // AppRoutes.register: (_) => const TransitionPage(
+    //       child: RegisterPage(),
+    //       pushTransition: PageTransition.fadeUpwards,
+    //     ),
     //AppRoutes.menu: (_) => TransitionPage(child: menuWidget),
     AppRoutes.main: (_) => const TransitionPage(child: MainPage()),
     AppRoutes.databaseExample: (_) => const TransitionPage(child: DatabaseExamplePage()),
@@ -58,8 +58,8 @@ final routesLoggedOut = RouteMap(
     AppRoutes.socketioExample: (_) => const TransitionPage(child: SocketIOExamplePage()),
     AppRoutes.userExample: (_) => const TransitionPage(child: UserExamplePage()),
     AppRoutes.intro: (_) => const TransitionPage(child: IntroPage()),
-    AppRoutes.userinfo: (_) => const TransitionPage(child: UserInfoPage()),
-    AppRoutes.resetPasswordConfirm: (_) => const TransitionPage(child: ResetPasswordConfirmPage()),
+    //AppRoutes.userinfo: (_) => const TransitionPage(child: UserInfoPage()),
+    //AppRoutes.resetPasswordConfirm: (_) => const TransitionPage(child: ResetPasswordConfirmPage()),
   },
 );
 
