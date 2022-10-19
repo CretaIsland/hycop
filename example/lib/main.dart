@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/hycop_example_app.dart';
 import 'package:hycop/common/util/device_info.dart';
 import 'package:hycop/common/util/logger.dart';
+import 'package:hycop/hycop/hycop_factory.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +18,8 @@ void main() {
   // HycopFactory.selectDatabase();
   // HycopFactory.selectRealTime();
   // HycopFactory.selectFunction();
+
+  HycopFactory.initAll();
 
   const String testValue = String.fromEnvironment('USERNAME', defaultValue: 'unknown');
   logger.info("-------------------------------$testValue");
