@@ -181,39 +181,6 @@ class _RealTimeExamplePageState extends State<RealTimeExamplePage> {
       },
       stickerList: [
         ...getStickerList(),
-        // Sticker(
-        //     id: "uniqueId_000",
-        //     position: Offset.zero,
-        //     angle: 0,
-        //     // child: Image.network(
-        //     //     "https://images.unsplash.com/photo-1640113292801-785c4c678e1e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=736&q=80"),
-        //     child: Container(
-        //       color: Colors.red,
-        //       width: 200,
-        //       height: 200,
-        //       child: Image.asset(
-        //         'assets/jisoo.png',
-        //         // frameBuilder:
-        //         //     (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
-        //         //   if (wasSynchronouslyLoaded) {
-        //         //     return child;
-        //         //   }
-        //         //   return AnimatedOpacity(
-        //         //     opacity: frame == null ? 0 : 1,
-        //         //     duration: const Duration(seconds: 10),
-        //         //     curve: Curves.easeOut,
-        //         //     child: child,
-        //         //   );
-        //         // },
-        //       ),
-        //     )),
-        // Sticker(
-        //   id: "uniqueId_222",
-        //   angle: 0,
-        //   position: const Offset(200, 200),
-        //   isText: true,
-        //   child: const Text("Hello"),
-        // ),
       ],
     );
   }
