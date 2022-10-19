@@ -3,6 +3,7 @@ library hycop;
 export 'common/undo/save_manager.dart';
 export 'common/undo/undo.dart';
 export 'common/util/config.dart';
+export 'common/util/my_encrypt.dart';
 export 'common/util/logger.dart';
 export 'common/util/state.dart';
 export 'common/util/util.dart';

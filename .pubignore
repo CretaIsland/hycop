@@ -1,0 +1,68 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+# Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock.
+/pubspec.lock
+**/doc/api/
+.dart_tool/
+.packages
+build/
+*.cc
+*.h
+*.make
+*.swift
+.flutter-plugins*
+release/
+.gitignore
+*~
+HelpMemo.txt
+lib/common/util/device_info.dart
+example/.dart_tool/
+example/android/
+example/build/
+example/hycop_assets_org/
+example/ios/
+example/linux/
+example/macos/
+example/release/
+example/test/
+example/web/
+example/windows/
+example/analysis_options.yaml
+example/assets/collection_hycop_delta.json
+example/assets/collection_hycop_user.json
+example/assets/hycop_config.json
+example/fonts/
+example/ios/Runner/AppDelegate.h
+example/linux/main.cc
+example/linux/my_application.cc
+example/linux/my_application.h
+example/macos/Runner/AppDelegate.swift
+example/macos/Runner/MainFlutterWindow.swift
+example/windows/runner/flutter_window.h
+example/windows/runner/resource.h
+example/windows/runner/utils.h
+example/windows/runner/win32_window.h
+
+
