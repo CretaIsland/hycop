@@ -112,7 +112,7 @@ Of course you need to add the 'hycop_config.json' file to assets entry in your'p
 # ############################
 # Run
 # ############################
-
+cd example
 flutter run -d chrome --web-renderer html
 # or
 flutter run -d chrome --web-renderer canvaskit
