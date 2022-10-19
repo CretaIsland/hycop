@@ -9,6 +9,9 @@ flutter run -d chrome --web-renderer canvaskit
 # ############################
 # build
 # ############################
+mkdir release
+cd release
+git clone https://github.com/CretaIsland/hycop_demo_v1.git
 
 # 초기에 한번, 빌드 위치를 잡아준다.  이미 잡았다면, 기존 빌드 폴더가 무효가 되므로 주의한다.
 cd example
