@@ -16,12 +16,14 @@ class SocketIOExamplePage extends StatefulWidget {
   State<SocketIOExamplePage> createState() => _SocketIOExamplePageState();
 }
 
-
 class _SocketIOExamplePageState extends State<SocketIOExamplePage> {
 
   SocketClient client = SocketClient();
   List<Color> userColorList = [Colors.red, Colors.blue, Colors.green, Colors.yellow, Colors.purple];
 
+  late double screenWidthPercentage;
+  late double screenHeightPrecentage;
+  late double screenWidth;
 
   @override
   void initState() {
@@ -35,6 +37,11 @@ class _SocketIOExamplePageState extends State<SocketIOExamplePage> {
 
   @override
   Widget build(BuildContext context) {
+
+    screenWidthPercentage = MediaQuery.of(context).size.width * 0.01;
+    screenHeightPrecentage = MediaQuery.of(context).size.height * 0.01;
+    screenWidth = MediaQuery.of(context).size.width;
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<MouseTracer>.value(value: mouseTracerHolder!)
@@ -59,76 +66,22 @@ class _SocketIOExamplePageState extends State<SocketIOExamplePage> {
         body: Consumer<MouseTracer>(builder: (context, mouseTracerManager, child) {
           return MouseRegion(
             onHover: (pointerEvent) {
-              mouseTracerManager.changePosition(0, pointerEvent.position.dx, pointerEvent.position.dy);
-              client.moveCursor(pointerEvent.position.dx, pointerEvent.position.dy);
+              mouseTracerManager.changePosition(0, pointerEvent.position.dx / screenWidthPercentage, (pointerEvent.position.dy-50) / screenHeightPrecentage);
+              client.moveCursor(pointerEvent.position.dx / screenWidthPercentage, (pointerEvent.position.dy-50) / screenHeightPrecentage);
             },
             child: Stack(
               children: [
-                GestureDetector(
-                  child: Container(
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height - 50,
-                    color: Colors.grey[300]
-                  ),
-                  onTap: () {
-                    client.unFocusFrame();
-                  },
-                ),
+                componentWidget("basicFrame", MediaQuery.of(context).size.width, MediaQuery.of(context).size.height - 80, 0, Colors.white, mouseTracerManager),
                 Center(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      GestureDetector(
-                        child: Container(
-                          width: 150,
-                          height: 150,
-                          decoration: BoxDecoration(
-                            border: getBorder("frameID_1", mouseTracerManager),
-                            borderRadius: BorderRadius.circular(150),
-                            color: const Color.fromARGB(255, 233, 163, 186)
-                          ),
-                        ),
-                        onTap: () {
-                          client.unFocusFrame();
-                          client.focusFrame("frameID_1");
-                        },
-                      ),
-                      const SizedBox(
-                        width: 50,
-                      ),
-                      GestureDetector(
-                        child: Container(
-                          width: 150,
-                          height: 150,
-                          decoration: BoxDecoration(
-                            border: getBorder("frameID_2", mouseTracerManager),
-                            color:const Color.fromARGB(255, 108, 182, 120)
-                          ),
-                        ),
-                        onTap: () {
-                          client.unFocusFrame();
-                          client.focusFrame("frameID_2");
-                        },
-                      ),
-                      const SizedBox(
-                        width: 50,
-                      ),
-                      GestureDetector(
-                        child: Container(
-                          width: 150,
-                          height: 150,
-                          decoration: BoxDecoration(
-                            border: getBorder("frameID_3", mouseTracerManager),
-                            borderRadius: BorderRadius.circular(50),
-                            color: const Color.fromARGB(255, 130, 175, 233)
-                          ),
-                        ),
-                        onTap: () {
-                          client.unFocusFrame();
-                          client.focusFrame("frameID_3");
-                        },
-                      )
+                      componentWidget("frame_1", screenWidth * 0.1, screenWidth * 0.1, screenWidth * 0.1, const Color.fromARGB(255, 255, 171, 164), mouseTracerManager),
+                      SizedBox(width: screenWidth * 0.05),
+                      componentWidget("frame_2", screenWidth * 0.1, screenWidth * 0.1, 0, const Color.fromARGB(255, 134, 190, 135), mouseTracerManager),
+                      SizedBox(width: screenWidth * 0.05),
+                      componentWidget("frame_3", screenWidth * 0.1, screenWidth * 0.1, screenWidth * 0.03, const Color.fromARGB(255, 144, 183, 215), mouseTracerManager),
                     ],
                   ),
                 ),
@@ -143,6 +96,7 @@ class _SocketIOExamplePageState extends State<SocketIOExamplePage> {
     );
   }
 
+  // 컴포넌트 위젯의 테두리 제공
   Border getBorder(String frameID, MouseTracer mouseTracerManager) {
     Border border = Border.all();
     for(var element in mouseTracerManager.focusFrameList) {
@@ -153,10 +107,32 @@ class _SocketIOExamplePageState extends State<SocketIOExamplePage> {
     return border;
   }
 
+  // 컴포넌트 위젯
+  Widget componentWidget(String frameID, double width, double height, double radius, Color color, MouseTracer mouseTracerManager) {
+    return GestureDetector(
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          border: frameID != "basicFrame" ? getBorder(frameID, mouseTracerManager) : null,
+          borderRadius: BorderRadius.circular(radius),
+          color: color
+        ),
+      ),
+      onTap: () {
+        client.unFocusFrame();
+        if(frameID != "basicFrame") {
+          client.focusFrame(frameID);
+        }
+      },
+    );
+  }
+
+  // 유저 마우스 객체 위젯
   Widget cursorWidget(int index, MouseTracer mouseTracerManager) {
     return Positioned(
-      left: mouseTracerManager.mouseModelList[index].cursorX,
-      top: mouseTracerManager.mouseModelList[index].cursorY-30,
+      left: mouseTracerManager.mouseModelList[index].cursorX * screenWidthPercentage,
+      top: mouseTracerManager.mouseModelList[index].cursorY * screenHeightPrecentage,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children : [
