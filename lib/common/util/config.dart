@@ -131,11 +131,16 @@ class AssetConfig extends AbsServerConfig {
   AssetConfig({String enterprise = 'Demo'}) : super(enterprise);
 
   int savePeriod = 1000;
+  String sessionServerUrl = '';
   @override
   Future<void> loadAsset(/*BuildContext context*/) async {
     await super.loadAsset(/*context*/);
     final dynamic configMap = jsonMap['AssetConfig'];
     savePeriod = configMap['savePeriod'] ?? 1000;
+    sessionServerUrl = configMap['sessionServerUrl'] ?? 'http://localhost:3000';
+    if (sessionServerUrl[sessionServerUrl.length-1] == '/') {
+      sessionServerUrl = sessionServerUrl.substring(0, sessionServerUrl.length-1);
+    }
   }
 }
 

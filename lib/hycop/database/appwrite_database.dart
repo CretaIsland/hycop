@@ -84,7 +84,7 @@ class AppwriteDatabase extends AbsDatabase {
     try {
       String key = HycopUtils.midToKey(mid);
       logger.finest('setData($key)');
-      database!.updateDocument(
+      await database!.updateDocument(
         databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
         collectionId: collectionId,
         documentId: key,
@@ -110,7 +110,7 @@ class AppwriteDatabase extends AbsDatabase {
       logger.finest('createData($mid),($collectionId)');
       String key = HycopUtils.midToKey(mid);
       logger.finest('createData($key)');
-      database!.createDocument(
+      await database!.createDocument(
         databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
         collectionId: collectionId,
         documentId: key,
@@ -225,7 +225,7 @@ class AppwriteDatabase extends AbsDatabase {
     await initialize();
     try {
       String key = HycopUtils.midToKey(mid);
-      database!.deleteDocument(
+      await database!.deleteDocument(
         databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
         collectionId: collectionId,
         documentId: key,

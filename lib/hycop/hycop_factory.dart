@@ -73,7 +73,7 @@ class HycopFactory {
   }
 
   static AbsAccount? account; // = null;
-  static void selectAccount() {
+  static Future<void> selectAccount() async {
     //if (account != null) return;
     if (HycopFactory.serverType == ServerType.appwrite) {
       account = AppwriteAccount();
@@ -82,16 +82,18 @@ class HycopFactory {
     }
   }
 
-  static Future<void> initAll({bool force = false}) async {
-    if (myConfig != null && force == false) return;
-    logger.info('initAll()');
+  static Future<bool> initAll({bool force = false}) async {
+    if (myConfig != null && force == false) return true;
     myConfig = HycopConfig();
     await myConfig!.serverConfig!.loadAsset();
+    await AccountManager.getSession();
     //await myConfig!.load
     await HycopFactory.selectDatabase();
+    await HycopFactory.selectAccount();
+    await AccountManager.getCurrentUserInfo();
     await HycopFactory.selectRealTime();
     await HycopFactory.selectFunction();
     await HycopFactory.selectStorage();
-    HycopFactory.selectAccount();
+    return true;
   }
 }

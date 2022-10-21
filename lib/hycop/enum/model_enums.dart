@@ -19,7 +19,7 @@ enum ExModelType {
 
 enum AccountSignUpType {
   none,
-  creta,
+  hycop,
   google,
   //facebook,
   //instagram,

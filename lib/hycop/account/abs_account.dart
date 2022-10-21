@@ -13,12 +13,12 @@ abstract class AbsAccount {
 
   Future<void> createAccount(Map<String, dynamic> createUserData);
   Future<bool> isExistAccount(String email);
+  Future<void> getAccountInfo(String userId, Map<String, dynamic> userData);
   Future<void> updateAccountInfo(Map<String, dynamic> updateUserData);
   Future<void> updateAccountPassword(String newPassword, String oldPassword);
   Future<void> deleteAccount();
 
-  Future<void> login(String email, String password, {Map<String, dynamic>? returnUserData, AccountSignUpType accountSignUpType=AccountSignUpType.creta});
-  //Future<void> loginByExternalService(String email, Map<String, dynamic>? returnUserData);
+  Future<void> login(String email, String password, {Map<String, dynamic>? returnUserData, AccountSignUpType accountSignUpType=AccountSignUpType.hycop});
   Future<void> logout();
   Future<void> resetPassword(String email);
   Future<void> resetPasswordConfirm(String userId, String secret, String newPassword);
