@@ -137,9 +137,10 @@ class AssetConfig extends AbsServerConfig {
     await super.loadAsset(/*context*/);
     final dynamic configMap = jsonMap['AssetConfig'];
     savePeriod = configMap['savePeriod'] ?? 1000;
+    //sessionServerUrl = configMap['sessionServerUrl'] ?? 'http://localhost:3000';
     sessionServerUrl = configMap['sessionServerUrl'] ?? 'http://localhost:3000';
-    if (sessionServerUrl[sessionServerUrl.length-1] == '/') {
-      sessionServerUrl = sessionServerUrl.substring(0, sessionServerUrl.length-1);
+    if (sessionServerUrl[sessionServerUrl.length - 1] == '/') {
+      sessionServerUrl = sessionServerUrl.substring(0, sessionServerUrl.length - 1);
     }
   }
 }

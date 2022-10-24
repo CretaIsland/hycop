@@ -1,4 +1,4 @@
-// ignore_for_file: depend_on_referenced_packages
+// ignore_for_file: depend_on_referenced_packages, library_prefixes
 
 import '../widgets/glass_box.dart';
 import '../widgets/widget_snippets.dart';
@@ -325,9 +325,7 @@ class _IntroPageState extends State<IntroPage> {
       return;
     }
 
-    googleSignInO = signInO.GoogleSignIn(
-        clientId: googleApiKey,
-        scopes: []);
+    googleSignInO = signInO.GoogleSignIn(clientId: googleApiKey, scopes: []);
 
     try {
       final checkSignInResultO = await googleSignInO!.isSignedIn();
@@ -434,9 +432,7 @@ class _IntroPageState extends State<IntroPage> {
       return;
     }
 
-    googleSignInO = signInO.GoogleSignIn(
-        clientId: googleApiKey,
-        scopes: []);
+    googleSignInO = signInO.GoogleSignIn(clientId: googleApiKey, scopes: []);
 
     try {
       final checkSignInResultO = await googleSignInO!.isSignedIn();

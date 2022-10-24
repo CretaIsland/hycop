@@ -11,7 +11,7 @@ import '../account/account_manager.dart';
 import 'package:uuid/uuid.dart';
 
 abstract class AbsRealtime {
-  static String deviceId = const Uuid().v4();
+  static String myDeviceId = const Uuid().v4();
   //connection info
   static FirebaseApp? _fbRTApp; // firebase only RealTime connetion
   static FirebaseApp? get fbRTApp => _fbRTApp;
@@ -53,7 +53,7 @@ abstract class AbsRealtime {
     input['collectionId'] = HycopUtils.collectionFromMid(mid, 'hycop');
     input['mid'] = mid; //'book=3ecb527f-4f5e-4350-8705-d5742781451b';
     input['userId'] = AccountManager.currentLoginUser.email;
-    input['deviceId'] = deviceId;
+    input['deviceId'] = myDeviceId;
     input['updateTime'] = HycopUtils.dateTimeToDB(DateTime.now());
     input['delta'] = delta != null ? json.encode(delta) : '';
 
@@ -64,8 +64,9 @@ abstract class AbsRealtime {
   void processEvent(Map<String, dynamic> mapValue) {
     lastUpdateTime = mapValue["updateTime"] ?? '';
 
-    String deviceId = mapValue["deviceId"] ?? '';
-    if (deviceId == deviceId) {
+    String fromDeviceId = mapValue["deviceId"] ?? '';
+    if (fromDeviceId == myDeviceId) {
+      logger.finest('same deviceId=$fromDeviceId');
       return;
     }
     String directive = mapValue["directive"] ?? '';

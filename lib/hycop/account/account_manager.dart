@@ -34,17 +34,19 @@ class AccountManager {
   }
 
   static Future<bool> getSession() async {
-    if (myConfig == null || myConfig!.serverConfig == null ||
-        myConfig!.config!.sessionServerUrl.isEmpty) return false;
-    final url = Uri.parse('${myConfig!.config!.sessionServerUrl}/getSession/');
-    // <!-- http.Response response = await http.get(url);
+    if (myConfig == null ||
+        myConfig!.serverConfig == null ||
+        myConfig!.config.sessionServerUrl.isEmpty) return false;
+    final url = Uri.parse('${myConfig!.config.sessionServerUrl}/getSession/');
+    // <!-- http.Response response = await htt!p.get(url);
     http.Client client = http.Client();
     if (client is BrowserClient) {
       logger.finest('client.withCredentials');
       client.withCredentials = true;
     }
     http.Response response = await client.get(url).catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(error: error, defaultMessage: 'client.get(getSession) Failed !!!'));
+        throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'client.get(getSession) Failed !!!'));
     // -->
     var responseBody = utf8.decode(response.bodyBytes);
     var jsonData = jsonDecode(responseBody);
@@ -69,7 +71,7 @@ class AccountManager {
 
   static Future<void> createSession() async {
     if (_currentLoginUser.isLoginedUser) {
-      final url = Uri.parse('${myConfig!.config!.sessionServerUrl}/createSession/');
+      final url = Uri.parse('${myConfig!.config.sessionServerUrl}/createSession/');
       http.Client client = http.Client();
       if (client is BrowserClient) {
         logger.finest('client.withCredentials');
@@ -85,8 +87,8 @@ class AccountManager {
           'user_id': _currentLoginUser.userId,
           'server_type': HycopFactory.serverType.name,
         },
-      ).catchError((error, stackTrace) =>
-          throw HycopUtils.getHycopException(error: error, defaultMessage: 'client.post(createSession) Failed !!!'));
+      ).catchError((error, stackTrace) => throw HycopUtils.getHycopException(
+          error: error, defaultMessage: 'client.post(createSession) Failed !!!'));
       // -->
       var responseBody = utf8.decode(response.bodyBytes);
       var jsonData = jsonDecode(responseBody);
@@ -95,7 +97,7 @@ class AccountManager {
   }
 
   static Future<void> deleteSession() async {
-    final url = Uri.parse('${myConfig!.config!.sessionServerUrl}/deleteSession/');
+    final url = Uri.parse('${myConfig!.config.sessionServerUrl}/deleteSession/');
 
     // <!-- http.Response response = await http.get(url);
     http.Client client = http.Client();
@@ -104,7 +106,8 @@ class AccountManager {
       client.withCredentials = true;
     }
     http.Response response = await client.get(url).catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(error: error, defaultMessage: 'client.get(deleteSession) Failed !!!'));
+        throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'client.get(deleteSession) Failed !!!'));
     // -->
 
     var responseBody = utf8.decode(response.bodyBytes);
@@ -116,7 +119,8 @@ class AccountManager {
     await initialize();
     logger.finest('createAccount start');
     await HycopFactory.account!.createAccount(userData).catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.createAccount Failed !!!'));
+        throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'AccountManager.createAccount Failed !!!'));
     logger.finest('createAccount end');
     _currentLoginUser = UserModel(userData: userData);
     logger.finest('createAccount set');
@@ -127,7 +131,8 @@ class AccountManager {
     logger.finest('isExistAccount');
     return HycopFactory.account!.isExistAccount(email).catchError((error, stackTrace) {
       logger.severe('isExistAccount failed (${error.toString()})');
-      throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.isExistAccount Failed !!!');
+      throw HycopUtils.getHycopException(
+          error: error, defaultMessage: 'AccountManager.isExistAccount Failed !!!');
     });
   }
 
@@ -139,8 +144,9 @@ class AccountManager {
     }
     await initialize();
     Map<String, dynamic> userData = {};
-    await HycopFactory.account!.getAccountInfo(_currentLoginUser.userId, userData).catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.updateAccount Failed !!!'));
+    await HycopFactory.account!.getAccountInfo(_currentLoginUser.userId, userData).catchError(
+        (error, stackTrace) => throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'AccountManager.updateAccount Failed !!!'));
     _currentLoginUser = UserModel(userData: userData);
   }
 
@@ -154,7 +160,8 @@ class AccountManager {
     newUserData.addAll(_currentLoginUser.getValueMap);
     newUserData.addAll(updateUserData);
     await HycopFactory.account!.updateAccountInfo(newUserData).catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.updateAccount Failed !!!'));
+        throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'AccountManager.updateAccount Failed !!!'));
     _currentLoginUser = UserModel(userData: newUserData);
   }
 
@@ -167,8 +174,9 @@ class AccountManager {
     Map<String, dynamic> newUserData = {};
     newUserData.addAll(_currentLoginUser.getValueMap);
     newUserData['password'] = HycopUtils.stringToSha1(newPassword);
-    await HycopFactory.account!.updateAccountPassword(newPassword, oldPassword).catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.updateAccount Failed !!!'));
+    await HycopFactory.account!.updateAccountPassword(newPassword, oldPassword).catchError(
+        (error, stackTrace) => throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'AccountManager.updateAccount Failed !!!'));
     _currentLoginUser = UserModel(userData: newUserData);
   }
 
@@ -179,8 +187,9 @@ class AccountManager {
     }
     await initialize();
     Map<String, dynamic> userData = {};
-    await HycopFactory.account!.login(email, password, returnUserData: userData).catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.loginByEmail Failed !!!'));
+    await HycopFactory.account!.login(email, password, returnUserData: userData).catchError(
+        (error, stackTrace) => throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'AccountManager.loginByEmail Failed !!!'));
     _currentLoginUser = UserModel(userData: userData);
     await createSession();
   }
@@ -194,8 +203,8 @@ class AccountManager {
     Map<String, dynamic> userData = {};
     await HycopFactory.account!
         .login(email, email, returnUserData: userData, accountSignUpType: accountSignUpType)
-        .catchError((error, stackTrace) =>
-            throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.loginByEmail Failed !!!'));
+        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'AccountManager.loginByEmail Failed !!!'));
     _currentLoginUser = UserModel(userData: userData);
     await createSession();
   }
@@ -207,7 +216,8 @@ class AccountManager {
     }
     await initialize();
     await HycopFactory.account!.deleteAccount().catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.deleteAccount Failed !!!'));
+        throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'AccountManager.deleteAccount Failed !!!'));
     _currentLoginUser = UserModel(logout: true);
     await deleteSession();
   }
@@ -219,7 +229,8 @@ class AccountManager {
     }
     await initialize();
     await HycopFactory.account!.logout().catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.logout Failed !!!'));
+        throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'AccountManager.logout Failed !!!'));
     _currentLoginUser = UserModel(logout: true);
     await deleteSession();
   }
@@ -227,13 +238,15 @@ class AccountManager {
   static Future<void> resetPassword(String email) async {
     await initialize();
     await HycopFactory.account!.resetPassword(email).catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.resetPassword Failed !!!'));
+        throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'AccountManager.resetPassword Failed !!!'));
   }
 
   static Future<void> resetPasswordConfirm(String userId, String secret, String newPassword) async {
     await initialize();
-    await HycopFactory.account!.resetPasswordConfirm(HycopUtils.midToKey(userId), secret, newPassword).catchError(
-        (error, stackTrace) => throw HycopUtils.getHycopException(
+    await HycopFactory.account!
+        .resetPasswordConfirm(HycopUtils.midToKey(userId), secret, newPassword)
+        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
             error: error, defaultMessage: 'AccountManager.resetPassword Failed !!!'));
   }
 

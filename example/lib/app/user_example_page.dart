@@ -1,6 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 
-import 'package:example/widgets/text_field.dart';
+//import 'package:example/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:routemaster/routemaster.dart';
 import '../widgets/widget_snippets.dart';
@@ -11,7 +11,7 @@ import 'package:hycop/hycop/utils/hycop_exceptions.dart';
 import 'package:hycop/hycop/account/account_manager.dart';
 import 'package:hycop/hycop/model/user_model.dart';
 import '../widgets/glowing_button.dart';
-import 'package:hycop/hycop/hycop_factory.dart';
+//import 'package:hycop/hycop/hycop_factory.dart';
 
 class UserExamplePage extends StatefulWidget {
   final VoidCallback? openDrawer;
@@ -23,13 +23,20 @@ class UserExamplePage extends StatefulWidget {
 }
 
 class _UserExamplePageState extends State<UserExamplePage> {
-  final _userIdTextEditingController = TextEditingController(text: AccountManager.currentLoginUser.userId);
-  final _emailTextEditingController = TextEditingController(text: AccountManager.currentLoginUser.email);
-  final _passwordTextEditingController = TextEditingController(text: AccountManager.currentLoginUser.password);
-  final _nameTextEditingController = TextEditingController(text: AccountManager.currentLoginUser.name);
-  final _phoneTextEditingController = TextEditingController(text: AccountManager.currentLoginUser.phone);
-  final _imagefileTextEditingController = TextEditingController(text: AccountManager.currentLoginUser.imagefile);
-  final _userTypeTextEditingController = TextEditingController(text: AccountManager.currentLoginUser.userType);
+  final _userIdTextEditingController =
+      TextEditingController(text: AccountManager.currentLoginUser.userId);
+  final _emailTextEditingController =
+      TextEditingController(text: AccountManager.currentLoginUser.email);
+  final _passwordTextEditingController =
+      TextEditingController(text: AccountManager.currentLoginUser.password);
+  final _nameTextEditingController =
+      TextEditingController(text: AccountManager.currentLoginUser.name);
+  final _phoneTextEditingController =
+      TextEditingController(text: AccountManager.currentLoginUser.phone);
+  final _imagefileTextEditingController =
+      TextEditingController(text: AccountManager.currentLoginUser.imagefile);
+  final _userTypeTextEditingController =
+      TextEditingController(text: AccountManager.currentLoginUser.userType);
   final _accountSignUpTypeTextEditingController =
       TextEditingController(text: AccountManager.currentLoginUser.accountSignUpType.name);
 
@@ -258,12 +265,12 @@ class _UserExamplePageState extends State<UserExamplePage> {
                 ),
                 _errMsg.isNotEmpty
                     ? Text(
-                  _errMsg,
-                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
-                )
+                        _errMsg,
+                        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+                      )
                     : const SizedBox(
-                  height: 10,
-                ),
+                        height: 10,
+                      ),
                 SizedBox(
                     width: 500.0,
                     height: 40.0,
@@ -346,39 +353,38 @@ class _UserExamplePageState extends State<UserExamplePage> {
     //Size screenSize = MediaQuery.of(context).size;
 
     return FutureBuilder(
-      future: _future(),//HycopFactory.initAll(),
-      builder: (context, AsyncSnapshot snapshot) {
-        if (snapshot.hasError) {
-          //error가 발생하게 될 경우 반환하게 되는 부분
-          logger.severe("data fetch error");
-          return const Center(child: Text('data fetch error'));
-        }
-        if (snapshot.hasData == false) {
-          logger.severe("No data founded(${AccountManager.currentLoginUser.email})");
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        if (snapshot.connectionState == ConnectionState.done) {
-          logger.severe("user data(${AccountManager.currentLoginUser.email})");
-          return Scaffold(
-            appBar: AppBar(
-              actions: WidgetSnippets.hyAppBarActions(context),
-              backgroundColor: Colors.orange,
-              title: const Text('User Info Example'),
-              leading: DrawerMenuWidget(onClicked: () {
-                if (widget.openDrawer != null) {
-                  widget.openDrawer!();
-                } else {
-                  Routemaster.of(context).push(AppRoutes.main);
-                }
-              }),
-            ),
-            body: _body(),
-          );
-        }
-        return Container();
-      }
-    );
+        future: _future(), //HycopFactory.initAll(),
+        builder: (context, AsyncSnapshot snapshot) {
+          if (snapshot.hasError) {
+            //error가 발생하게 될 경우 반환하게 되는 부분
+            logger.severe("data fetch error");
+            return const Center(child: Text('data fetch error'));
+          }
+          if (snapshot.hasData == false) {
+            logger.severe("No data founded(${AccountManager.currentLoginUser.email})");
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          if (snapshot.connectionState == ConnectionState.done) {
+            logger.severe("user data(${AccountManager.currentLoginUser.email})");
+            return Scaffold(
+              appBar: AppBar(
+                actions: WidgetSnippets.hyAppBarActions(context),
+                backgroundColor: Colors.orange,
+                title: const Text('User Info Example'),
+                leading: DrawerMenuWidget(onClicked: () {
+                  if (widget.openDrawer != null) {
+                    widget.openDrawer!();
+                  } else {
+                    Routemaster.of(context).push(AppRoutes.main);
+                  }
+                }),
+              ),
+              body: _body(),
+            );
+          }
+          return Container();
+        });
   }
 }
