@@ -47,7 +47,7 @@ class SocketClient {
     });
     socket.on("disconnect", (data) {
       logger.finest("disconnect");
-      disconnect(data);
+      disconnect();
     });
     socket.on("joinUser", (data) {
       joinUser(data);
@@ -128,7 +128,7 @@ class SocketClient {
     });
   }
 
-  void disconnect(Map<String, dynamic> data) {
+  void disconnect() {
     socket.disconnect().onError((err) {
       throw HycopException(message: err.toString());
     });

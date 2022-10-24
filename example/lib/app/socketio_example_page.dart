@@ -36,6 +36,12 @@ class _SocketIOExamplePageState extends State<SocketIOExamplePage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    client.disconnect();
+  }
+
+  @override
   Widget build(BuildContext context) {
 
     screenWidthPercentage = MediaQuery.of(context).size.width * 0.01;
