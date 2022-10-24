@@ -42,8 +42,6 @@ class FirebaseAppStorage extends AbsStorage {
       logger.info("_storage init");
       _storage = FirebaseStorage.instanceFor(app: AbsStorage.fbStorageConn);
     }
-
-    // setBucketId("userId1");
   }
 
   @override
@@ -146,7 +144,7 @@ class FirebaseAppStorage extends AbsStorage {
 
   @override
   Future<void> setBucketId() async {
-    await initialize();
+    // await initialize();
     myConfig!.serverConfig!.storageConnInfo.bucketId =
         "${HycopUtils.genBucketId(AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId)}/";
   }
