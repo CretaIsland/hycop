@@ -63,7 +63,6 @@ class AccountManager {
       if (logined) {
         _currentLoginUser = UserModel(userData: {'userId': userId});
         HycopFactory.serverType = ServerType.fromString(serverType);
-        HycopFactory.setBucketId();
         return true;
       }
     }

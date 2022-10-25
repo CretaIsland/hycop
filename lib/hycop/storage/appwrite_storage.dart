@@ -155,7 +155,7 @@ class AppwriteStorage extends AbsStorage {
 
   @override
   Future<void> setBucketId() async {
-    await initialize();
+    // await initialize();
     logger.info('-----setBucketId()');
     String bucketId = HycopUtils.genBucketId(
         AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId);
