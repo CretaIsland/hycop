@@ -17,6 +17,7 @@ import '../enum/model_enums.dart'; // AccountSignUpType 사용
 import '../model/user_model.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:google_sign_in/google_sign_in.dart' as google_sign_in;
 
 class AccountManager {
   // // static
@@ -126,6 +127,72 @@ class AccountManager {
     logger.finest('createAccount set');
   }
 
+  static google_sign_in.GoogleSignIn? _googleSignIn;
+  static google_sign_in.GoogleSignInAccount? _googleAccount;
+
+  static Future<void> createAccountByGoogle(String googleApiKey) async {
+    await initialize();
+    logger.finest('createAccountByGoogle start');
+
+    if (googleApiKey.isEmpty) {
+      throw HycopUtils.getHycopException(defaultMessage: 'No googleApiKey !!!');
+    }
+
+    _googleSignIn ??= google_sign_in.GoogleSignIn(clientId: googleApiKey, scopes: []);
+
+    try {
+      final checkSignInResultO = await _googleSignIn!.isSignedIn();
+      logger.finest('login result=$checkSignInResultO');
+      if (checkSignInResultO) {
+        _googleAccount = await _googleSignIn!.signInSilently();
+        if (_googleAccount == null) {
+          logger.finest('login disconnect');
+          await _googleSignIn!.disconnect();
+          throw HycopUtils.getHycopException(defaultMessage: 'login disconnect!!!');
+        }
+      } else {
+        _googleAccount = await _googleSignIn!.signIn();
+        if (_googleAccount == null) {
+          logger.finest('login cancel');
+          await _googleSignIn!.disconnect();
+          throw HycopUtils.getHycopException(defaultMessage: 'login cancel!!!');
+        }
+      }
+      bool alreadyExistAccount = false;
+      await AccountManager.isExistAccount(_googleAccount!.email).catchError((error, stackTrace) {
+        throw HycopUtils.getHycopException(error: error, defaultMessage: 'isExistAccount error !!!');
+      }).then((value) {
+        if (value == true) {
+          alreadyExistAccount = true;
+          //throw HycopUtils.getHycopException(defaultMessage: 'already exist account !!!');
+        }
+      });
+
+      if(alreadyExistAccount == true) {
+        await loginByService(_googleAccount!.email, AccountSignUpType.google).then((value) {
+          return;
+        }).onError((error, stackTrace) {
+          throw HycopUtils.getHycopException(error: error, defaultMessage: 'loginByService error !!!');
+        });
+        return;
+      }
+
+      //
+      Map<String, dynamic> userData = {};
+      userData['name'] = _googleAccount!.displayName ?? '';
+      userData['email'] = _googleAccount!.email;
+      userData['password'] = _googleAccount!.email;
+      userData['accountSignUpType'] = AccountSignUpType.google.index;
+      await createAccount(userData).then((value) {
+        return;
+      }).onError((error, stackTrace) {
+        throw HycopUtils.getHycopException(error: error, defaultMessage: 'createAccount error !!!');
+      });
+    } catch (error) {
+      throw HycopUtils.getHycopException(error: error, defaultMessage: 'unknown google-account error !!!');
+    }
+  }
+
   static Future<bool> isExistAccount(String email) async {
     await initialize();
     logger.finest('isExistAccount');
@@ -207,6 +274,43 @@ class AccountManager {
             error: error, defaultMessage: 'AccountManager.loginByEmail Failed !!!'));
     _currentLoginUser = UserModel(userData: userData);
     await createSession();
+  }
+
+  static Future<void> loginByGoogle(String googleApiKey) async {
+    logger.finest('loginByGoogle');
+
+    if (googleApiKey.isEmpty) {
+      throw HycopUtils.getHycopException(defaultMessage: 'No googleApiKey !!!');
+    }
+
+    _googleSignIn ??= google_sign_in.GoogleSignIn(clientId: googleApiKey, scopes: []);
+
+    try {
+      final checkSignInResult = await _googleSignIn!.isSignedIn();
+      logger.finest('login result=$checkSignInResult');
+      if (checkSignInResult) {
+        _googleAccount = await _googleSignIn!.signInSilently();
+        if (_googleAccount == null) {
+          logger.finest('login disconnect');
+          await _googleSignIn!.disconnect();
+          throw HycopUtils.getHycopException(defaultMessage: 'login disconnect!!!');
+        }
+      } else {
+        _googleAccount = await _googleSignIn!.signIn();
+        if (_googleAccount == null) {
+          logger.finest('login cancel');
+          await _googleSignIn!.disconnect();
+          throw HycopUtils.getHycopException(defaultMessage: 'login cancel!!!');
+        }
+      }
+      await loginByService(_googleAccount!.email, AccountSignUpType.google).then((value) {
+        return;
+      }).onError((error, stackTrace) {
+        throw HycopUtils.getHycopException(error: error, defaultMessage: 'loginByService error !!!');
+      });
+    } catch (error) {
+      throw HycopUtils.getHycopException(error: error, defaultMessage: 'unknown google-account error !!!');
+    }
   }
 
   static Future<void> deleteAccount() async {
