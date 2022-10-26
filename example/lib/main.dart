@@ -9,7 +9,7 @@ import 'app/hycop_example_app.dart';
 import 'package:hycop/common/util/logger.dart';
 import 'package:hycop/hycop/hycop_factory.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setupLogger();
   //DeviceInfo.init();
@@ -18,7 +18,7 @@ void main() {
   // HycopFactory.selectRealTime();
   // HycopFactory.selectFunction();
 
-  HycopFactory.initAll();
+  await HycopFactory.initAll();
 
   const String testValue = String.fromEnvironment('USERNAME', defaultValue: 'unknown');
   logger.info("-------------------------------$testValue");

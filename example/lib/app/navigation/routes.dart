@@ -1,6 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages, equal_keys_in_map
 
 //import 'package:flutter/material.dart';
+import 'package:hycop/hycop.dart';
 import 'package:routemaster/routemaster.dart';
 import '../database_example_page.dart';
 //import '../drawer_menu_page.dart';
@@ -32,14 +33,16 @@ abstract class AppRoutes {
   static const String register = '/register';
 
   //static const String userinfo  = '/userinfo';
-  static const String resetPasswordConfirm  = '/resetPasswordConfirm';
+  static const String resetPasswordConfirm = '/resetPasswordConfirm';
 }
 
 //final menuKey = GlobalKey<DrawerMenuPageState>();
 //DrawerMenuPage menuWidget = DrawerMenuPage(key: menuKey);
 
 final routesLoggedOut = RouteMap(
-  onUnknownRoute: (_) => const Redirect(AppRoutes.intro),
+  onUnknownRoute: (_) => (AccountManager.currentLoginUser.isLoginedUser)
+      ? const Redirect(AppRoutes.main)
+      : const Redirect(AppRoutes.intro),
   routes: {
     // AppRoutes.login: (_) => const TransitionPage(
     //       child: LoginPage(),
@@ -50,14 +53,18 @@ final routesLoggedOut = RouteMap(
     //       pushTransition: PageTransition.fadeUpwards,
     //     ),
     //AppRoutes.menu: (_) => TransitionPage(child: menuWidget),
-    AppRoutes.main: (_) => const TransitionPage(child: MainPage()),
+    AppRoutes.main: (_) => (AccountManager.currentLoginUser.isLoginedUser)
+        ? const TransitionPage(child: MainPage())
+        : const Redirect(AppRoutes.intro),
     AppRoutes.databaseExample: (_) => const TransitionPage(child: DatabaseExamplePage()),
     AppRoutes.realtimeExample: (_) => const TransitionPage(child: RealTimeExamplePage()),
     AppRoutes.functionExample: (_) => const TransitionPage(child: FunctionExamplePage()),
     AppRoutes.storageExample: (_) => const TransitionPage(child: StorageExamplePage()),
     AppRoutes.socketioExample: (_) => const TransitionPage(child: SocketIOExamplePage()),
     AppRoutes.userExample: (_) => const TransitionPage(child: UserExamplePage()),
-    AppRoutes.intro: (_) => const TransitionPage(child: IntroPage()),
+    AppRoutes.intro: (_) => (AccountManager.currentLoginUser.isLoginedUser)
+        ? const Redirect(AppRoutes.main)
+        : const TransitionPage(child: IntroPage()),
     //AppRoutes.userinfo: (_) => const TransitionPage(child: UserInfoPage()),
     //AppRoutes.resetPasswordConfirm: (_) => const TransitionPage(child: ResetPasswordConfirmPage()),
   },

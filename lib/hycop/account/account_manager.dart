@@ -1,3 +1,4 @@
+import 'package:appwrite/appwrite.dart';
 import 'package:http/browser_client.dart';
 
 import '../../../hycop/hycop_factory.dart';
@@ -123,6 +124,7 @@ class AccountManager {
             error: error, defaultMessage: 'AccountManager.createAccount Failed !!!'));
     logger.finest('createAccount end');
     _currentLoginUser = UserModel(userData: userData);
+    await createSession();
     logger.finest('createAccount set');
   }
 
@@ -167,26 +169,24 @@ class AccountManager {
         }
       });
 
-      if(alreadyExistAccount == true) {
+      if(alreadyExistAccount == false) {
+        Map<String, dynamic> userData = {};
+        userData['name'] = _googleAccount!.displayName ?? '';
+        userData['email'] = _googleAccount!.email;
+        userData['password'] = _googleAccount!.email;
+        userData['accountSignUpType'] = AccountSignUpType.google.index;
+        await createAccount(userData).then((value) {
+        }).onError((error, stackTrace) {
+          throw HycopUtils.getHycopException(error: error, defaultMessage: 'createAccount error !!!');
+        });
+      }
+
+      if(_currentLoginUser.isLoginedUser == false) {
         await loginByService(_googleAccount!.email, AccountSignUpType.google).then((value) {
-          return;
         }).onError((error, stackTrace) {
           throw HycopUtils.getHycopException(error: error, defaultMessage: 'loginByService error !!!');
         });
-        return;
       }
-
-      //
-      Map<String, dynamic> userData = {};
-      userData['name'] = _googleAccount!.displayName ?? '';
-      userData['email'] = _googleAccount!.email;
-      userData['password'] = _googleAccount!.email;
-      userData['accountSignUpType'] = AccountSignUpType.google.index;
-      await createAccount(userData).then((value) {
-        return;
-      }).onError((error, stackTrace) {
-        throw HycopUtils.getHycopException(error: error, defaultMessage: 'createAccount error !!!');
-      });
     } catch (error) {
       throw HycopUtils.getHycopException(error: error, defaultMessage: 'unknown google-account error !!!');
     }
@@ -304,7 +304,11 @@ class AccountManager {
       }
       await loginByService(_googleAccount!.email, AccountSignUpType.google).then((value) {
         return;
-      }).onError((error, stackTrace) {
+      }).onError((error, stackTrace) async {
+        await _googleSignIn?.signOut();
+        await _googleSignIn?.disconnect();
+        _googleSignIn = null;
+        _googleAccount = null;
         throw HycopUtils.getHycopException(error: error, defaultMessage: 'loginByService error !!!');
       });
     } catch (error) {
@@ -321,8 +325,7 @@ class AccountManager {
     await HycopFactory.account!.deleteAccount().catchError((error, stackTrace) =>
         throw HycopUtils.getHycopException(
             error: error, defaultMessage: 'AccountManager.deleteAccount Failed !!!'));
-    _currentLoginUser = UserModel(logout: true);
-    await deleteSession();
+    await logout();
   }
 
   static Future<void> logout() async {
@@ -334,6 +337,15 @@ class AccountManager {
     await HycopFactory.account!.logout().catchError((error, stackTrace) =>
         throw HycopUtils.getHycopException(
             error: error, defaultMessage: 'AccountManager.logout Failed !!!'));
+    if (_currentLoginUser.accountSignUpType == AccountSignUpType.google) {
+      logger.finest('_googleSignIn?.signOut()');
+      await _googleSignIn?.signOut();
+      logger.finest('_googleSignIn?.disconnect()');
+      await _googleSignIn?.disconnect();
+      logger.finest('_googleSignIn = null');
+      _googleSignIn = null;
+      _googleAccount = null;
+    }
     _currentLoginUser = UserModel(logout: true);
     await deleteSession();
   }

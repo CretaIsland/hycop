@@ -5,7 +5,6 @@ import '../widgets/widget_snippets.dart';
 import 'package:flutter/material.dart';
 import 'package:routemaster/routemaster.dart';
 import 'package:flutter/gestures.dart';
-import 'package:google_sign_in/google_sign_in.dart' as signInO;
 
 import 'package:hycop/common/util/config.dart';
 import 'package:hycop/common/util/logger.dart';
@@ -18,7 +17,7 @@ import 'package:hycop/hycop/hycop_factory.dart';
 import 'navigation/routes.dart';
 import 'package:hycop/hycop/account/account_manager.dart';
 import 'package:hycop/hycop/utils/hycop_exceptions.dart';
-import 'package:hycop/hycop/enum/model_enums.dart';
+//import 'package:hycop/hycop/enum/model_enums.dart';
 
 enum IntroPageType {
   none,
@@ -46,8 +45,6 @@ class IntroPage extends StatefulWidget {
 }
 
 class _IntroPageState extends State<IntroPage> {
-  //ServerType _serverType = ServerType.firebase;
-  //String _enterpriseId = '';
   final TextEditingController _enterpriseCtrl = TextEditingController();
   final TextEditingController _apiKeyCtrl = TextEditingController();
   final TextEditingController _authDomainCtrl = TextEditingController();
@@ -143,10 +140,10 @@ class _IntroPageState extends State<IntroPage> {
         return signupPage();
 
       case IntroPageType.resetPassword:
-        return resetPasswordPage(); ////////////////////////
+        return resetPasswordPage();
 
       case IntroPageType.resetPasswordConfirm:
-        return resetPasswordConfirmPage(); ///////////////////////////
+        return resetPasswordConfirmPage();
 
       case IntroPageType.dbSelect:
       default:
@@ -310,75 +307,22 @@ class _IntroPageState extends State<IntroPage> {
     });
   }
 
-  signInO.GoogleSignIn? googleSignInO;
-  signInO.GoogleSignInAccount? accountO;
-  String googleApiKey = '';
-
   Future<void> _loginByGoogle() async {
     logger.finest('_loginByGoogle pressed');
     _errMsg = '';
 
-    if (googleApiKey.isEmpty) {
-      _errMsg = 'No googleApiKey, add googleApiKey in source-code !!!';
-      showSnackBar(context, _errMsg);
-      setState(() {});
-      return;
-    }
-
-    googleSignInO = signInO.GoogleSignIn(clientId: googleApiKey, scopes: []);
-
-    try {
-      final checkSignInResultO = await googleSignInO!.isSignedIn();
-      logger.finest('login result=$checkSignInResultO');
-      if (checkSignInResultO) {
-        accountO = await googleSignInO!.signInSilently();
-        if (accountO == null) {
-          logger.finest('login disconnect');
-          await googleSignInO!.disconnect();
-          return;
-        }
+    AccountManager.loginByGoogle(myConfig!.config.googleOAuthCliendId).then((value) {
+      Routemaster.of(context).push(AppRoutes.main);
+    }).onError((error, stackTrace) {
+      if (error is HycopException) {
+        HycopException ex = error;
+        _errMsg = ex.message;
       } else {
-        accountO = await googleSignInO!.signIn();
-        if (accountO == null) {
-          logger.finest('login cancel');
-          return;
-        }
+        _errMsg = 'Uknown DB Error !!!';
       }
-      if (accountO != null) {
-        AccountManager.loginByService(accountO!.email, AccountSignUpType.google).then((value) {
-          Routemaster.of(context).push(AppRoutes.main);
-        }).onError((error, stackTrace) {
-          if (error is HycopException) {
-            HycopException ex = error;
-            _errMsg = ex.message;
-          } else {
-            _errMsg = 'Uknown DB Error !!!';
-          }
-          showSnackBar(context, _errMsg);
-          setState(() {});
-        });
-      }
-    } catch (e) {
-      _errMsg = e.toString();
       showSnackBar(context, _errMsg);
       setState(() {});
-    }
-
-    // String email = _signinEmailTextEditingController.text;
-    // // String password = _passwordTextEditingController.text;
-    //
-    // AccountManager.loginByService(email, AccountSignUpType.google).then((value) {
-    //   Routemaster.of(context).push(AppRoutes.main);
-    // }).onError((error, stackTrace) {
-    //   if (error is HycopException) {
-    //     HycopException ex = error;
-    //     _errMsg = ex.message;
-    //   } else {
-    //     _errMsg = 'Uknown DB Error !!!';
-    //   }
-    //   showSnackBar(context, _errMsg);
-    //   setState(() {});
-    // });
+    });
   }
 
   Future<void> _signup() async {
@@ -425,59 +369,8 @@ class _IntroPageState extends State<IntroPage> {
     logger.finest('_signupByGoogle pressed');
     _errMsg = '';
 
-    if (googleApiKey.isEmpty) {
-      _errMsg = 'No googleApiKey, add googleApiKey in source-code !!!';
-      showSnackBar(context, _errMsg);
-      setState(() {});
-      return;
-    }
-
-    googleSignInO = signInO.GoogleSignIn(clientId: googleApiKey, scopes: []);
-
     try {
-      final checkSignInResultO = await googleSignInO!.isSignedIn();
-      logger.finest('login result=$checkSignInResultO');
-      if (checkSignInResultO) {
-        accountO = await googleSignInO!.signInSilently();
-        if (accountO == null) {
-          logger.finest('login disconnect');
-          await googleSignInO!.disconnect();
-          return;
-        }
-      } else {
-        accountO = await googleSignInO!.signIn();
-        if (accountO == null) {
-          logger.finest('login cancel');
-          return;
-        }
-      }
-      if (accountO != null) {
-        await AccountManager.isExistAccount(accountO!.email).catchError((error, stackTrace) {
-          if (error is HycopException) {
-            HycopException ex = error;
-            _errMsg = ex.message;
-          } else {
-            _errMsg = 'Unknown DB Error !!!';
-          }
-          showSnackBar(context, _errMsg);
-          setState(() {});
-          return false;
-        }).then((value) {
-          if (value == true) {
-            _errMsg = 'Already exist user !!!';
-            showSnackBar(context, _errMsg);
-            setState(() {});
-            return;
-          }
-        });
-
-        //
-        Map<String, dynamic> userData = {};
-        userData['name'] = accountO!.displayName ?? '';
-        userData['email'] = accountO!.email;
-        userData['password'] = accountO!.email;
-        userData['accountSignUpType'] = AccountSignUpType.google.index;
-        AccountManager.createAccount(userData).then((value) {
+        AccountManager.createAccountByGoogle(myConfig!.config.googleOAuthCliendId).then((value) {
           Routemaster.of(context).push(AppRoutes.main);
         }).onError((error, stackTrace) {
           if (error is HycopException) {
@@ -489,7 +382,7 @@ class _IntroPageState extends State<IntroPage> {
           showSnackBar(context, _errMsg);
           setState(() {});
         });
-      }
+     // }
     } catch (e) {
       _errMsg = e.toString();
       showSnackBar(context, _errMsg);

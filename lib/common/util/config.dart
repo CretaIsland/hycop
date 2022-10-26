@@ -130,18 +130,24 @@ class AppwriteConfig extends AbsServerConfig {
 class AssetConfig extends AbsServerConfig {
   AssetConfig({String enterprise = 'Demo'}) : super(enterprise);
 
-  int savePeriod = 1000;
-  String sessionServerUrl = '';
+  int _savePeriod = 1000;
+  String _sessionServerUrl = '';
+  String _googleOAuthCliendId = '';
+
+  int get savePeriod => _savePeriod;
+  String get sessionServerUrl => _sessionServerUrl;
+  String get googleOAuthCliendId => _googleOAuthCliendId;
+
   @override
   Future<void> loadAsset(/*BuildContext context*/) async {
     await super.loadAsset(/*context*/);
     final dynamic configMap = jsonMap['AssetConfig'];
-    savePeriod = configMap['savePeriod'] ?? 1000;
-    //sessionServerUrl = configMap['sessionServerUrl'] ?? 'http://localhost:3000';
-    sessionServerUrl = configMap['sessionServerUrl'] ?? 'http://localhost:3000';
-    if (sessionServerUrl[sessionServerUrl.length - 1] == '/') {
-      sessionServerUrl = sessionServerUrl.substring(0, sessionServerUrl.length - 1);
+    _savePeriod = configMap['savePeriod'] ?? 1000;
+    _sessionServerUrl = configMap['sessionServerUrl'] ?? 'http://localhost:3000';
+    if (_sessionServerUrl[_sessionServerUrl.length - 1] == '/') {
+      _sessionServerUrl = _sessionServerUrl.substring(0, _sessionServerUrl.length - 1);
     }
+    _googleOAuthCliendId = configMap['googleOAuthCliendId'] ?? '';
   }
 }
 
