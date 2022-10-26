@@ -1,3 +1,5 @@
+## 0.0.5
+- modify google-account
 ## 0.0.4
 test4
 ## 0.0.3
