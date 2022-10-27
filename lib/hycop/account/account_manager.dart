@@ -32,7 +32,7 @@ class AccountManager {
     //   HycopFactory.account = FirebaseAccount();
     // }
     // //HycopFactory.account!.initialize();
-    await HycopFactory.initAll();
+    //await HycopFactory.initAll();
   }
 
   static Future<bool> getSession() async {

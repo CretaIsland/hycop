@@ -17,7 +17,7 @@ class AppwriteDatabase extends AbsDatabase {
     if (AbsDatabase.awDBConn == null) {
       //logger.finest(
       //    "AppwriteDatabase initialize ${myConfig!.serverConfig!.dbConnInfo.databaseURL}, ${myConfig!.serverConfig!.dbConnInfo.projectId}");
-      await HycopFactory.initAll();
+      //await HycopFactory.initAll();
       AbsDatabase.setAppWriteApp(Client()
         ..setProject(myConfig!.serverConfig!.dbConnInfo.projectId)
         ..setSelfSigned(status: true)

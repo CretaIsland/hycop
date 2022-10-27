@@ -33,7 +33,7 @@ abstract class AppRoutes {
   static const String register = '/register';
 
   //static const String userinfo  = '/userinfo';
-  static const String resetPasswordConfirm = '/resetPasswordConfirm';
+  //static const String resetPasswordConfirm = '/resetPasswordConfirm';
 }
 
 //final menuKey = GlobalKey<DrawerMenuPageState>();

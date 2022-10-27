@@ -15,7 +15,7 @@ class FirebaseFunction extends AbsFunction {
   @override
   Future<void> initialize() async {
     if (functions == null) {
-      await HycopFactory.initAll();
+      //await HycopFactory.initAll();
       FirebaseApp app = await Firebase.initializeApp(
           name: "functions",
           options: FirebaseOptions(

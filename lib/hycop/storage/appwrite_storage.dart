@@ -25,7 +25,7 @@ class AppwriteStorage extends AbsStorage {
   @override
   Future<void> initialize() async {
     if (AbsStorage.awStorageConn == null) {
-      await HycopFactory.initAll();
+      //await HycopFactory.initAll();
       AbsStorage.setAppwriteApp(Client()
         ..setEndpoint(myConfig!.serverConfig!.storageConnInfo.storageURL)
         ..setProject(myConfig!.serverConfig!.storageConnInfo.projectId)

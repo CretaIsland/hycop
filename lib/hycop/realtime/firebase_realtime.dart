@@ -17,7 +17,7 @@ class FirebaseRealtime extends AbsRealtime {
   @override
   Future<void> initialize() async {
     if (AbsRealtime.fbRTApp == null) {
-      await HycopFactory.initAll();
+      //await HycopFactory.initAll();
       AbsRealtime.setFirebaseApp(await Firebase.initializeApp(
           name: "realTime",
           options: FirebaseOptions(

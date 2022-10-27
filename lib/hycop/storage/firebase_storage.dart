@@ -24,7 +24,7 @@ class FirebaseAppStorage extends AbsStorage {
   @override
   Future<void> initialize() async {
     if (AbsStorage.fbStorageConn == null) {
-      await HycopFactory.initAll();
+      //await HycopFactory.initAll();
       logger.info("storage initialize");
 
       AbsStorage.setFirebaseApp(await Firebase.initializeApp(
