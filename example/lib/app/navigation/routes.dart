@@ -1,6 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages, equal_keys_in_map
 
 //import 'package:flutter/material.dart';
+import 'package:example/app/webrtc_example_page.dart';
 import 'package:hycop/hycop.dart';
 import 'package:routemaster/routemaster.dart';
 import '../database_example_page.dart';
@@ -27,6 +28,7 @@ abstract class AppRoutes {
   static const String storageExample = '/storageExample';
   static const String socketioExample = '/socketioExample';
   static const String userExample = '/userExample';
+  static const String webrtcExample = '/webrtcExample';
   static const String studio = '/studio';
   static const String login = '/login';
   static const String intro = '/intro';
@@ -62,6 +64,7 @@ final routesLoggedOut = RouteMap(
     AppRoutes.storageExample: (_) => const TransitionPage(child: StorageExamplePage()),
     AppRoutes.socketioExample: (_) => const TransitionPage(child: SocketIOExamplePage()),
     AppRoutes.userExample: (_) => const TransitionPage(child: UserExamplePage()),
+    AppRoutes.webrtcExample: (_) => const TransitionPage(child: WebRTCExamplePage()),
     AppRoutes.intro: (_) => (AccountManager.currentLoginUser.isLoginedUser)
         ? const Redirect(AppRoutes.main)
         : const TransitionPage(child: IntroPage()),
