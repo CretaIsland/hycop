@@ -16,7 +16,12 @@ class WebRTCClient{
 
   final pcConfig = {
     "iceServers": [
-      { "urls": ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19305" ] }
+      { "urls": ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19305" ] },
+      {
+        "urls" : ["turn:3.35.0.0:3478"],
+        "credential" : "hycoppass",
+        "username" : "hycop"
+    }
     ],
   };
 
@@ -84,8 +89,6 @@ class WebRTCClient{
   Future<void> createSenderPeerConnection(MediaStream stream, String senderSocketID) async {
     logger.finest(">>>>> createSenderPeerConnection ");
     localPC = await createPeerConnection(pcConfig);
-
-    logger.finest("최초 상태 : ${localPC!.iceConnectionState}");
 
     localPC!.onIceCandidate = (ice) {
       logger.finest("senderPC onICeCandidate");
@@ -160,7 +163,7 @@ class WebRTCClient{
 
   // Socket Connect
   Future<void> connectSocket() async {
-    socket = IO.io("http://192.168.102.111:4434", IO.OptionBuilder().setTransports(["websocket"]).build());
+    socket = IO.io("https://hycop-socket.tk", IO.OptionBuilder().setTransports(["websocket"]).build());
     socket.connect().onError((data) => logger.finest("connect socket!"));
     socket.emit("init");  // socketID 요청
 
