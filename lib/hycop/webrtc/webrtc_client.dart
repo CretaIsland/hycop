@@ -163,7 +163,7 @@ class WebRTCClient{
 
   // Socket Connect
   Future<void> connectSocket() async {
-    socket = IO.io("https://hycop-socket.tk", IO.OptionBuilder().setTransports(["websocket"]).build());
+    socket = IO.io("https://hycop-socket.tk:443", IO.OptionBuilder().setTransports(["websocket"]).build());
     socket.connect().onError((data) => logger.finest("connect socket!"));
     socket.emit("init");  // socketID 요청
 
