@@ -49,7 +49,6 @@ class WebRTCClient {
   }
 
   Future<void> disableWebcam() async {
-    print("webcam 끄기");
     String webcamId = producerDataHolder!.webcam!.id;
     producerDataHolder!.producerRemove('webcam');
     try {
@@ -85,13 +84,11 @@ class WebRTCClient {
   }
 
   void _consumerCallback(Consumer consumer, [dynamic accept]) {
-    ScalabilityMode scalabilityMode = ScalabilityMode.parse(consumer.rtpParameters.encodings.first.scalabilityMode);
     accept({});
     peersDataHolder!.consumerAdd(consumer, consumer.peerId!);
   }
 
   Future<MediaStream> createAudioStream() async {
-    print("createAudio");
     audioInputDeviceId = mediaDeviceDataHolder!.selectedAudioInput!.deviceId;
     Map<String, dynamic> mediaConstraints = {
       'audio': {
@@ -127,7 +124,6 @@ class WebRTCClient {
   }
 
   Future<void> enableWebcam() async {
-    print("enableWebcam 실행!");
     if (_mediasoupDevice!.canProduce(RTCRtpMediaType.RTCRtpMediaTypeVideo) == false) return;
     MediaStream? videoStream;
     MediaStreamTrack? track;
@@ -162,7 +158,6 @@ class WebRTCClient {
   }
 
   Future<void> enableMic() async {
-    print("enableMic 실행!");
     if (_mediasoupDevice!.canProduce(RTCRtpMediaType.RTCRtpMediaTypeAudio) == false) return;
 
     MediaStream? audioStream;
@@ -310,13 +305,6 @@ class WebRTCClient {
       if (_produce) {
         enableMic();
         enableWebcam();
-
-        _sendTransport!.on('connectionstatechange', (connectionState) {
-          if (connectionState == 'connected') {
-            // enableChatDataProducer();
-            // enableBotDataProducer();
-          }
-        });
       }
     } catch (error) {
       print(error);
@@ -383,11 +371,6 @@ class WebRTCClient {
 
     _webSocket!.onNotification = (notification) async {
       switch (notification['method']) {
-        //TODO: todo;
-        case 'producerScore':
-          {
-            break;
-          }
         case 'consumerClosed':
           {
             String consumerId = notification['data']['consumerId'];

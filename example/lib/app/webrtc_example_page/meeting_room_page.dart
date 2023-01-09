@@ -25,7 +25,8 @@ class _MeetingRoomPageState extends State<MeetingRoomPage> {
     webRTCClient = WebRTCClient(
       roomId: widget.roomId, 
       peerId: AccountManager.currentLoginUser.email, 
-      url: 'wss://v3demo.mediasoup.org:4443', 
+      url: 'wss://hycop-socket.tk:444',
+      //url: 'wss://v3demo.mediasoup.org:4443', 
       displayName: randomAlpha(8).toLowerCase()
     );
   }
