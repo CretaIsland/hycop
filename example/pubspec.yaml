@@ -65,7 +65,8 @@ dependencies:
   flutter_dropzone: ^3.0.5
   socket_io_client: ^2.0.0
   flutter_webrtc: ^0.8.12
-  mediasoup_client_flutter: ^0.8.0
+  webrtc_interface: 1.0.5
+  #mediasoup_client_flutter: ^0.8.0
   protoo_client: ^0.3.1
   flutter_bloc: ^7.0.1
 
