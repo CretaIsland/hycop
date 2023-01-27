@@ -129,6 +129,19 @@ class _MainPageState extends State<MainPage> {
               ],
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: _glowingButton(
+                text: 'WebRTC',
+                onPressed: () {
+                  Routemaster.of(context).push(AppRoutes.webRtcExampleWaitingroom);
+                },
+                icon1: Icons.groups,
+                icon2: Icons.groups_outlined,
+              ),
+            ),
+          ),
         ]),
       ),
     );

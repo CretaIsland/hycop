@@ -40,7 +40,8 @@ class _DatabaseExamplePageState extends State<DatabaseExamplePage> {
     bookManagerHolder = BookManager();
     logger.info('initState');
     //HycopFactory.initAll();
-    HycopFactory.realtime!.addListener("hycop_book", bookManagerHolder!.realTimeCallback);
+    HycopFactory.realtime!
+        .addListener("example", "hycop_book", bookManagerHolder!.realTimeCallback);
   }
 
   @override

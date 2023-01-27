@@ -43,7 +43,8 @@ class _RealTimeExamplePageState extends State<RealTimeExamplePage> {
         saveManagerHolder!.runSaveTimer();
       }
     }
-    HycopFactory.realtime!.addListener("hycop_frame", frameManagerHolder!.realTimeCallback);
+    HycopFactory.realtime!
+        .addListener("example", "hycop_frame", frameManagerHolder!.realTimeCallback);
     HycopFactory.realtime!.start();
   }
 
