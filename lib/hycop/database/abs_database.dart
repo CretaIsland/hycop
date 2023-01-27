@@ -9,6 +9,11 @@ import '../../common/util/logger.dart';
 import '../../hycop/absModel/abs_ex_model.dart';
 import '../hycop_factory.dart';
 
+enum OrderDirection {
+  ascending,
+  descending,
+}
+
 abstract class AbsDatabase {
   //connection info
   static Client? _awDBConn; //appwrite only
@@ -38,6 +43,13 @@ abstract class AbsDatabase {
       {required Map<String, dynamic> where,
       required String orderBy,
       bool descending = true,
+      int? limit,
+      int? offset, // appwrite only
+      List<Object?>? startAfter}); // firebase onlu
+
+  Future<List> queryPage(String collectionId,
+      {required Map<String, dynamic> where,
+      required Map<String, OrderDirection> orderBy,
       int? limit,
       int? offset, // appwrite only
       List<Object?>? startAfter}); // firebase onlu

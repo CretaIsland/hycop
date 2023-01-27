@@ -12,7 +12,7 @@ class FirebaseDatabase extends AbsDatabase {
   @override
   Future<void> initialize() async {
     if (AbsDatabase.fbDBApp == null) {
-      //await HycopFactory.initAll();
+      await HycopFactory.initAll();
       logger.info('initialize');
       AbsDatabase.setFirebaseApp(await Firebase.initializeApp(
           name: 'database',
@@ -115,6 +115,43 @@ class FirebaseDatabase extends AbsDatabase {
     assert(_db != null);
     CollectionReference collectionRef = _db!.collection(collectionId);
     Query<Object?> query = collectionRef.orderBy(orderBy, descending: descending);
+    where.map((mid, value) {
+      query = query.where(mid, isEqualTo: value);
+      return MapEntry(mid, value);
+    });
+
+    if (limit != null) query = query.limit(limit);
+    if (startAfter != null && startAfter.isNotEmpty) query = query.startAfter(startAfter);
+
+    return await query.get().then((snapshot) {
+      return snapshot.docs.map((doc) {
+        //logger.finest(doc.data()!.toString());
+        return doc.data()! as Map<String, dynamic>;
+      }).toList();
+    });
+  }
+
+  @override
+  Future<List> queryPage(String collectionId,
+      {required Map<String, dynamic> where,
+      required Map<String, OrderDirection> orderBy,
+      int? limit,
+      int? offset,
+      List<Object?>? startAfter}) async {
+    logger.info('queryPage');
+    await initialize();
+    assert(_db != null);
+    CollectionReference collectionRef = _db!.collection(collectionId);
+    Query<Object?> query = collectionRef;
+    //Query<Object?> query = collectionRef.orderBy(orderBy, descending: descending);
+
+    //for (var val in orderBy.entries) {
+    orderBy.map((key, value) {
+      query = query.orderBy(key, descending: (value == OrderDirection.descending));
+      logger.finest('order by $key');
+      return MapEntry(key, value);
+    });
+
     where.map((mid, value) {
       query = query.where(mid, isEqualTo: value);
       return MapEntry(mid, value);

@@ -19,9 +19,14 @@ abstract class AbsRealtime {
   static void setFirebaseApp(FirebaseApp fb) => _fbRTApp = fb;
 
   String lastUpdateTime = HycopUtils.dateTimeToDB(DateTime.now()); // used only firebase
+  String collcetion_prefix = 'hycop';
 
   Future<void> initialize();
   Future<void> start();
+  void setPrefix(String prefix) {
+    collcetion_prefix = prefix;
+  }
+
   void stop();
   void clearListener() {
     logger.fine('clearListener()');
@@ -35,11 +40,23 @@ abstract class AbsRealtime {
   });
 
   @protected
-  Map<String, void Function(String directive, String userId, Map<String, dynamic> dataModel)>
+  Map<
+          String,
+          Map<String,
+              void Function(String directive, String userId, Map<String, dynamic> dataModel)>>
       listenerMap = {};
-  void addListener(String collectionId,
+
+  void addListener(String listenerId, String collectionId,
       void Function(String directive, String userId, Map<String, dynamic> dataModel) listener) {
-    listenerMap[collectionId] = listener;
+    if (listenerMap[listenerId] == null) {
+      listenerMap[listenerId] = {};
+    }
+    var map = listenerMap[listenerId]!;
+    map[collectionId] = listener;
+  }
+
+  void removeListener(String listenerId, String collectionId) {
+    listenerMap[listenerId]?.remove(collectionId);
   }
 
   @protected
@@ -50,7 +67,7 @@ abstract class AbsRealtime {
   }) {
     Map<String, dynamic> input = {};
     input['directive'] = directive;
-    input['collectionId'] = HycopUtils.collectionFromMid(mid, 'hycop');
+    input['collectionId'] = HycopUtils.collectionFromMid(mid, collcetion_prefix);
     input['mid'] = mid; //'book=3ecb527f-4f5e-4350-8705-d5742781451b';
     input['userId'] = AccountManager.currentLoginUser.email;
     input['deviceId'] = myDeviceId;
@@ -77,6 +94,9 @@ abstract class AbsRealtime {
     logger.finest('$lastUpdateTime,$directive,$collectionId,$userId');
 
     Map<String, dynamic> dataMap = json.decode(delta) as Map<String, dynamic>;
-    listenerMap[collectionId]?.call(directive, userId, dataMap);
+
+    for (var ele in listenerMap.values) {
+      ele[collectionId]?.call(directive, userId, dataMap);
+    }
   }
 }

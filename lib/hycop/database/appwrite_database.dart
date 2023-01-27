@@ -17,7 +17,7 @@ class AppwriteDatabase extends AbsDatabase {
     if (AbsDatabase.awDBConn == null) {
       //logger.finest(
       //    "AppwriteDatabase initialize ${myConfig!.serverConfig!.dbConnInfo.databaseURL}, ${myConfig!.serverConfig!.dbConnInfo.projectId}");
-      //await HycopFactory.initAll();
+      await HycopFactory.initAll();
       AbsDatabase.setAppWriteApp(Client()
         ..setProject(myConfig!.serverConfig!.dbConnInfo.projectId)
         ..setSelfSigned(status: true)
@@ -185,6 +185,72 @@ class AppwriteDatabase extends AbsDatabase {
       List<String> additional = [
         descending ? Query.orderDesc(orderBy) : Query.orderAsc(orderBy),
       ];
+      if (limit != null) {
+        additional.add(Query.limit(limit));
+      }
+      if (offset != null) {
+        additional.add(Query.offset(offset));
+      }
+
+      final result = await database!.listDocuments(
+          databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
+          collectionId: collectionId,
+          queries: [
+            ...queryList,
+            ...additional,
+          ] // index 를 만들어줘야 함.
+          //orderAttributes: [orderBy],
+          //orderTypes: [orderType],
+          //limit: limit,
+          //offset: offset,
+          );
+      return result.documents.map((doc) {
+        //logger.finest(doc.data.toString());
+        return doc.data;
+      }).toList();
+    } on AppwriteException catch (e) {
+      if (e.code == 404) {
+        logger.finest(e.message!);
+        return [];
+      }
+      if (e.message != null) {
+        throw HycopException(message: e.message!, code: e.code);
+      }
+      throw HycopException(message: 'Appwrite error', code: e.code);
+    }
+  }
+
+  @override
+  Future<List> queryPage(
+    String collectionId, {
+    required Map<String, dynamic> where,
+    required Map<String, OrderDirection> orderBy,
+    int? limit,
+    int? offset, // appwrite only
+    List<Object?>? startAfter, // firebase only
+  }) async {
+    await initialize();
+
+    try {
+      //String orderType = descending ? 'DESC' : 'ASC';
+
+      List<dynamic> queryList = [];
+      where.map((mid, value) {
+        queryList.add(Query.equal(mid, value));
+        return MapEntry(mid, value);
+      });
+
+      // List<String> additional = [
+      //   descending ? Query.orderDesc(orderBy) : Query.orderAsc(orderBy),
+      // ];
+      List<String> additional = [];
+
+      for (var val in orderBy.entries) {
+        additional.add((val.value == OrderDirection.descending)
+            ? Query.orderDesc(val.key)
+            : Query.orderAsc(val.key));
+      }
+
       if (limit != null) {
         additional.add(Query.limit(limit));
       }

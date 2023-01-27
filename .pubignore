@@ -64,5 +64,5 @@ example/windows/runner/flutter_window.h
 example/windows/runner/resource.h
 example/windows/runner/utils.h
 example/windows/runner/win32_window.h
-
+example/assets/text_hycop_config.json
 
