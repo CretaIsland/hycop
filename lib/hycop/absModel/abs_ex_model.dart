@@ -32,7 +32,7 @@ class AbsExModel extends Equatable {
       _mid = pmid;
     }
     parentMid = UndoAble<String>(parent, mid);
-    order = UndoAble<double>(0, mid);
+    order = UndoAble<double>(1, mid);
     hashTag = UndoAble<String>('', mid);
     isRemoved = UndoAble<bool>(false, mid);
   }
@@ -54,7 +54,7 @@ class AbsExModel extends Equatable {
     _mid = map["mid"];
     _updateTime = HycopUtils.dateTimeFromDB(map["updateTime"]);
     parentMid.set(map["parentMid"] ?? '', save: false, noUndo: true);
-    order.set(map["order"] ?? 0, save: false, noUndo: true);
+    order.set(map["order"] ?? 1, save: false, noUndo: true);
     hashTag.set(map["hashTag"] ?? '', save: false, noUndo: true);
     isRemoved.set(map["isRemoved"] ?? false, save: false, noUndo: true);
   }
