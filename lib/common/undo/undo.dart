@@ -28,6 +28,10 @@ class UndoAble<T> {
     _mid = mid;
   }
 
+  void printMid() {
+    logger.finest('value mid = $_mid');
+  }
+
   void set(T val,
       {bool save = true,
       bool noUndo = false,

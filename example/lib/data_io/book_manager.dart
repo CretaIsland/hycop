@@ -8,13 +8,14 @@ BookManager? bookManagerHolder;
 class BookManager extends AbsExModelManager {
   BookManager() : super('hycop_book');
   @override
-  AbsExModel newModel() => BookModel();
+  AbsExModel newModel(String mid) => BookModel(mid);
 
   @override
   void realTimeCallback(String directive, String userId, Map<String, dynamic> dataMap) {
     logger.finest('realTimeCallback invoker($directive, $userId)');
     if (directive == 'create') {
-      BookModel book = BookModel();
+      String mid = dataMap["mid"] ?? '';
+      BookModel book = BookModel(mid);
       book.fromMap(dataMap);
       modelList.insert(0, book);
       logger.finest('${book.mid} realtime added');

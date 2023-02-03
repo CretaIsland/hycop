@@ -25,8 +25,12 @@ class AbsExModel extends Equatable {
   @override
   List<Object?> get props => [mid, type, parentMid, order, hashTag, isRemoved];
 
-  AbsExModel({required this.type, required String parent}) {
-    _mid = HycopUtils.genMid(type);
+  AbsExModel({String? pmid, required this.type, required String parent}) {
+    if (pmid == null || pmid.isEmpty) {
+      _mid = HycopUtils.genMid(type);
+    } else {
+      _mid = pmid;
+    }
     parentMid = UndoAble<String>(parent, mid);
     order = UndoAble<double>(0, mid);
     hashTag = UndoAble<String>('', mid);

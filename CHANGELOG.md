@@ -1,3 +1,7 @@
+## 0.0.8
+- Create Data Object bug fix2
+## 0.0.7
+- Create Data Object bug fix
 ## 0.0.6
 - flutter 3.7 version
 - add webrtc module

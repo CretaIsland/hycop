@@ -39,7 +39,7 @@ class BookModel extends AbsExModel {
         thumbnailAspectRatio,
         viewCount
       ];
-  BookModel() : super(type: ExModelType.book, parent: '') {
+  BookModel(String pmid) : super(pmid: pmid, type: ExModelType.book, parent: '') {
     name = UndoAble<String>('', mid);
     width = UndoAble<int>(0, mid);
     height = UndoAble<int>(0, mid);

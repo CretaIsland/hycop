@@ -63,6 +63,11 @@ class FirebaseDatabase extends AbsDatabase {
 
     CollectionReference collectionRef = _db!.collection(collectionId);
     await collectionRef.doc(mid).set(data, SetOptions(merge: false));
+    for (MapEntry e in data.entries) {
+      if (e.value is List) {
+        await collectionRef.doc(mid).update({e.key.toString(): FieldValue.arrayUnion(e.value)});
+      }
+    }
     logger.finest('$mid saved');
   }
 
@@ -70,9 +75,15 @@ class FirebaseDatabase extends AbsDatabase {
   Future<void> createData(String collectionId, String mid, Map<dynamic, dynamic> data) async {
     await initialize();
 
-    logger.finest('createData $mid!');
+    logger.finest('createData... $mid!');
     CollectionReference collectionRef = _db!.collection(collectionId);
     await collectionRef.doc(mid).set(data, SetOptions(merge: false));
+    for (MapEntry e in data.entries) {
+      if (e.value is List) {
+        await collectionRef.doc(mid).update({e.key.toString(): FieldValue.arrayUnion(e.value)});
+      }
+    }
+
     //await collectionRef.add(data);
     logger.finest('$mid! created');
   }
@@ -131,9 +142,29 @@ class FirebaseDatabase extends AbsDatabase {
     });
   }
 
+  Query<Object?> queryMaker(String mid, QueryValue value, Query<Object?> query) {
+    switch (value.operType) {
+      case OperType.isEqualTo:
+        return query.where(mid, isEqualTo: value.value);
+      case OperType.isGreaterThan:
+        return query.where(mid, isGreaterThan: value.value);
+      case OperType.isGreaterThanOrEqualTo:
+        return query.where(mid, isGreaterThanOrEqualTo: value.value);
+      case OperType.isLessThan:
+        return query.where(mid, isLessThan: value.value);
+      case OperType.isLessThanOrEqualTo:
+        return query.where(mid, isLessThanOrEqualTo: value.value);
+      case OperType.isNotEqualTo:
+        return query.where(mid, isNotEqualTo: value.value);
+      case OperType.arrayContains:
+        logger.finest('query=mid arrayContains ${value.value}');
+        return query.where(mid, arrayContains: value.value);
+    }
+  }
+
   @override
   Future<List> queryPage(String collectionId,
-      {required Map<String, dynamic> where,
+      {required Map<String, QueryValue> where,
       required Map<String, OrderDirection> orderBy,
       int? limit,
       int? offset,
@@ -153,7 +184,8 @@ class FirebaseDatabase extends AbsDatabase {
     });
 
     where.map((mid, value) {
-      query = query.where(mid, isEqualTo: value);
+      //query = query.where(mid, isEqualTo: value);
+      query = queryMaker(mid, value, query);
       return MapEntry(mid, value);
     });
 
@@ -161,6 +193,10 @@ class FirebaseDatabase extends AbsDatabase {
     if (startAfter != null && startAfter.isNotEmpty) query = query.startAfter(startAfter);
 
     return await query.get().then((snapshot) {
+      if (snapshot.docs.isEmpty) {
+        logger.finest('no data founded');
+        return [];
+      }
       return snapshot.docs.map((doc) {
         //logger.finest(doc.data()!.toString());
         return doc.data()! as Map<String, dynamic>;

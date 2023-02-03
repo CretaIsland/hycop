@@ -8,13 +8,14 @@ FrameManager? frameManagerHolder;
 class FrameManager extends AbsExModelManager {
   FrameManager() : super('hycop_frame');
   @override
-  AbsExModel newModel() => FrameModel();
+  AbsExModel newModel(String mid) => FrameModel(mid);
 
   @override
   void realTimeCallback(String directive, String userId, Map<String, dynamic> dataMap) {
     logger.finest('realTimeCallback invoker($directive, $userId)');
     if (directive == 'create') {
-      FrameModel frame = FrameModel();
+      String mid = dataMap["mid"] ?? '';
+      FrameModel frame = FrameModel(mid);
       frame.fromMap(dataMap);
       modelList.insert(0, frame);
       logger.finest('${frame.mid} realtime added');

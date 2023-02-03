@@ -220,10 +220,36 @@ class AppwriteDatabase extends AbsDatabase {
     }
   }
 
+  void queryMaker(String mid, QueryValue value, List<dynamic> queryList) {
+    switch (value.operType) {
+      case OperType.isEqualTo:
+        queryList.add(Query.equal(mid, value.value));
+        break;
+      case OperType.isGreaterThan:
+        queryList.add(Query.greaterThan(mid, value.value));
+        break;
+      case OperType.isGreaterThanOrEqualTo:
+        queryList.add(Query.greaterThanEqual(mid, value.value));
+        break;
+      case OperType.isLessThan:
+        queryList.add(Query.lessThan(mid, value.value));
+        break;
+      case OperType.isLessThanOrEqualTo:
+        queryList.add(Query.lessThanEqual(mid, value.value));
+        break;
+      case OperType.isNotEqualTo:
+        queryList.add(Query.notEqual(mid, value.value));
+        break;
+      case OperType.arrayContains:
+        queryList.add(Query.search(mid, value.value));
+        break;
+    }
+  }
+
   @override
   Future<List> queryPage(
     String collectionId, {
-    required Map<String, dynamic> where,
+    required Map<String, QueryValue> where,
     required Map<String, OrderDirection> orderBy,
     int? limit,
     int? offset, // appwrite only
@@ -233,10 +259,10 @@ class AppwriteDatabase extends AbsDatabase {
 
     try {
       //String orderType = descending ? 'DESC' : 'ASC';
-
       List<dynamic> queryList = [];
       where.map((mid, value) {
-        queryList.add(Query.equal(mid, value));
+        queryMaker(mid, value, queryList);
+        //queryList.add(Query.equal(mid, value));
         return MapEntry(mid, value);
       });
 

@@ -218,7 +218,7 @@ class _DatabaseExamplePageState extends State<DatabaseExamplePage> {
                     BookModel.withName('sample($counter)', AccountManager.currentLoginUser.email);
                 await bookManager.createToDB(book);
               } else {
-                BookModel book = BookModel();
+                BookModel book = BookModel('');
                 book.copyFrom(bookManager.modelList.first, newMid: book.mid);
                 book.name.set('(${counter++}) new created book', save: false);
                 await bookManager.createToDB(book);

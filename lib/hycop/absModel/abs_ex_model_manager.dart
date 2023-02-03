@@ -9,7 +9,7 @@ abstract class AbsExModelManager extends ChangeNotifier {
   final String collectionId;
   AbsExModelManager(this.collectionId);
 
-  AbsExModel newModel();
+  AbsExModel newModel(String mid);
   void realTimeCallback(String directive, String userId, Map<String, dynamic> dataMap);
 
   void notify() => notifyListeners();
@@ -42,7 +42,7 @@ abstract class AbsExModelManager extends ChangeNotifier {
         //startAfter: [DateTime.parse('2022-08-04 12:00:01.000')], //firebase only
       );
       return resultList.map((ele) {
-        AbsExModel model = newModel();
+        AbsExModel model = newModel(ele['mid'] ?? '');
         model.fromMap(ele);
         modelList.add(model);
         return model;
@@ -55,7 +55,7 @@ abstract class AbsExModelManager extends ChangeNotifier {
 
   Future<AbsExModel> getFromDB(String mid) async {
     try {
-      AbsExModel model = newModel();
+      AbsExModel model = newModel(mid);
       model.fromMap(await HycopFactory.dataBase!.getData(collectionId, mid));
       return model;
     } catch (e) {
@@ -78,7 +78,7 @@ abstract class AbsExModelManager extends ChangeNotifier {
         //startAfter: [DateTime.parse('2022-08-04 12:00:01.000')], //firebase only
       );
       return resultList.map((ele) {
-        AbsExModel model = newModel();
+        AbsExModel model = newModel(ele['mid'] ?? '');
         model.fromMap(ele);
         modelList.add(model);
         return model;

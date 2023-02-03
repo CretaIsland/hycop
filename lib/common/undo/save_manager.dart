@@ -27,6 +27,10 @@ class SaveManager extends ChangeNotifier {
     _managerMap[className] = manager;
   }
 
+  void unregisterManager(String className) {
+    _managerMap.remove(className);
+  }
+
   AbsExModelManager? getManager(String mid) {
     String className = HycopUtils.getClassName(mid);
     logger.fine('getManager($className)');

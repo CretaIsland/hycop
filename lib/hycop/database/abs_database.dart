@@ -14,6 +14,25 @@ enum OrderDirection {
   descending,
 }
 
+enum OperType {
+  isEqualTo,
+  isNotEqualTo,
+  isLessThan,
+  isLessThanOrEqualTo,
+  isGreaterThan,
+  isGreaterThanOrEqualTo,
+  arrayContains,
+}
+
+class QueryValue {
+  final OperType operType;
+  final dynamic value;
+  QueryValue({
+    required this.value,
+    this.operType = OperType.isEqualTo,
+  });
+}
+
 abstract class AbsDatabase {
   //connection info
   static Client? _awDBConn; //appwrite only
@@ -48,7 +67,7 @@ abstract class AbsDatabase {
       List<Object?>? startAfter}); // firebase onlu
 
   Future<List> queryPage(String collectionId,
-      {required Map<String, dynamic> where,
+      {required Map<String, QueryValue> where,
       required Map<String, OrderDirection> orderBy,
       int? limit,
       int? offset, // appwrite only
