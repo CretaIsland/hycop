@@ -21,19 +21,54 @@ class SaveManager extends ChangeNotifier {
   final Queue<String> _dataChangedQue = Queue<String>();
   final Queue<AbsExModel> _dataCreatedQue = Queue<AbsExModel>();
 
-  final Map<String, AbsExModelManager> _managerMap = {};
+  final Map<String, Map<String, AbsExModelManager>> _managerMap = {};
 
-  void registerManager(String className, AbsExModelManager manager) {
-    _managerMap[className] = manager;
+  AbsExModel? _defaultBook;
+  final List<String> _bookChildrens = [];
+
+  void addBookChildren(String child) {
+    _bookChildrens.add(child);
   }
 
-  void unregisterManager(String className) {
-    _managerMap.remove(className);
+  bool isBookChildren(String mid) {
+    for (var ele in _bookChildrens) {
+      if (ele == mid.substring(0, 5)) return true;
+    }
+    return false;
   }
 
-  AbsExModelManager? getManager(String mid) {
+  void setDefaultBook(AbsExModel? book) {
+    if (book == null) {
+      logger.severe('setDefaultBook() failed');
+      return;
+    }
+    logger.fine('setDefaultBook()');
+    _defaultBook = book;
+  }
+
+  void registerManager(String className, AbsExModelManager manager, {String postfix = 'onlyOne'}) {
+    Map<String, AbsExModelManager>? map = _managerMap[className];
+    if (map == null) {
+      map = {postfix: manager};
+      _managerMap[className] = map;
+    } else {
+      map[postfix] = manager;
+    }
+  }
+
+  void unregisterManager(String className, {String postfix = 'onlyOne'}) {
+    Map<String, AbsExModelManager>? map = _managerMap[className];
+    if (map != null) {
+      map.remove(postfix);
+    }
+    if (map == null || map.isEmpty) {
+      _managerMap.remove(className);
+    }
+  }
+
+  Map<String, AbsExModelManager>? _getManager(String mid) {
     String className = HycopUtils.getClassName(mid);
-    logger.fine('getManager($className)');
+    logger.fine('_getManager($className)');
     return _managerMap[className];
   }
 
@@ -44,15 +79,16 @@ class SaveManager extends ChangeNotifier {
     _saveTimer = null;
   }
 
-  // void shouldBookSave(String mid) {
-  //   if (mid.substring(0, 5) != 'Book=') {
-  //     // book 이 아닌 다른 Row 가 save 된 것인데, 마지막에 Book 의 updateTime 을 한번 바뀌어 줘야 한다.
-  //     if (bookManagerHolder!.defaultBook != null) {
-  //       bookManagerHolder!.defaultBook!.updateTime = DateTime.now();
-  //       _dataChangedQue.add(bookManagerHolder!.defaultBook!.mid);
-  //     }
-  //   }
-  // }
+  void shouldBookSave(String mid) {
+    if (isBookChildren(mid) == true) {
+      // book 이 아닌 다른 Row 가 save 된 것인데, 마지막에 Book 의 updateTime 을 한번 바뀌어 줘야 한다.
+      if (_defaultBook != null) {
+        logger.fine('shouldBookSave');
+        _defaultBook!.setUpdateTime();
+        _dataChangedQue.add(_defaultBook!.mid);
+      }
+    }
+  }
 
   Future<void> pushChanged(String mid, String hint, {bool dontChangeBookTime = false}) async {
     await _datalock.synchronized(() async {
@@ -61,7 +97,8 @@ class SaveManager extends ChangeNotifier {
         _dataChangedQue.add(mid);
         notifyListeners();
         if (dontChangeBookTime == false) {
-          //shouldBookSave(mid);
+          logger.fine('shouldBookSave');
+          shouldBookSave(mid);
         }
       }
     });
@@ -72,7 +109,7 @@ class SaveManager extends ChangeNotifier {
       logger.finest('created:${model.mid}, via $hint');
       _dataCreatedQue.add(model);
       notifyListeners();
-      //shouldBookSave(model.mid);
+      shouldBookSave(model.mid);
     });
   }
 
@@ -83,8 +120,13 @@ class SaveManager extends ChangeNotifier {
           while (_dataChangedQue.isNotEmpty) {
             final mid = _dataChangedQue.first;
             // Save here !!!!
-            getManager(mid)?.setToDBByMid(mid);
-            logger.finest('$mid saved');
+            Map<String, AbsExModelManager>? managerMap = _getManager(mid);
+            if (managerMap != null) {
+              for (AbsExModelManager manager in managerMap.values) {
+                manager.setToDBByMid(mid);
+                logger.finest('$mid saved');
+              }
+            }
             _dataChangedQue.removeFirst();
           }
           notifyListeners();
@@ -97,8 +139,16 @@ class SaveManager extends ChangeNotifier {
           while (_dataCreatedQue.isNotEmpty) {
             final model = _dataCreatedQue.first;
             // Save here !!!!
-            getManager(model.mid)?.createToDB(model);
-            logger.finest('${model.mid} saved');
+            // _getManager(model.mid)?.createToDB(model);
+            // logger.finest('${model.mid} saved');
+            Map<String, AbsExModelManager>? managerMap = _getManager(model.mid);
+            if (managerMap != null) {
+              for (AbsExModelManager manager in managerMap.values) {
+                manager.createToDB(model);
+                logger.finest('${model.mid} created');
+              }
+            }
+
             _dataCreatedQue.removeFirst();
           }
           notifyListeners();

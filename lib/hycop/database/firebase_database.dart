@@ -201,6 +201,10 @@ class FirebaseDatabase extends AbsDatabase {
         //logger.finest(doc.data()!.toString());
         return doc.data()! as Map<String, dynamic>;
       }).toList();
+    }, onError: (trace) {
+      logger.severe("------------DATABASE ERROR -----------");
+      logger.severe(trace.toString());
+      return [];
     });
   }
 

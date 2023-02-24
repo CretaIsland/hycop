@@ -15,7 +15,13 @@ class AbsExModel extends Equatable {
   late String _mid;
   String get mid => _mid;
   DateTime _updateTime = DateTime.now();
+  DateTime _createTime = DateTime.now();
   DateTime get updateTime => _updateTime;
+  DateTime get createTime => _createTime;
+
+  void setUpdateTime() {
+    _updateTime = DateTime.now();
+  }
 
   late UndoAble<String> parentMid;
   late UndoAble<double> order;
@@ -53,6 +59,8 @@ class AbsExModel extends Equatable {
   void fromMap(Map<String, dynamic> map) {
     _mid = map["mid"];
     _updateTime = HycopUtils.dateTimeFromDB(map["updateTime"]);
+    _createTime =
+        map["createTime"] == null ? _updateTime : HycopUtils.dateTimeFromDB(map["createTime"]);
     parentMid.set(map["parentMid"] ?? '', save: false, noUndo: true);
     order.set(map["order"] ?? 1, save: false, noUndo: true);
     hashTag.set(map["hashTag"] ?? '', save: false, noUndo: true);
@@ -64,6 +72,7 @@ class AbsExModel extends Equatable {
       //"type": type.index,
       "mid": mid,
       "updateTime": HycopUtils.dateTimeToDB(updateTime),
+      "createTime": HycopUtils.dateTimeToDB(createTime),
       "parentMid": parentMid.value,
       "order": order.value,
       "hashTag": hashTag.value,

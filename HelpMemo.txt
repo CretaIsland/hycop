@@ -62,7 +62,6 @@ flutter create -t plugin --platforms web ../hycop_web
 # ############################
 
 # 사전 점검
-cd ../hycop_web
 flutter pub publish --dry-run
 
 # pubspec.yaml 에 다음을 추가함.
