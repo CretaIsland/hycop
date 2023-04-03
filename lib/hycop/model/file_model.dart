@@ -23,7 +23,7 @@ class FileModel {
     return {
       'fileId' : fileId,
       'fileName' : fileName,
-      'fileUrl' : fileView,
+      'fileView' : fileView,
       'fileMd5' : fileMd5,
       'fileSize' : fileSize,
       'fileType' : fileType
@@ -33,7 +33,7 @@ class FileModel {
   void fromMap(Map<String, dynamic> map) {
     fileId = map['fileId'];
     fileName = map['fileName'];
-    fileView = map['fileUrl'];
+    fileView = map['fileView'];
     fileMd5 = map['fileMd5'];
     fileSize = map['fileSize'];
     fileType = map['fileType'];

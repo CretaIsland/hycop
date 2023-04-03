@@ -83,7 +83,7 @@ class SaveManager extends ChangeNotifier {
     if (isBookChildren(mid) == true) {
       // book 이 아닌 다른 Row 가 save 된 것인데, 마지막에 Book 의 updateTime 을 한번 바뀌어 줘야 한다.
       if (_defaultBook != null) {
-        logger.fine('shouldBookSave');
+        logger.finest('shouldBookSave');
         _defaultBook!.setUpdateTime();
         _dataChangedQue.add(_defaultBook!.mid);
       }
@@ -93,11 +93,11 @@ class SaveManager extends ChangeNotifier {
   Future<void> pushChanged(String mid, String hint, {bool dontChangeBookTime = false}) async {
     await _datalock.synchronized(() async {
       if (!_dataChangedQue.contains(mid)) {
-        logger.severe('changed:$mid, via $hint');
+        logger.finest('changed:$mid, via $hint');
         _dataChangedQue.add(mid);
         notifyListeners();
         if (dontChangeBookTime == false) {
-          logger.fine('shouldBookSave');
+          logger.finest('shouldBookSave');
           shouldBookSave(mid);
         }
       }

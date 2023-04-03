@@ -52,8 +52,10 @@ class FirebaseAppStorage extends AbsStorage {
         _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
 
     try {
-      await getFileInfo(uploadFile.fullPath);
+      // 해당 파일이 이미 있으면 파일 리턴
+      return await getFileInfo(uploadFile.fullPath);
     } catch (e) {
+      // 해당 파일이 없으면 업로드 후 리턴
       await uploadFile.putData(fileBytes).onError((error, stackTrace) {
         throw HycopException(message: stackTrace.toString());
       });
@@ -64,7 +66,6 @@ class FirebaseAppStorage extends AbsStorage {
       });
       return await getFileInfo("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
     }
-    return null;
   }
 
   @override

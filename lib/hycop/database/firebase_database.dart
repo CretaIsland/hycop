@@ -13,7 +13,7 @@ class FirebaseDatabase extends AbsDatabase {
   Future<void> initialize() async {
     if (AbsDatabase.fbDBApp == null) {
       await HycopFactory.initAll();
-      logger.info('initialize');
+      logger.finest('initialize');
       AbsDatabase.setFirebaseApp(await Firebase.initializeApp(
           name: 'database',
           options: FirebaseOptions(
@@ -27,7 +27,7 @@ class FirebaseDatabase extends AbsDatabase {
     }
     // ignore: prefer_conditional_assignment
     if (_db == null) {
-      logger.info('_db init');
+      logger.finest('_db init');
       _db = FirebaseFirestore.instanceFor(app: AbsDatabase.fbDBApp!);
     }
     assert(_db != null);
@@ -61,13 +61,21 @@ class FirebaseDatabase extends AbsDatabase {
   Future<void> setData(String collectionId, String mid, Map<dynamic, dynamic> data) async {
     await initialize();
 
-    CollectionReference collectionRef = _db!.collection(collectionId);
-    await collectionRef.doc(mid).set(data, SetOptions(merge: false));
+    Map<String, Object?> converted = {};
     for (MapEntry e in data.entries) {
       if (e.value is List) {
-        await collectionRef.doc(mid).update({e.key.toString(): FieldValue.arrayUnion(e.value)});
+        converted[e.key.toString()] = FieldValue.arrayUnion(e.value);
+      } else {
+        converted[e.key.toString()] = e.value as Object?;
       }
     }
+    CollectionReference collectionRef = _db!.collection(collectionId);
+    await collectionRef.doc(mid).update(converted);
+    // for (MapEntry e in data.entries) {
+    //   if (e.value is List) {
+    //     await collectionRef.doc(mid).update({e.key.toString(): FieldValue.arrayUnion(e.value)});
+    //   }
+    // }
     logger.finest('$mid saved');
   }
 
@@ -120,9 +128,9 @@ class FirebaseDatabase extends AbsDatabase {
       int? limit,
       int? offset,
       List<Object?>? startAfter}) async {
-    logger.info('before');
+    logger.finest('before');
     await initialize();
-    logger.info('after');
+    logger.finest('after');
     assert(_db != null);
     CollectionReference collectionRef = _db!.collection(collectionId);
     Query<Object?> query = collectionRef.orderBy(orderBy, descending: descending);
@@ -169,7 +177,7 @@ class FirebaseDatabase extends AbsDatabase {
       int? limit,
       int? offset,
       List<Object?>? startAfter}) async {
-    logger.info('queryPage');
+    logger.finest('queryPage');
     await initialize();
     assert(_db != null);
     CollectionReference collectionRef = _db!.collection(collectionId);
