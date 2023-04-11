@@ -92,8 +92,8 @@ class AppwriteStorage extends AbsStorage {
     return FileModel(
         fileId: res.$id,
         fileName: res.name,
-        fileView: await _storage!.getFileView(
-            bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: res.$id),
+        fileView: await _storage!.getFileView(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: res.$id),
+        thumbnailUrl: "",
         fileMd5: res.signature,
         fileSize: res.sizeOriginal,
         fileType: ContentsType.getContentTypes(res.mimeType));
@@ -146,6 +146,7 @@ class AppwriteStorage extends AbsStorage {
           fileId: element.$id,
           fileName: element.name,
           fileView: fileData,
+          thumbnailUrl: "",
           fileMd5: element.signature,
           fileSize: element.sizeOriginal,
           fileType: ContentsType.getContentTypes(element.mimeType)));
