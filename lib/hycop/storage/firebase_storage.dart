@@ -47,11 +47,11 @@ class FirebaseAppStorage extends AbsStorage {
   }
 
   @override
-  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes) async {
+  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes, {bool makeThumbnail = true}) async {
     await initialize();
 
-    final uploadFile =
-        _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
+    fileName = fileName.replaceAll(" ", "_");
+    final uploadFile = _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
 
     try {
       // 해당 파일이 이미 있으면 파일 리턴
@@ -67,13 +67,12 @@ class FirebaseAppStorage extends AbsStorage {
         throw HycopException(message: stackTrace.toString());
       });
 
-      // 영상이라면 썸네일 추출
-      if(fileType.contains("video")) {
-        await createThumbnail(fileName);
+      if(makeThumbnail && (fileType.contains("video") || fileType.contains("image"))) {
+        await createThumbnail(fileName, fileType);
+        return await getFileInfo("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
       }
-
-      return await getFileInfo("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
     }
+    return null;
   }
 
   @override
@@ -107,37 +106,33 @@ class FirebaseAppStorage extends AbsStorage {
     final res = await _storage!.ref().child(fileId).getMetadata().onError((error, stackTrace) {
       throw HycopException(message: stackTrace.toString());
     });
-
     String fileView = await _storage!.ref().child(res.fullPath).getDownloadURL();
 
-    // 영상이라면 썸네일 url 가져오기
-    if(ContentsType.getContentTypes(res.contentType!) == ContentsType.video) {
-
+    if(res.contentType!.contains("video") || res.contentType!.contains("image")) {
       String fileName = fileId.substring(fileId.indexOf("/")+1, fileId.lastIndexOf("."));
-
-      final thumbnailRes = await _storage!.ref().child("${fileId.substring(0, fileId.indexOf("/"))}/thumbnail_$fileName.jpg").getMetadata().onError((error, stackTrace) {
-        createThumbnail(fileId.substring(fileId.indexOf("/")));
-        throw HycopException(message: stackTrace.toString());
+      final thumbnailRes = await _storage!.ref().child("${fileId.substring(0, fileId.indexOf("/"))}/thumbnail_$fileName.jpg").getMetadata().onError((error, stackTrace) async {
+        return FullMetadata({"fullPath" : ""});
       });
 
       return FileModel(
         fileId: res.fullPath,
         fileName: res.name,
         fileView: fileView,
-        thumbnailUrl: await _storage!.ref().child(thumbnailRes.fullPath).getDownloadURL(),
+        thumbnailUrl: thumbnailRes.fullPath == "" ? "" : await _storage!.ref().child(thumbnailRes.fullPath).getDownloadURL(),
         fileMd5: res.md5Hash!,
         fileSize: res.size!,
         fileType: ContentsType.getContentTypes(res.contentType!));
-    } 
-
+    }
+  
     return FileModel(
-        fileId: res.fullPath,
-        fileName: res.name,
-        fileView: fileView,
-        thumbnailUrl: fileView,
-        fileMd5: res.md5Hash!,
-        fileSize: res.size!,
-        fileType: ContentsType.getContentTypes(res.contentType!));
+      fileId: res.fullPath,
+      fileName: res.name,
+      fileView: fileView,
+      thumbnailUrl: "",
+      fileMd5: res.md5Hash!,
+      fileSize: res.size!,
+      fileType: ContentsType.getContentTypes(res.contentType!));
+   
   }
 
   @override
@@ -166,23 +161,20 @@ class FirebaseAppStorage extends AbsStorage {
       var fileData = await element.getMetadata();
       String fileView = await _storage!.ref().child(fileData.fullPath).getDownloadURL();
 
-      if(ContentsType.getContentTypes(fileData.contentType!) == ContentsType.video) {
-        
+      // 파일이 썸네일을 가지는 형태일 때
+      if(fileData.contentType!.contains("video") || fileData.contentType!.contains("image")) {
         String folderName = fileData.fullPath.substring(0, fileData.fullPath.indexOf("/"));
         String fileName = fileData.fullPath.substring(fileData.fullPath.indexOf("/")+1, fileData.fullPath.lastIndexOf("."));
-
+        
         final thumbnailRes = await _storage!.ref().child("$folderName/thumbnail_$fileName.jpg").getMetadata().onError((error, stackTrace) async {
-          logger.info(error);
-          await createThumbnail(fileData.fullPath.substring(fileData.fullPath.indexOf("/")+1));
-          return FullMetadata({"fullPath" : "$folderName/thumbnail_$fileName.jpg"});
-          //throw HycopException(message: stackTrace.toString());
+          return FullMetadata({"fullPath" : ""});
         });
 
         fileInfoList.add(FileModel(
           fileId: fileData.fullPath,
           fileName: fileData.name,
           fileView: fileView,
-          thumbnailUrl: await _storage!.ref().child(thumbnailRes.fullPath).getDownloadURL(),
+          thumbnailUrl: thumbnailRes.fullPath == "" ? "" : await _storage!.ref().child(thumbnailRes.fullPath).getDownloadURL(),
           fileMd5: fileData.md5Hash!,
           fileSize: fileData.size!,
           fileType: ContentsType.getContentTypes(fileData.contentType!)));
@@ -192,7 +184,7 @@ class FirebaseAppStorage extends AbsStorage {
           fileId: fileData.fullPath,
           fileName: fileData.name,
           fileView: fileView,
-          thumbnailUrl: fileView,
+          thumbnailUrl: "",
           fileMd5: fileData.md5Hash!,
           fileSize: fileData.size!,
           fileType: ContentsType.getContentTypes(fileData.contentType!)));
@@ -208,14 +200,15 @@ class FirebaseAppStorage extends AbsStorage {
         "${HycopUtils.genBucketId(AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId)}/";
   }
 
-  Future<void> createThumbnail(String fileName) async {
+  Future<void> createThumbnail(String fileName, String fileType) async {
     try {
       await http.post(
         Uri.parse("https://devcreta.tk:447/createThumbnail"),
         headers: {"Content-type": "application/json"},
         body: jsonEncode({
           "userId" : myConfig!.serverConfig!.storageConnInfo.bucketId,
-          "fileName" : fileName
+          "fileName" : fileName,
+          "fileType" : fileType
         })
       );
     } catch (error) {
