@@ -110,7 +110,7 @@ class FirebaseAppStorage extends AbsStorage {
 
     if(res.contentType!.contains("video") || res.contentType!.contains("image")) {
       String fileName = fileId.substring(fileId.indexOf("/")+1, fileId.lastIndexOf("."));
-      final thumbnailRes = await _storage!.ref().child("${fileId.substring(0, fileId.indexOf("/"))}/thumbnail_$fileName.jpg").getMetadata().onError((error, stackTrace) async {
+      final thumbnailRes = await _storage!.ref().child("${fileId.substring(0, fileId.indexOf("/"))}/thumbnail/$fileName.jpg").getMetadata().onError((error, stackTrace) async {
         return FullMetadata({"fullPath" : ""});
       });
 
@@ -166,7 +166,7 @@ class FirebaseAppStorage extends AbsStorage {
         String folderName = fileData.fullPath.substring(0, fileData.fullPath.indexOf("/"));
         String fileName = fileData.fullPath.substring(fileData.fullPath.indexOf("/")+1, fileData.fullPath.lastIndexOf("."));
         
-        final thumbnailRes = await _storage!.ref().child("$folderName/thumbnail_$fileName.jpg").getMetadata().onError((error, stackTrace) async {
+        final thumbnailRes = await _storage!.ref().child("$folderName/thumbnail/$fileName.jpg").getMetadata().onError((error, stackTrace) async {
           return FullMetadata({"fullPath" : ""});
         });
 
