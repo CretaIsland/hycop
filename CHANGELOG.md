@@ -1,3 +1,7 @@
+## 0.1.3
+- add Thumbnail function 
+## 0.1.2
+- Storage already exist case 
 ## 0.1.1
 - SaveManagre can have second key
 ## 0.1.0
