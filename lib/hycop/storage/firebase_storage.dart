@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:http/http.dart' as http;
 import 'package:hycop/common/util/logger.dart';
 import 'package:hycop/hycop/account/account_manager.dart';
 // import 'package:logging/logging.dart';
@@ -45,11 +47,11 @@ class FirebaseAppStorage extends AbsStorage {
   }
 
   @override
-  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes) async {
+  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes, {bool makeThumbnail = true}) async {
     await initialize();
 
-    final uploadFile =
-        _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
+    fileName = fileName.replaceAll(" ", "_");
+    final uploadFile = _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
 
     try {
       // 해당 파일이 이미 있으면 파일 리턴
@@ -64,8 +66,13 @@ class FirebaseAppStorage extends AbsStorage {
           .onError((error, stackTrace) {
         throw HycopException(message: stackTrace.toString());
       });
-      return await getFileInfo("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
+
+      if(makeThumbnail && (fileType.contains("video") || fileType.contains("image"))) {
+        await createThumbnail(fileName, fileType);
+        return await getFileInfo("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
+      }
     }
+    return null;
   }
 
   @override
@@ -99,13 +106,33 @@ class FirebaseAppStorage extends AbsStorage {
     final res = await _storage!.ref().child(fileId).getMetadata().onError((error, stackTrace) {
       throw HycopException(message: stackTrace.toString());
     });
-    return FileModel(
+    String fileView = await _storage!.ref().child(res.fullPath).getDownloadURL();
+
+    if(res.contentType!.contains("video") || res.contentType!.contains("image")) {
+      String fileName = fileId.substring(fileId.indexOf("/")+1, fileId.lastIndexOf("."));
+      final thumbnailRes = await _storage!.ref().child("${fileId.substring(0, fileId.indexOf("/"))}/thumbnail/$fileName.jpg").getMetadata().onError((error, stackTrace) async {
+        return FullMetadata({"fullPath" : ""});
+      });
+
+      return FileModel(
         fileId: res.fullPath,
         fileName: res.name,
-        fileView: await _storage!.ref().child(res.fullPath).getDownloadURL(),
+        fileView: fileView,
+        thumbnailUrl: thumbnailRes.fullPath == "" ? "" : await _storage!.ref().child(thumbnailRes.fullPath).getDownloadURL(),
         fileMd5: res.md5Hash!,
         fileSize: res.size!,
         fileType: ContentsType.getContentTypes(res.contentType!));
+    }
+  
+    return FileModel(
+      fileId: res.fullPath,
+      fileName: res.name,
+      fileView: fileView,
+      thumbnailUrl: "",
+      fileMd5: res.md5Hash!,
+      fileSize: res.size!,
+      fileType: ContentsType.getContentTypes(res.contentType!));
+   
   }
 
   @override
@@ -132,13 +159,36 @@ class FirebaseAppStorage extends AbsStorage {
 
     for (var element in res.items) {
       var fileData = await element.getMetadata();
-      fileInfoList.add(FileModel(
+      String fileView = await _storage!.ref().child(fileData.fullPath).getDownloadURL();
+
+      // 파일이 썸네일을 가지는 형태일 때
+      if(fileData.contentType!.contains("video") || fileData.contentType!.contains("image")) {
+        String folderName = fileData.fullPath.substring(0, fileData.fullPath.indexOf("/"));
+        String fileName = fileData.fullPath.substring(fileData.fullPath.indexOf("/")+1, fileData.fullPath.lastIndexOf("."));
+        
+        final thumbnailRes = await _storage!.ref().child("$folderName/thumbnail/$fileName.jpg").getMetadata().onError((error, stackTrace) async {
+          return FullMetadata({"fullPath" : ""});
+        });
+
+        fileInfoList.add(FileModel(
           fileId: fileData.fullPath,
           fileName: fileData.name,
-          fileView: await _storage!.ref().child(fileData.fullPath).getDownloadURL(),
+          fileView: fileView,
+          thumbnailUrl: thumbnailRes.fullPath == "" ? "" : await _storage!.ref().child(thumbnailRes.fullPath).getDownloadURL(),
           fileMd5: fileData.md5Hash!,
           fileSize: fileData.size!,
           fileType: ContentsType.getContentTypes(fileData.contentType!)));
+
+      } else {
+        fileInfoList.add(FileModel(
+          fileId: fileData.fullPath,
+          fileName: fileData.name,
+          fileView: fileView,
+          thumbnailUrl: "",
+          fileMd5: fileData.md5Hash!,
+          fileSize: fileData.size!,
+          fileType: ContentsType.getContentTypes(fileData.contentType!)));
+      }
     }
     return fileInfoList;
   }
@@ -149,4 +199,22 @@ class FirebaseAppStorage extends AbsStorage {
     myConfig!.serverConfig!.storageConnInfo.bucketId =
         "${HycopUtils.genBucketId(AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId)}/";
   }
+
+  Future<void> createThumbnail(String fileName, String fileType) async {
+    try {
+      await http.post(
+        Uri.parse("https://devcreta.tk:447/createThumbnail"),
+        headers: {"Content-type": "application/json"},
+        body: jsonEncode({
+          "userId" : myConfig!.serverConfig!.storageConnInfo.bucketId,
+          "fileName" : fileName,
+          "fileType" : fileType
+        })
+      );
+    } catch (error) {
+      logger.info(error);
+    }
+  }
+
+
 }

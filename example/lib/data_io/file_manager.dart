@@ -29,7 +29,7 @@ class FileManager extends ChangeNotifier {
     final res = (await HycopFactory.storage!.getFileInfoList());
     for(var element in res) {
       if(element.fileType == ContentsType.image) {
-        imgFileList.add(FileModel(fileId: element.fileId, fileName: element.fileName, fileView: element.fileView, fileMd5: element.fileMd5, fileSize: element.fileSize, fileType: element.fileType));
+        imgFileList.add(FileModel(fileId: element.fileId, fileName: element.fileName, fileView: element.fileView, thumbnailUrl: element.thumbnailUrl, fileMd5: element.fileMd5, fileSize: element.fileSize, fileType: element.fileType));
       }
     }
     notifyListeners();
@@ -41,7 +41,7 @@ class FileManager extends ChangeNotifier {
     final res = await HycopFactory.storage!.getFileInfoList();
     for(var element in res) {
       if(element.fileType == ContentsType.video) {
-        videoFileList.add(FileModel(fileId: element.fileId, fileName: element.fileName, fileView: element.fileView, fileMd5: element.fileMd5, fileSize: element.fileSize, fileType: element.fileType));
+        videoFileList.add(FileModel(fileId: element.fileId, fileName: element.fileName, fileView: element.fileView, thumbnailUrl: element.thumbnailUrl, fileMd5: element.fileMd5, fileSize: element.fileSize, fileType: element.fileType));
       }
     }
     notifyListeners();
@@ -53,7 +53,7 @@ class FileManager extends ChangeNotifier {
     final res = await HycopFactory.storage!.getFileInfoList();
     for(var element in res) {
       if(element.fileType != ContentsType.image && element.fileType != ContentsType.video) {
-        etcFileList.add(FileModel(fileId: element.fileId, fileName: element.fileName, fileView: element.fileView, fileMd5: element.fileMd5, fileSize: element.fileSize, fileType: element.fileType));
+        etcFileList.add(FileModel(fileId: element.fileId, fileName: element.fileName, fileView: element.fileView, thumbnailUrl: element.thumbnailUrl, fileMd5: element.fileMd5, fileSize: element.fileSize, fileType: element.fileType));
       }
     }
     notifyListeners();
