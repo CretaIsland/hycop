@@ -1,3 +1,5 @@
+## 0.1.4
+- add Thumbnail function 
 ## 0.1.3
 - add Thumbnail function 
 ## 0.1.2

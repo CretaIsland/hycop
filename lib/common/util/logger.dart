@@ -8,8 +8,12 @@ import 'package:logging/logging.dart';
 
 final logger = Logger('App');
 
-void showSnackBar(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+const Duration defaultSnackBarDuration = Duration(milliseconds: 4000);
+
+//2023.04.18  skpark give duration parameter
+void showSnackBar(BuildContext context, String message,
+    {Duration duration = defaultSnackBarDuration}) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), duration: duration));
 }
 
 void setupLogger() {
@@ -42,7 +46,9 @@ extension RefX on WidgetRef {
     listen<StateBase>(provider, ((previous, next) {
       final message = next.error?.message;
       if (next.error != previous?.error && message != null && message.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(message),
+        ));
       }
     }));
   }
