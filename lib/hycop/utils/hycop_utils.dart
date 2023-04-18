@@ -105,7 +105,10 @@ class HycopUtils {
   // 사용자의 email과 userId를 토대로 bucketId 생성
   static String genBucketId(String email, String userId) {
     String replaceEmail = email.replaceAll(RegExp(r'[!@#$%^&*(),.?":{}|<>]'), "-");
-    return "$replaceEmail.${userId.substring(0, 35-replaceEmail.length)}";
+    if(replaceEmail.length > 30) {
+      return "$replaceEmail.${userId.substring(0, 63-replaceEmail.length)}";
+    }
+    return "$replaceEmail.$userId";
   }
 
 }
