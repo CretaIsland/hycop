@@ -22,6 +22,7 @@ enum OperType {
   isGreaterThan,
   isGreaterThanOrEqualTo,
   arrayContains,
+  arrayContainsAny,
 }
 
 class QueryValue {
