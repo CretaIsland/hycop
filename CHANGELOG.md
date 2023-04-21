@@ -1,3 +1,5 @@
+## 0.1.5
+- add ArrayContentsAny 
 ## 0.1.4
 - add Thumbnail function 
 ## 0.1.3
