@@ -61,16 +61,17 @@ class FirebaseDatabase extends AbsDatabase {
   Future<void> setData(String collectionId, String mid, Map<dynamic, dynamic> data) async {
     await initialize();
 
-    Map<String, Object?> converted = {};
-    for (MapEntry e in data.entries) {
-      if (e.value is List) {
-        converted[e.key.toString()] = FieldValue.arrayUnion(e.value);
-      } else {
-        converted[e.key.toString()] = e.value as Object?;
-      }
-    }
+    // Map<String, Object?> converted = {};
+    // for (MapEntry e in data.entries) {
+    //   if (e.value is List) {
+    //     converted[e.key.toString()] = FieldValue.arrayUnion(e.value);
+    //   } else {
+    //     converted[e.key.toString()] = e.value as Object?;
+    //   }
+    // }
     CollectionReference collectionRef = _db!.collection(collectionId);
-    await collectionRef.doc(mid).update(converted);
+    //await collectionRef.doc(mid).update(converted);
+    await collectionRef.doc(mid).set(data, SetOptions(merge: false));
     // for (MapEntry e in data.entries) {
     //   if (e.value is List) {
     //     await collectionRef.doc(mid).update({e.key.toString(): FieldValue.arrayUnion(e.value)});
@@ -86,11 +87,11 @@ class FirebaseDatabase extends AbsDatabase {
     logger.finest('createData... $mid!');
     CollectionReference collectionRef = _db!.collection(collectionId);
     await collectionRef.doc(mid).set(data, SetOptions(merge: false));
-    for (MapEntry e in data.entries) {
-      if (e.value is List) {
-        await collectionRef.doc(mid).update({e.key.toString(): FieldValue.arrayUnion(e.value)});
-      }
-    }
+    // for (MapEntry e in data.entries) {
+    //   if (e.value is List) {
+    //     await collectionRef.doc(mid).update({e.key.toString(): FieldValue.arrayUnion(e.value)});
+    //   }
+    // }
 
     //await collectionRef.add(data);
     logger.finest('$mid! created');
