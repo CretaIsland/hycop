@@ -59,6 +59,14 @@ abstract class AbsRealtime {
     listenerMap[listenerId]?.remove(collectionId);
   }
 
+  dynamic myEncode(dynamic item) {
+    if(item is DateTime) {
+      //return item.toIso8601String();
+      return item.toString();
+    }
+    return item;
+  }
+
   @protected
   Map<String, dynamic> makeData({
     required String directive,
@@ -72,7 +80,7 @@ abstract class AbsRealtime {
     input['userId'] = AccountManager.currentLoginUser.email;
     input['deviceId'] = myDeviceId;
     input['updateTime'] = HycopUtils.dateTimeToDB(DateTime.now());
-    input['delta'] = delta != null ? json.encode(delta) : '';
+    input['delta'] = delta != null ? json.encode(delta, toEncodable: myEncode) : '';
 
     return input;
   }
