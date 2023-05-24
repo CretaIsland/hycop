@@ -80,7 +80,7 @@ abstract class AbsRealtime {
     input['userId'] = AccountManager.currentLoginUser.email;
     input['deviceId'] = myDeviceId;
     input['updateTime'] = HycopUtils.dateTimeToDB(DateTime.now());
-    input['delta'] = delta != null ? json.encode(delta, toEncodable: myEncode) : '';
+    input['delta'] = (delta != null) ? json.encode(delta, toEncodable: myEncode) : '';
 
     return input;
   }

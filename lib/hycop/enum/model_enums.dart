@@ -10,6 +10,7 @@ enum ExModelType {
   contents,
   user,
   team,
+  channel,
   watchHistory,
   playlist,
   end;

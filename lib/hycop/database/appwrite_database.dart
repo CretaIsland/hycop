@@ -246,6 +246,15 @@ class AppwriteDatabase extends AbsDatabase {
       case OperType.arrayContainsAny: // 임시로 넣어놓은 것임.
         queryList.add(Query.search(mid, value.value));
         break;
+      case OperType.whereIn: // 임시로 넣어놓은 것임.
+        queryList.add(Query.search(mid, value.value));
+        break;
+      case OperType.whereNotIn: // 임시로 넣어놓은 것임.
+        queryList.add(Query.search(mid, value.value));
+        break;
+      case OperType.isNull: // 임시로 넣어놓은 것임.
+        queryList.add(Query.search(mid, value.value));
+        break;
     }
   }
 

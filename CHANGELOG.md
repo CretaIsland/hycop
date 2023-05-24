@@ -1,3 +1,9 @@
+## 0.1.7
+- add channel & watchHistory & playlist in ExModelType-enum
+- add whereIn, whereNotIn, isNull in OperType-enum
+- fix error DateTime-type in json.encode on AbsRealtime
+## 0.1.6
+- change merge-Option, true to false in firebase
 ## 0.1.5
 - add ArrayContentsAny 
 ## 0.1.4
@@ -7,7 +13,7 @@
 ## 0.1.2
 - Storage already exist case 
 ## 0.1.1
-- SaveManagre can have second key
+- SaveManager can have second key
 ## 0.1.0
 - Save book change time
 ## 0.0.9

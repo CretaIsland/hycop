@@ -171,6 +171,15 @@ class FirebaseDatabase extends AbsDatabase {
       case OperType.arrayContainsAny:
         logger.finest('query=mid arrayContainsAny ${value.value}');
         return query.where(mid, arrayContainsAny: value.value);
+      case OperType.whereIn:
+        logger.finest('query=mid whereIn ${value.value}');
+        return query.where(mid, whereIn: value.value);
+      case OperType.whereNotIn:
+        logger.finest('query=mid whereNotIn ${value.value}');
+        return query.where(mid, whereNotIn: value.value);
+      case OperType.isNull:
+        logger.finest('query=mid isNull ${value.value}');
+        return query.where(mid, isNull: value.value);
     }
   }
 
