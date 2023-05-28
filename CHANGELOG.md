@@ -1,3 +1,5 @@
+## 0.1.8
+- add link in ExModelType-enum
 ## 0.1.7
 - add channel & watchHistory & playlist in ExModelType-enum
 - add whereIn, whereNotIn, isNull in OperType-enum
