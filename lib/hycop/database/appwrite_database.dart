@@ -243,17 +243,25 @@ class AppwriteDatabase extends AbsDatabase {
       case OperType.arrayContains:
         queryList.add(Query.search(mid, value.value));
         break;
-      case OperType.arrayContainsAny: // 임시로 넣어놓은 것임.
-        queryList.add(Query.search(mid, value.value));
+      case OperType.arrayContainsAny: // equal 로 대체
+        queryList.add(Query.equal(mid, value.value));
         break;
-      case OperType.whereIn: // 임시로 넣어놓은 것임.
-        queryList.add(Query.search(mid, value.value));
+      case OperType.whereIn: // equal 로 대체
+        queryList.add(Query.equal(mid, value.value));
         break;
-      case OperType.whereNotIn: // 임시로 넣어놓은 것임.
-        queryList.add(Query.search(mid, value.value));
+      case OperType.whereNotIn: // appwrite에서는 해당 쿼리가 없음
+        assert(true);
         break;
-      case OperType.isNull: // 임시로 넣어놓은 것임.
-        queryList.add(Query.search(mid, value.value));
+      case OperType.isNull: // appwrite에서는 해당 쿼리가 없음
+        assert(true);
+        // 최신버전 appwrite에서는 아래와 같이 처리 가능
+        // if (value.value is bool) {
+        //   if (value.value == true) {
+        //     queryList.add(Query.isNull(mid));
+        //   } else {
+        //     queryList.add(Query.isNotNull(mid));
+        //   }
+        // }
         break;
     }
   }

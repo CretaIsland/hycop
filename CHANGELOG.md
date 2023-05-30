@@ -1,3 +1,5 @@
+## 0.1.9
+- modify query of appwrite
 ## 0.1.8
 - add link in ExModelType-enum
 ## 0.1.7
