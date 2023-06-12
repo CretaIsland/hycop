@@ -56,23 +56,28 @@ class FirebaseAppStorage extends AbsStorage {
     try {
       // 해당 파일이 이미 있으면 파일 리턴
       return await getFileInfo(uploadFile.fullPath);
-    } catch (e) {
-      // 해당 파일이 없으면 업로드 후 리턴
-      await uploadFile.putData(fileBytes).onError((error, stackTrace) {
-        throw HycopException(message: stackTrace.toString());
-      });
-      await uploadFile
+    } catch (getError) {
+      try {
+        // 해당 파일이 없으면 업로드 후 리턴
+        await uploadFile.putData(fileBytes).onError((error, stackTrace) {
+          throw HycopException(message: stackTrace.toString());
+        });
+        await uploadFile
           .updateMetadata(SettableMetadata(contentType: fileType))
           .onError((error, stackTrace) {
-        throw HycopException(message: stackTrace.toString());
-      });
+            throw HycopException(message: stackTrace.toString());
+           });
 
-      if(makeThumbnail && (fileType.contains("video") || fileType.contains("image"))) {
-        await createThumbnail(fileName, fileType);
+        // 썸네일 생성 여부가 true라면
+        if(makeThumbnail && (fileType.contains("video") || fileType.contains("image"))) {
+          await createThumbnail(fileName, fileType);
+        }
         return await getFileInfo("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
+      
+      } catch (uploadError) {
+        return null;
       }
     }
-    return null;
   }
 
   @override
