@@ -1,3 +1,7 @@
+## 0.1.11
+- modify logic of upload file to storage
+## 0.1.10
+- add enterprise model type
 ## 0.1.9
 - modify query of appwrite
 ## 0.1.8
