@@ -37,18 +37,19 @@ class AbsExModel extends Equatable {
     } else {
       _mid = pmid;
     }
-    parentMid = UndoAble<String>(parent, mid);
-    order = UndoAble<double>(1, mid);
-    hashTag = UndoAble<String>('', mid);
-    isRemoved = UndoAble<bool>(false, mid);
+    parentMid = UndoAble<String>(parent, mid, 'parentMid');
+    order = UndoAble<double>(1, mid, 'order');
+    hashTag = UndoAble<String>('', mid, 'hashTag');
+    isRemoved = UndoAble<bool>(false, mid, 'isRemoved');
   }
 
   void copyFrom(AbsExModel src, {String? newMid, String? pMid}) {
     _mid = newMid ?? HycopUtils.genMid(type);
-    parentMid = UndoAble<String>(pMid ?? src.parentMid.value, mid);
-    order = UndoAble<double>(src.order.value, mid);
-    hashTag = UndoAble<String>(src.hashTag.value, mid);
-    isRemoved = UndoAble<bool>(src.isRemoved.value, mid);
+    parentMid = UndoAble<String>(pMid ?? src.parentMid.value, mid, 'parentMid');
+    order = UndoAble<double>(src.order.value, mid, 'order');
+    hashTag = UndoAble<String>(src.hashTag.value, mid, 'hashTag');
+    isRemoved = UndoAble<bool>(src.isRemoved.value, mid, 'isRemoved');
+
     autoSave = src.autoSave;
   }
 

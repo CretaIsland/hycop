@@ -26,6 +26,13 @@ class SaveManager extends ChangeNotifier {
   AbsExModel? _defaultBook;
   final List<String> _bookChildrens = [];
 
+  bool _somethingSaved = false;
+  bool isSomethingSaved() {
+    if (_somethingSaved == false) return false;
+    _somethingSaved = false;
+    return true;
+  }
+
   void addBookChildren(String child) {
     _bookChildrens.add(child);
   }
@@ -93,7 +100,7 @@ class SaveManager extends ChangeNotifier {
   Future<void> pushChanged(String mid, String hint, {bool dontChangeBookTime = false}) async {
     await _datalock.synchronized(() async {
       if (!_dataChangedQue.contains(mid)) {
-        logger.finest('changed:$mid, via $hint');
+        logger.info('changed:$mid, via $hint');
         _dataChangedQue.add(mid);
         notifyListeners();
         if (dontChangeBookTime == false) {
@@ -106,7 +113,7 @@ class SaveManager extends ChangeNotifier {
 
   Future<void> pushCreated(AbsExModel model, String hint) async {
     await _dataCreatedlock.synchronized(() async {
-      logger.finest('created:${model.mid}, via $hint');
+      logger.info('created:${model.mid}, via $hint');
       _dataCreatedQue.add(model);
       notifyListeners();
       shouldBookSave(model.mid);
@@ -125,6 +132,7 @@ class SaveManager extends ChangeNotifier {
               for (AbsExModelManager manager in managerMap.values) {
                 manager.setToDBByMid(mid);
                 logger.finest('$mid saved');
+                _somethingSaved = true;
               }
             }
             _dataChangedQue.removeFirst();
@@ -146,6 +154,7 @@ class SaveManager extends ChangeNotifier {
               for (AbsExModelManager manager in managerMap.values) {
                 manager.createToDB(model);
                 logger.finest('${model.mid} created');
+                _somethingSaved = true;
               }
             }
 

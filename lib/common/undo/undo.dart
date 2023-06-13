@@ -16,10 +16,12 @@ MyChangeStack mychangeStack = MyChangeStack();
 class UndoAble<T> {
   late T _value;
   late String _mid;
+  String? hint;
 
-  UndoAble(T val, String m) {
+  UndoAble(T val, String m, String? hint) {
     _value = val;
     _mid = m;
+    hint = hint;
   }
 
   T get value => _value;
@@ -44,7 +46,8 @@ class UndoAble<T> {
       _value = val;
       if (save && saveManagerHolder != null && _mid.isNotEmpty) {
         logger.finest('pushChanged');
-        saveManagerHolder!.pushChanged(_mid, 'execute', dontChangeBookTime: dontChangeBookTime);
+        saveManagerHolder!
+            .pushChanged(_mid, 'execute $hint', dontChangeBookTime: dontChangeBookTime);
       }
       return;
     }
@@ -52,19 +55,20 @@ class UndoAble<T> {
     MyChange<T> c = MyChange<T>(_value, execute: () {
       _value = val;
       if (save && saveManagerHolder != null && _mid.isNotEmpty) {
-        saveManagerHolder!.pushChanged(_mid, 'execute', dontChangeBookTime: dontChangeBookTime);
+        saveManagerHolder!
+            .pushChanged(_mid, 'execute $hint', dontChangeBookTime: dontChangeBookTime);
       }
     }, redo: () {
       _value = val;
       if (save && saveManagerHolder != null && _mid.isNotEmpty) {
-        saveManagerHolder!.pushChanged(_mid, 'redo', dontChangeBookTime: dontChangeBookTime);
+        saveManagerHolder!.pushChanged(_mid, 'redo $hint', dontChangeBookTime: dontChangeBookTime);
       }
       if (doComplete != null) doComplete(_value);
     }, undo: (T old) {
       if (old == _value) return; // 값이 동일하다면, 할 필요가 없다.
       _value = old;
       if (save && saveManagerHolder != null && _mid.isNotEmpty) {
-        saveManagerHolder!.pushChanged(_mid, 'undo', dontChangeBookTime: dontChangeBookTime);
+        saveManagerHolder!.pushChanged(_mid, 'undo $hint', dontChangeBookTime: dontChangeBookTime);
       }
       if (undoComplete != null) undoComplete(_value);
     });
