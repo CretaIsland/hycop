@@ -61,6 +61,11 @@ flutter create -t plugin --platforms web ../hycop_web
 # Publishing
 # ############################
 
+#pubspec.yaml의 version을 올려준다.
+ex. version: 0.1.9
+
+# release note 를 CHANGELOG.md 파일에 써준다.
+
 # 사전 점검
 flutter pub publish --dry-run
 
