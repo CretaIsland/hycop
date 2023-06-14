@@ -18,10 +18,10 @@ class UndoAble<T> {
   late String _mid;
   String? hint;
 
-  UndoAble(T val, String m, String? hint) {
+  UndoAble(T val, String m, String? h) {
     _value = val;
     _mid = m;
-    hint = hint;
+    hint = h;
   }
 
   T get value => _value;
@@ -45,7 +45,7 @@ class UndoAble<T> {
     if (noUndo) {
       _value = val;
       if (save && saveManagerHolder != null && _mid.isNotEmpty) {
-        logger.finest('pushChanged');
+        //print('noUndo pushChanged $hint');
         saveManagerHolder!
             .pushChanged(_mid, 'execute $hint', dontChangeBookTime: dontChangeBookTime);
       }
@@ -54,23 +54,28 @@ class UndoAble<T> {
 
     MyChange<T> c = MyChange<T>(_value, execute: () {
       _value = val;
+      //print('new MyChange $_value, $_mid');
+
       if (save && saveManagerHolder != null && _mid.isNotEmpty) {
+        //print('pushChanged $hint $_mid');
         saveManagerHolder!
             .pushChanged(_mid, 'execute $hint', dontChangeBookTime: dontChangeBookTime);
       }
     }, redo: () {
+      //print('redo old=$val, new=$_value');
       _value = val;
       if (save && saveManagerHolder != null && _mid.isNotEmpty) {
         saveManagerHolder!.pushChanged(_mid, 'redo $hint', dontChangeBookTime: dontChangeBookTime);
       }
-      if (doComplete != null) doComplete(_value);
+      doComplete?.call(_value);
     }, undo: (T old) {
+      //print('undo old=$old, new=$_value  $_mid');
       if (old == _value) return; // 값이 동일하다면, 할 필요가 없다.
       _value = old;
       if (save && saveManagerHolder != null && _mid.isNotEmpty) {
         saveManagerHolder!.pushChanged(_mid, 'undo $hint', dontChangeBookTime: dontChangeBookTime);
       }
-      if (undoComplete != null) undoComplete(_value);
+      undoComplete?.call(_value);
     });
     mychangeStack.add(c);
   }
@@ -272,11 +277,12 @@ class MyChangeStack {
   /// Undo Last Change
   void undo() {
     while (true) {
+      //print('TransState=$canUndo');
       if (canUndo == false) {
         break;
       }
       final change = _history.removeLast();
-      logger.finest('TransState=${change.transState}');
+      //print('TransState=${change.transState}');
       change.undoExecute();
       _redos.addFirst(change);
       if (change.transState == TransState.none || change.transState == TransState.start) {

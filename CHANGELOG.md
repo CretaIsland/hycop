@@ -1,3 +1,5 @@
+## 0.2.0
+- modify undo logic
 ## 0.1.13
 - modify upload file logic
 ## 0.1.12

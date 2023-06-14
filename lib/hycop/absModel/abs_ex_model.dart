@@ -53,6 +53,14 @@ class AbsExModel extends Equatable {
     autoSave = src.autoSave;
   }
 
+  void updateFrom(AbsExModel src) {
+    parentMid.init(src.parentMid.value);
+    order.init(src.order.value);
+    hashTag.init(src.hashTag.value);
+    isRemoved.init(src.isRemoved.value);
+    autoSave = src.autoSave;
+  }
+
   void copyTo(AbsExModel target) {
     target.copyFrom(this, newMid: mid, pMid: parentMid.value);
   }

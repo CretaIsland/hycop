@@ -55,6 +55,7 @@ class SaveManager extends ChangeNotifier {
 
   void registerManager(String className, AbsExModelManager manager, {String postfix = 'onlyOne'}) {
     Map<String, AbsExModelManager>? map = _managerMap[className];
+    //print('registerManager $className, $postfix');
     if (map == null) {
       map = {postfix: manager};
       _managerMap[className] = map;
@@ -127,11 +128,14 @@ class SaveManager extends ChangeNotifier {
           while (_dataChangedQue.isNotEmpty) {
             final mid = _dataChangedQue.first;
             // Save here !!!!
+            //('saveTimer $mid');
             Map<String, AbsExModelManager>? managerMap = _getManager(mid);
             if (managerMap != null) {
-              for (AbsExModelManager manager in managerMap.values) {
-                manager.setToDBByMid(mid);
-                logger.finest('$mid saved');
+              //for (AbsExModelManager manager in managerMap.values) {
+              for (String key in managerMap.keys) {
+                AbsExModelManager? manager = managerMap[key];
+                manager?.setToDBByMid(mid);
+                //print('$mid saved, managerKey=$key');
                 _somethingSaved = true;
               }
             }

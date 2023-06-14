@@ -42,16 +42,15 @@ String genMid2(ObjectType type) {
 // }
 
 class AbsModel {
-
   Map<String, dynamic> _map = {};
   Map<String, dynamic> get getValueMap => _map;
-  dynamic getValue(String key) => _map[key];// ?? '';
+  dynamic getValue(String key) => _map[key]; // ?? '';
   void setValue(String key, dynamic value) => _map[key] = value;
 
   ObjectType type;
-  late String mid;// => (_map['mid'] ?? '');
-  String createTime = '';// => (_map['createTime'] ?? '');
-  String updateTime = '';// => (_map['createTime'] ?? '');
+  late String mid; // => (_map['mid'] ?? '');
+  String createTime = ''; // => (_map['createTime'] ?? '');
+  String updateTime = ''; // => (_map['createTime'] ?? '');
 
   //
   // isRemoved attr 추가

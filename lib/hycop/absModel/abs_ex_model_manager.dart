@@ -113,10 +113,11 @@ abstract class AbsExModelManager extends ChangeNotifier {
     try {
       //await HycopFactory.dataBase!.setData(collectionId, model.mid, model.toMap());
       AbsExModel? model = getModel(mid);
+
       if (model != null) {
         await HycopFactory.dataBase!.setModel(collectionId, model);
       } else {
-        logger.fine('model not found($collectionId, $mid)');
+        logger.finest('model not found($collectionId, $mid) in this manager');
       }
     } catch (e) {
       logger.severe('databaseError', e);
