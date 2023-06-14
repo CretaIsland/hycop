@@ -1,3 +1,5 @@
+## 0.1.13
+- modify upload file logic
 ## 0.1.12
 - modify undo, saveManager, abs_ex_model to make easy to debug
 ## 0.1.11

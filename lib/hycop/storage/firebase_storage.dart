@@ -54,30 +54,29 @@ class FirebaseAppStorage extends AbsStorage {
     final uploadFile = _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
 
     try {
-      // 해당 파일이 이미 있으면 파일 리턴
-      return await getFileInfo(uploadFile.fullPath);
-    } catch (getError) {
+      FileModel uploadedFile = await getFileInfo(uploadFile.fullPath);
+      if(uploadedFile.fileSize != fileBytes.length) { // 기존에 있는 파일과 같은 파일인지 검사
+        throw "diffError";
+      } else {
+        return uploadedFile;
+      }
+    } catch (getError) { 
       try {
-        // 해당 파일이 없으면 업로드 후 리턴
-        await uploadFile.putData(fileBytes).onError((error, stackTrace) {
-          throw HycopException(message: stackTrace.toString());
-        });
-        await uploadFile
-          .updateMetadata(SettableMetadata(contentType: fileType))
-          .onError((error, stackTrace) {
-            throw HycopException(message: stackTrace.toString());
-           });
+        await uploadFile.putData(fileBytes).onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
+        await uploadFile.updateMetadata(SettableMetadata(contentType: fileType)).onError((error, stackTrace) 
+          => throw HycopException(message: stackTrace.toString()) 
+        );
 
         // 썸네일 생성 여부가 true라면
         if(makeThumbnail && (fileType.contains("video") || fileType.contains("image"))) {
           await createThumbnail(fileName, fileType);
         }
         return await getFileInfo("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
-      
       } catch (uploadError) {
         return null;
       }
     }
+
   }
 
   @override
