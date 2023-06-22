@@ -17,6 +17,7 @@ enum ExModelType {
   favorites,
   subscription,
   link,
+  filter,
   end;
 
   static int validCheck(int val) => (val > end.index || val < none.index) ? none.index : val;

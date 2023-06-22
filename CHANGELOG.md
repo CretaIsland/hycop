@@ -1,3 +1,5 @@
+## 0.2.1
+- add filter type to ExModelType.
 ## 0.2.0
 - modify undo logic
 ## 0.1.13
