@@ -10,7 +10,8 @@ abstract class AbsExModelManager extends ChangeNotifier {
   AbsExModelManager(this.collectionId);
 
   AbsExModel newModel(String mid);
-  void realTimeCallback(String directive, String userId, Map<String, dynamic> dataMap);
+  void realTimeCallback(
+      String listenerId, String directive, String userId, Map<String, dynamic> dataMap);
 
   void notify() => notifyListeners();
 

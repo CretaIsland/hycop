@@ -41,13 +41,18 @@ abstract class AbsRealtime {
 
   @protected
   Map<
+      String,
+      Map<
           String,
-          Map<String,
-              void Function(String directive, String userId, Map<String, dynamic> dataModel)>>
-      listenerMap = {};
+          void Function(String listenerId, String directive, String userId,
+              Map<String, dynamic> dataModel)>> listenerMap = {};
 
-  void addListener(String listenerId, String collectionId,
-      void Function(String directive, String userId, Map<String, dynamic> dataModel) listener) {
+  void addListener(
+      String listenerId,
+      String collectionId,
+      void Function(
+              String listenerId, String directive, String userId, Map<String, dynamic> dataModel)
+          listener) {
     if (listenerMap[listenerId] == null) {
       listenerMap[listenerId] = {};
     }
@@ -60,7 +65,7 @@ abstract class AbsRealtime {
   }
 
   dynamic myEncode(dynamic item) {
-    if(item is DateTime) {
+    if (item is DateTime) {
       //return item.toIso8601String();
       return item.toString();
     }
@@ -91,7 +96,7 @@ abstract class AbsRealtime {
 
     String fromDeviceId = mapValue["deviceId"] ?? '';
     if (fromDeviceId == myDeviceId) {
-      logger.finest('same deviceId=$fromDeviceId');
+      print('same deviceId=$fromDeviceId &&&&&&&&&&&&&&&&&&&&&&&&');
       return;
     }
     String directive = mapValue["directive"] ?? '';
@@ -99,12 +104,17 @@ abstract class AbsRealtime {
     String collectionId = mapValue["collectionId"] ?? '';
     String userId = mapValue["userId"] ?? '';
     String delta = mapValue["delta"] ?? '';
-    logger.finest('$lastUpdateTime,$directive,$collectionId,$userId');
+    print('$lastUpdateTime,$directive,$collectionId,$userId -----------------------------');
 
     Map<String, dynamic> dataMap = json.decode(delta) as Map<String, dynamic>;
-
-    for (var ele in listenerMap.values) {
-      ele[collectionId]?.call(directive, userId, dataMap);
+    String? parentMid = dataMap['parentMid'] as String?;
+    if (parentMid == null) {
+      return;
+    }
+    for (var key in listenerMap.keys) {
+      if (key != parentMid) continue;
+      var map = listenerMap[key];
+      map![collectionId]?.call(key, directive, userId, dataMap);
     }
   }
 }

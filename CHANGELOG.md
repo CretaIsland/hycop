@@ -1,3 +1,5 @@
+## 0.2.2
+- modify realtime bug.
 ## 0.2.1
 - add filter type to ExModelType.
 ## 0.2.0
