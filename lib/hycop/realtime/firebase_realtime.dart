@@ -96,7 +96,7 @@ class FirebaseRealtime extends AbsRealtime {
 
     try {
       await _db!.child('hycop_delta').child(mid).set(input);
-      logger.finest("hycop_delta sample data created");
+      logger.info("hycop_delta sample data created");
       return true;
     } catch (e) {
       logger.severe("hycop_delta SET DB ERROR : $e");

@@ -96,7 +96,7 @@ abstract class AbsRealtime {
 
     String fromDeviceId = mapValue["deviceId"] ?? '';
     if (fromDeviceId == myDeviceId) {
-      print('same deviceId=$fromDeviceId &&&&&&&&&&&&&&&&&&&&&&&&');
+      //print('same deviceId=$fromDeviceId &&&&&&&&&&&&&&&&&&&&&&&&');
       return;
     }
     String directive = mapValue["directive"] ?? '';
@@ -104,17 +104,20 @@ abstract class AbsRealtime {
     String collectionId = mapValue["collectionId"] ?? '';
     String userId = mapValue["userId"] ?? '';
     String delta = mapValue["delta"] ?? '';
-    print('$lastUpdateTime,$directive,$collectionId,$userId -----------------------------');
+    //print('$lastUpdateTime,$directive,$collectionId,$userId -----------------------------');
 
     Map<String, dynamic> dataMap = json.decode(delta) as Map<String, dynamic>;
     String? parentMid = dataMap['parentMid'] as String?;
-    if (parentMid == null) {
+    if (parentMid == null || parentMid.isEmpty) {
+      //print('parentMid is null');
       return;
     }
     for (var key in listenerMap.keys) {
+      //print('parentMid=$parentMid, key=$key');
       if (key != parentMid) continue;
       var map = listenerMap[key];
       map![collectionId]?.call(key, directive, userId, dataMap);
+      break;
     }
   }
 }

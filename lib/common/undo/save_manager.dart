@@ -39,7 +39,8 @@ class SaveManager extends ChangeNotifier {
 
   bool isBookChildren(String mid) {
     for (var ele in _bookChildrens) {
-      if (ele == mid.substring(0, 5)) return true;
+      //print('bookChildren=$ele, mid=$mid');
+      if (ele == mid.substring(0, ele.length)) return true;
     }
     return false;
   }
@@ -49,7 +50,7 @@ class SaveManager extends ChangeNotifier {
       logger.severe('setDefaultBook() failed');
       return;
     }
-    logger.fine('setDefaultBook()');
+    //print('setDefaultBook(${book!.mid})');
     _defaultBook = book;
   }
 
@@ -91,7 +92,7 @@ class SaveManager extends ChangeNotifier {
     if (isBookChildren(mid) == true) {
       // book 이 아닌 다른 Row 가 save 된 것인데, 마지막에 Book 의 updateTime 을 한번 바뀌어 줘야 한다.
       if (_defaultBook != null) {
-        logger.finest('shouldBookSave');
+        //print('shouldBookSave^^^^^^^^^^^^^^');
         _defaultBook!.setUpdateTime();
         _dataChangedQue.add(_defaultBook!.mid);
       }

@@ -52,7 +52,7 @@ class UndoAble<T> {
       return;
     }
 
-    MyChange<T> c = MyChange<T>(_value, execute: () {
+    MyChange<T> c = MyChange<T>(_value, mid: _mid, execute: () {
       _value = val;
       //print('new MyChange $_value, $_mid');
 
@@ -69,14 +69,15 @@ class UndoAble<T> {
       }
       doComplete?.call(_value);
     }, undo: (T old) {
-      //print('undo old=$old, new=$_value  $_mid');
       if (old == _value) return; // 값이 동일하다면, 할 필요가 없다.
       _value = old;
+      //print('undo old=$old, new=$_value,_mid=$_mid, save=$save,');
       if (save && saveManagerHolder != null && _mid.isNotEmpty) {
         saveManagerHolder!.pushChanged(_mid, 'undo $hint', dontChangeBookTime: dontChangeBookTime);
       }
       undoComplete?.call(_value);
     });
+
     mychangeStack.add(c);
   }
 
@@ -214,6 +215,8 @@ class MyChangeStack {
 
   TransState transState = TransState.none;
 
+  //MyChange? lastChanged;
+
   /// Can redo the previous change
   bool get canRedo => _redos.isNotEmpty;
 
@@ -261,6 +264,7 @@ class MyChangeStack {
 
   /// Redo Previous Undo
   void redo() {
+    int count = 0;
     while (true) {
       if (canRedo == false) {
         break;
@@ -268,7 +272,13 @@ class MyChangeStack {
       final change = _redos.removeFirst();
       change.redoExecute();
       _history.addLast(change);
+      //lastChanged = change;
+      count++;
       if (change.transState == TransState.none || change.transState == TransState.end) {
+        if (count > 1 && change.mid.isNotEmpty) {
+          //print('redo endTrans call save ----------------------');
+          saveManagerHolder!.pushChanged(change.mid, 'redo endTrans');
+        }
         break;
       }
     }
@@ -276,16 +286,23 @@ class MyChangeStack {
 
   /// Undo Last Change
   void undo() {
+    int count = 0;
     while (true) {
       //print('TransState=$canUndo');
       if (canUndo == false) {
         break;
       }
+      count++;
       final change = _history.removeLast();
       //print('TransState=${change.transState}');
       change.undoExecute();
       _redos.addFirst(change);
+      //lastChanged = change;
       if (change.transState == TransState.none || change.transState == TransState.start) {
+        if (count > 1 && change.mid.isNotEmpty) {
+          //print('undo endTrans call save ----------------------');
+          saveManagerHolder!.pushChanged(change.mid, 'undo endTrans');
+        }
         break;
       }
     }
@@ -313,23 +330,25 @@ class MyChange<T> {
     required this.undo(T oldValue),
     this.monitored = false,
     this.transState = TransState.none,
+    this.mid = '',
   });
 
-  MyChange.withContext(
-    this._oldValue,
-    this.context, {
-    required this.execute(),
-    required this.redo(),
-    required this.undo(T oldValue),
-    this.monitored = false,
-    this.transState = TransState.none,
-  });
+  // MyChange.withContext(
+  //   this._oldValue,
+  //   this.context, {
+  //   required this.execute(),
+  //   required this.redo(),
+  //   required this.undo(T oldValue),
+  //   this.monitored = false,
+  //   this.transState = TransState.none,
+  // });
 
   TransState transState = TransState.none;
   bool monitored = false;
 
   final T _oldValue;
-  BuildContext? context;
+  //BuildContext? context;
+  final String mid;
 
   final void Function() execute;
   final void Function() redo;
