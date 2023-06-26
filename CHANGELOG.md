@@ -1,3 +1,5 @@
+## 0.2.3
+- change thumbnail server url
 ## 0.2.2
 - modify realtime bug.
 ## 0.2.1
