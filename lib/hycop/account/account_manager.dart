@@ -161,7 +161,8 @@ class AccountManager {
       }
       bool alreadyExistAccount = false;
       await AccountManager.isExistAccount(_googleAccount!.email).catchError((error, stackTrace) {
-        throw HycopUtils.getHycopException(error: error, defaultMessage: 'isExistAccount error !!!');
+        throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'isExistAccount error !!!');
       }).then((value) {
         if (value == true) {
           alreadyExistAccount = true;
@@ -169,26 +170,30 @@ class AccountManager {
         }
       });
 
-      if(alreadyExistAccount == false) {
+      if (alreadyExistAccount == false) {
         Map<String, dynamic> userData = {};
         userData['name'] = _googleAccount!.displayName ?? '';
         userData['email'] = _googleAccount!.email;
         userData['password'] = _googleAccount!.email;
         userData['accountSignUpType'] = AccountSignUpType.google.index;
-        await createAccount(userData).then((value) {
-        }).onError((error, stackTrace) {
-          throw HycopUtils.getHycopException(error: error, defaultMessage: 'createAccount error !!!');
+        userData['imagefile'] = _googleAccount!.photoUrl;
+        await createAccount(userData).then((value) {}).onError((error, stackTrace) {
+          throw HycopUtils.getHycopException(
+              error: error, defaultMessage: 'createAccount error !!!');
         });
       }
 
-      if(_currentLoginUser.isLoginedUser == false) {
-        await loginByService(_googleAccount!.email, AccountSignUpType.google).then((value) {
-        }).onError((error, stackTrace) {
-          throw HycopUtils.getHycopException(error: error, defaultMessage: 'loginByService error !!!');
+      if (_currentLoginUser.isLoginedUser == false) {
+        await loginByService(_googleAccount!.email, AccountSignUpType.google)
+            .then((value) {})
+            .onError((error, stackTrace) {
+          throw HycopUtils.getHycopException(
+              error: error, defaultMessage: 'loginByService error !!!');
         });
       }
     } catch (error) {
-      throw HycopUtils.getHycopException(error: error, defaultMessage: 'unknown google-account error !!!');
+      throw HycopUtils.getHycopException(
+          error: error, defaultMessage: 'unknown google-account error !!!');
     }
   }
 
@@ -309,10 +314,12 @@ class AccountManager {
         await _googleSignIn?.disconnect();
         _googleSignIn = null;
         _googleAccount = null;
-        throw HycopUtils.getHycopException(error: error, defaultMessage: 'loginByService error !!!');
+        throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'loginByService error !!!');
       });
     } catch (error) {
-      throw HycopUtils.getHycopException(error: error, defaultMessage: 'unknown google-account error !!!');
+      throw HycopUtils.getHycopException(
+          error: error, defaultMessage: 'unknown google-account error !!!');
     }
   }
 

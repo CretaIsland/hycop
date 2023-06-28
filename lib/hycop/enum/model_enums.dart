@@ -19,6 +19,7 @@ enum ExModelType {
   link,
   filter,
   connected_user,
+  comment,
   end;
 
   static int validCheck(int val) => (val > end.index || val < none.index) ? none.index : val;

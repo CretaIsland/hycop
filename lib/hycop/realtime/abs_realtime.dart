@@ -23,6 +23,13 @@ abstract class AbsRealtime {
 
   Future<void> initialize();
   Future<void> start();
+  Future<void> startTemp(String? realTimeKey) async {
+    if (realTimeKey == null) {
+      await start();
+      return;
+    }
+  }
+
   void setPrefix(String prefix) {
     collcetion_prefix = prefix;
   }
@@ -79,14 +86,18 @@ abstract class AbsRealtime {
     required Map<String, dynamic>? delta,
   }) {
     Map<String, dynamic> input = {};
+    String now = HycopUtils.dateTimeToDB(DateTime.now());
     input['directive'] = directive;
     input['collectionId'] = HycopUtils.collectionFromMid(mid, collcetion_prefix);
     input['mid'] = mid; //'book=3ecb527f-4f5e-4350-8705-d5742781451b';
     input['userId'] = AccountManager.currentLoginUser.email;
     input['deviceId'] = myDeviceId;
-    input['updateTime'] = HycopUtils.dateTimeToDB(DateTime.now());
+    input['updateTime'] = now;
     input['delta'] = (delta != null) ? json.encode(delta, toEncodable: myEncode) : '';
-
+    if (delta != null) {
+      String realTimeKey = delta['realTimeKey'] ?? '';
+      input['realTimeKey'] = "$now-$realTimeKey";
+    }
     return input;
   }
 

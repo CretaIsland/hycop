@@ -27,11 +27,16 @@ class AbsExModel extends Equatable {
   late UndoAble<double> order;
   late UndoAble<String> hashTag;
   late UndoAble<bool> isRemoved;
+  String _realTimeKey = '';
+  String get realTimeKey => _realTimeKey;
+  void setRealTimeKey(String key) {
+    _realTimeKey = key;
+  }
 
   @override
-  List<Object?> get props => [mid, type, parentMid, order, hashTag, isRemoved];
+  List<Object?> get props => [mid, type, parentMid, order, hashTag, isRemoved, realTimeKey];
 
-  AbsExModel({String? pmid, required this.type, required String parent}) {
+  AbsExModel({String? pmid, required this.type, required String parent, String? realTimeKey}) {
     if (pmid == null || pmid.isEmpty) {
       _mid = HycopUtils.genMid(type);
     } else {
@@ -41,6 +46,7 @@ class AbsExModel extends Equatable {
     order = UndoAble<double>(1, mid, 'order');
     hashTag = UndoAble<String>('', mid, 'hashTag');
     isRemoved = UndoAble<bool>(false, mid, 'isRemoved');
+    _realTimeKey = realTimeKey ?? '';
   }
 
   void copyFrom(AbsExModel src, {String? newMid, String? pMid}) {
@@ -49,7 +55,7 @@ class AbsExModel extends Equatable {
     order = UndoAble<double>(src.order.value, mid, 'order');
     hashTag = UndoAble<String>(src.hashTag.value, mid, 'hashTag');
     isRemoved = UndoAble<bool>(src.isRemoved.value, mid, 'isRemoved');
-
+    _realTimeKey = src.realTimeKey;
     autoSave = src.autoSave;
   }
 
@@ -59,6 +65,7 @@ class AbsExModel extends Equatable {
     hashTag.init(src.hashTag.value);
     isRemoved.init(src.isRemoved.value);
     autoSave = src.autoSave;
+    _realTimeKey = src.realTimeKey;
   }
 
   void copyTo(AbsExModel target) {
@@ -74,6 +81,7 @@ class AbsExModel extends Equatable {
     order.set(map["order"] ?? 1, save: false, noUndo: true);
     hashTag.set(map["hashTag"] ?? '', save: false, noUndo: true);
     isRemoved.set(map["isRemoved"] ?? false, save: false, noUndo: true);
+    _realTimeKey = map["realTimeKey"] ?? '';
   }
 
   Map<String, dynamic> toMap() {
@@ -86,6 +94,7 @@ class AbsExModel extends Equatable {
       "order": order.value,
       "hashTag": hashTag.value,
       "isRemoved": isRemoved.value,
+      "realTimeKey": realTimeKey,
     };
   }
 

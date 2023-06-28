@@ -58,6 +58,35 @@ class FirebaseRealtime extends AbsRealtime {
     });
   }
 
+  @override
+  Future<void> startTemp(String? realTimeKey) async {
+    if (realTimeKey == null || realTimeKey.isEmpty) {
+      return;
+    }
+
+    await initialize();
+
+    logger.finest('FirebaseRealtime startTemp()');
+    if (_listenTimer != null) return;
+    logger.finest('FirebaseRealtime startTemp...()');
+    _listenTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (isListenComplete) {
+        isListenComplete = false;
+        logger.info('listener restart $lastUpdateTime-$realTimeKey');
+        _deltaStream?.cancel();
+        _deltaStream = _db!
+            .child('hycop_delta')
+            //.orderByChild('updateTime')
+            //.startAfter(lastUpdateTime)
+            .orderByChild('realTimeKey')
+            .startAfter('$lastUpdateTime-$realTimeKey')
+            //.equalTo(realTimeKey)
+            .onValue
+            .listen((event) => _listenCallback(event, ''));
+      }
+    });
+  }
+
   void _listenCallback(DatabaseEvent event, String hint) {
     logger.finest('_listenCallback invoked');
     if (event.snapshot.value == null) {
