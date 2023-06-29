@@ -96,7 +96,7 @@ abstract class AbsRealtime {
     input['delta'] = (delta != null) ? json.encode(delta, toEncodable: myEncode) : '';
     if (delta != null) {
       String realTimeKey = delta['realTimeKey'] ?? '';
-      input['realTimeKey'] = "$now-$realTimeKey";
+      input['realTimeKey'] = "$realTimeKey-$now";
     }
     return input;
   }

@@ -1,5 +1,7 @@
 //import 'dart:ui';
 
+// ignore_for_file: constant_identifier_names
+
 /////////////////
 // <!-- 삭제될 예정
 enum ExModelType {

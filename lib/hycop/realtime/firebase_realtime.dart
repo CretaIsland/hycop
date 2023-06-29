@@ -72,14 +72,14 @@ class FirebaseRealtime extends AbsRealtime {
     _listenTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (isListenComplete) {
         isListenComplete = false;
-        logger.info('listener restart $lastUpdateTime-$realTimeKey');
+        logger.finest('listener restart $realTimeKey-$lastUpdateTime');
         _deltaStream?.cancel();
         _deltaStream = _db!
             .child('hycop_delta')
             //.orderByChild('updateTime')
             //.startAfter(lastUpdateTime)
             .orderByChild('realTimeKey')
-            .startAfter('$lastUpdateTime-$realTimeKey')
+            .startAfter('$realTimeKey-$lastUpdateTime')
             //.equalTo(realTimeKey)
             .onValue
             .listen((event) => _listenCallback(event, ''));
@@ -125,7 +125,7 @@ class FirebaseRealtime extends AbsRealtime {
 
     try {
       await _db!.child('hycop_delta').child(mid).set(input);
-      logger.info("hycop_delta sample data created");
+      logger.finest("hycop_delta sample data created");
       return true;
     } catch (e) {
       logger.severe("hycop_delta SET DB ERROR : $e");
