@@ -1,3 +1,5 @@
+## 0.2.7
+- change realtime bug
 ## 0.2.6
 - change realtime bug
 ## 0.2.5

@@ -81,7 +81,8 @@ class AbsExModel extends Equatable {
     order.set(map["order"] ?? 1, save: false, noUndo: true);
     hashTag.set(map["hashTag"] ?? '', save: false, noUndo: true);
     isRemoved.set(map["isRemoved"] ?? false, save: false, noUndo: true);
-    _realTimeKey = map["realTimeKey"] ?? '';
+    String? rtKey = map["realTimeKey"];
+    if (rtKey != null && rtKey.isNotEmpty) _realTimeKey = rtKey;
   }
 
   Map<String, dynamic> toMap() {

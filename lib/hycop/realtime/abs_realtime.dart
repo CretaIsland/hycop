@@ -18,13 +18,16 @@ abstract class AbsRealtime {
   @protected
   static void setFirebaseApp(FirebaseApp fb) => _fbRTApp = fb;
 
-  String lastUpdateTime = HycopUtils.dateTimeToDB(DateTime.now()); // used only firebase
+  DateTime lastUpdateTime = DateTime.now(); // used only firebase
+  String lastUpdateTimeStr = HycopUtils.dateTimeToDB(DateTime.now()); // used only firebase
+  DateTime maxDataTime = DateTime.now();
   String collcetion_prefix = 'hycop';
+  String? realTimeKey;
 
   Future<void> initialize();
   Future<void> start();
-  Future<void> startTemp(String? realTimeKey) async {
-    if (realTimeKey == null) {
+  Future<void> startTemp(String? rtKey) async {
+    if (rtKey == null) {
       await start();
       return;
     }
@@ -95,16 +98,29 @@ abstract class AbsRealtime {
     input['updateTime'] = now;
     input['delta'] = (delta != null) ? json.encode(delta, toEncodable: myEncode) : '';
     if (delta != null) {
-      String realTimeKey = delta['realTimeKey'] ?? '';
-      input['realTimeKey'] = "$realTimeKey-$now";
+      input['realTimeKey'] = delta['realTimeKey'] ?? '';
     }
     return input;
   }
 
   @protected
   void processEvent(Map<String, dynamic> mapValue) {
-    lastUpdateTime = mapValue["updateTime"] ?? '';
-
+    String? dataTimeStr = mapValue["updateTime"];
+    if (dataTimeStr == null) {
+      return;
+    }
+    if (realTimeKey == null) {
+      lastUpdateTimeStr = dataTimeStr;
+    } else {
+      DateTime dataTime = DateTime.parse(dataTimeStr);
+      int dataTimeSec = dataTime.microsecondsSinceEpoch;
+      if (dataTimeSec > maxDataTime.microsecondsSinceEpoch) {
+        maxDataTime = dataTime;
+      }
+      if (dataTimeSec < lastUpdateTime.microsecondsSinceEpoch) {
+        return;
+      }
+    }
     String fromDeviceId = mapValue["deviceId"] ?? '';
     if (fromDeviceId == myDeviceId) {
       //print('same deviceId=$fromDeviceId &&&&&&&&&&&&&&&&&&&&&&&&');
@@ -115,7 +131,7 @@ abstract class AbsRealtime {
     String collectionId = mapValue["collectionId"] ?? '';
     String userId = mapValue["userId"] ?? '';
     String delta = mapValue["delta"] ?? '';
-    //print('$lastUpdateTime,$directive,$collectionId,$userId -----------------------------');
+    //print('$lastUpdateTimeStr,$directive,$collectionId,$userId -----------------------------');
 
     Map<String, dynamic> dataMap = json.decode(delta) as Map<String, dynamic>;
     String? parentMid = dataMap['parentMid'] as String?;

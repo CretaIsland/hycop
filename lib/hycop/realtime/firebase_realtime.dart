@@ -6,6 +6,7 @@ import 'package:firebase_database/firebase_database.dart';
 import '../../common/util/config.dart';
 import '../../common/util/logger.dart';
 //import '../hycop_factory.dart';
+import '../utils/hycop_utils.dart';
 import 'abs_realtime.dart';
 
 class FirebaseRealtime extends AbsRealtime {
@@ -39,6 +40,7 @@ class FirebaseRealtime extends AbsRealtime {
 
   @override
   Future<void> start() async {
+    realTimeKey = null;
     await initialize();
     logger.finest('FirebaseRealtime start()');
     if (_listenTimer != null) return;
@@ -46,12 +48,12 @@ class FirebaseRealtime extends AbsRealtime {
     _listenTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (isListenComplete) {
         isListenComplete = false;
-        logger.finest('listener restart $lastUpdateTime');
+        logger.finest('listener restart $lastUpdateTimeStr');
         _deltaStream?.cancel();
         _deltaStream = _db!
             .child('hycop_delta')
             .orderByChild('updateTime')
-            .startAfter(lastUpdateTime)
+            .startAfter(lastUpdateTimeStr)
             .onValue
             .listen((event) => _listenCallback(event, ''));
       }
@@ -59,8 +61,9 @@ class FirebaseRealtime extends AbsRealtime {
   }
 
   @override
-  Future<void> startTemp(String? realTimeKey) async {
-    if (realTimeKey == null || realTimeKey.isEmpty) {
+  Future<void> startTemp(String? rtKey) async {
+    realTimeKey = rtKey;
+    if (realTimeKey == null || realTimeKey!.isEmpty) {
       return;
     }
 
@@ -72,15 +75,15 @@ class FirebaseRealtime extends AbsRealtime {
     _listenTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (isListenComplete) {
         isListenComplete = false;
-        logger.finest('listener restart $realTimeKey-$lastUpdateTime');
+        logger.finest('listener restart $realTimeKey, $lastUpdateTimeStr');
         _deltaStream?.cancel();
         _deltaStream = _db!
             .child('hycop_delta')
-            //.orderByChild('updateTime')
-            //.startAfter(lastUpdateTime)
+            // .orderByChild('updateTime')
+            // .startAfter(lastUpdateTimeStr)
             .orderByChild('realTimeKey')
-            .startAfter('$realTimeKey-$lastUpdateTime')
-            //.equalTo(realTimeKey)
+            //.startAfter('$realTimeKey-$lastUpdateTimeStr')
+            .equalTo(realTimeKey)
             .onValue
             .listen((event) => _listenCallback(event, ''));
       }
@@ -92,14 +95,18 @@ class FirebaseRealtime extends AbsRealtime {
     if (event.snapshot.value == null) {
       return;
     }
-    DateTime now = DateTime.now();
     final rows = event.snapshot.value as Map<String, dynamic>;
 
     logger.finest('[$hint Listen]------------------------------');
     rows.forEach((mapKey, mapValue) {
       processEvent(mapValue);
     });
-    logger.finest('[$hint end ${now.toString()}]-------------------------------------');
+    if (realTimeKey != null) {
+      lastUpdateTime = maxDataTime;
+      lastUpdateTimeStr = HycopUtils.dateTimeToDB(maxDataTime);
+      logger.finest('[$hint end $lastUpdateTimeStr]-------------------------------------');
+    }
+
     isListenComplete = true;
   }
 
