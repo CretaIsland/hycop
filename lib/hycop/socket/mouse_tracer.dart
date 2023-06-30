@@ -5,19 +5,32 @@ MouseTracer? mouseTracerHolder;
 
 class MouseTracer extends ChangeNotifier {
 
+  String methodFlag = '';
+  String targetUserEmail = '';
+  String targetUserName = '';
+
   List<MouseModel> mouseModelList = [];
   List<Map<String, String>> focusFrameList = [];
 
 
   void joinUser(List<dynamic> userList) {
-    for(var element in userList) {
-      mouseModelList.add(MouseModel(element["userID"], element["userName"], 0.0, 0.0));
+    for(var user in userList) {
+      if(mouseModelList.where((element) => element.socketID == user["socketID"]).isEmpty) {
+        mouseModelList.add(MouseModel(user["socketID"], user["userID"], user["userName"], 0.0, 0.0));
+      }
     }
+    methodFlag = 'joinUser';
+    targetUserEmail = mouseModelList.last.userID;
+    targetUserName = mouseModelList.last.userName;
     notifyListeners();
   }
 
-  void leaveUser(String userID) {
-    mouseModelList.removeWhere((userCursor) => userCursor.userID == userID);
+  void leaveUser(String socketID) {
+    MouseModel targetModel = mouseModelList.firstWhere((userCursor) => userCursor.socketID == socketID);
+    methodFlag = 'leaveUser';
+    targetUserEmail = targetModel.userID;
+    targetUserName = targetModel.userName;
+    mouseModelList.remove(targetModel);
     notifyListeners();
   }
 
@@ -44,12 +57,13 @@ class MouseTracer extends ChangeNotifier {
 
 
 class MouseModel {
+  String socketID = "";
   String userID = "";
   String userName = "";
   double cursorX = 0.0;
   double cursorY = 0.0;
 
-  MouseModel(this.userID, this.userName, this.cursorX, this.cursorY);
+  MouseModel(this.socketID, this.userID, this.userName, this.cursorX, this.cursorY);
 
   void changePosition(double dx, double dy) {
     cursorX = dx;

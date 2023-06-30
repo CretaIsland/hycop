@@ -3,7 +3,6 @@ import 'package:hycop/hycop/account/account_manager.dart';
 import '../../hycop/utils/hycop_exceptions.dart';
 import '../../common/util/logger.dart';
 import 'mouse_tracer.dart';
-import '../../hycop/socket/socket_utils.dart';
 // ignore: depend_on_referenced_packages
 import 'package:socket_io_client/socket_io_client.dart';
 
@@ -14,11 +13,10 @@ class SocketClient {
   late String roomID;
 
   
-  void initialize() {
+  void initialize(String serverUrl) {
     socket = io(
       //"ws://localhost:4432",
-      "https://hycop-socket.tk:443",
-      //myConfig!.serverConfig!.socketConnInfo.serverUrl + myConfig!.serverConfig!.socketConnInfo.serverPort.toString(),  // url:port
+      serverUrl,
       <String, dynamic> {
         "transports" : ['websocket'],
         "autoConnect" : false
@@ -28,8 +26,7 @@ class SocketClient {
 
   Future<void> connectServer(String contentBookID) async {
 
-    roomID = SocketUtils.getRoomID(contentBookID);
-  
+    roomID = contentBookID;
 
     socket.connect().onConnectError((err) => 
       throw HycopException(message: err.toString())
@@ -76,8 +73,8 @@ class SocketClient {
   }
 
   void leaveUser(Map<String, dynamic> data) {
-    mouseTracerHolder!.unFocusFrame(data["userID"]);
-    mouseTracerHolder!.leaveUser(data["userID"]);
+    mouseTracerHolder!.unFocusFrame(data["socketID"]);
+    mouseTracerHolder!.leaveUser(data["socketID"]);
   }
 
   void updateData() {

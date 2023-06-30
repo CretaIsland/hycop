@@ -58,6 +58,10 @@ class FirebaseAppStorage extends AbsStorage {
       if(uploadedFile.fileSize != fileBytes.length) { // 기존에 있는 파일과 같은 파일인지 검사
         throw "diffError";
       } else {
+        if(makeThumbnail && (fileType.contains("video") || fileType.contains("image")) && uploadedFile.thumbnailUrl == "") {
+          await createThumbnail(fileName, fileType);
+          return await getFileInfo(uploadFile.fullPath);
+        }
         return uploadedFile;
       }
     } catch (getError) { 

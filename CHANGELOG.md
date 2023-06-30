@@ -1,3 +1,5 @@
+## 0.2.9
+- change FirebaseStorage, SocketClient
 ## 0.2.8
 - change FirebaseAccount.isExistAccount
 ## 0.2.7
