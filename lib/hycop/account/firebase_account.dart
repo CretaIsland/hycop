@@ -74,23 +74,27 @@ class FirebaseAccount extends AbsAccount {
 
   @override
   Future<bool> isExistAccount(String email) async {
-    // final getUserData = 
+    final getUserData =
     await HycopFactory.dataBase!
         .simpleQueryData('hycop_users', name: 'email', value: email, orderBy: 'name')
         .catchError((error, stackTrace) =>
-            throw HycopUtils.getHycopException(error: error, defaultMessage: 'not exist account(email:$email) !!!'))
-        .then((value) {
-      if (value.isEmpty) {
-        logger.finest('not exist account(email:$email) !!!');
-        //throw HycopException(message: 'not exist account(email:$email) !!!');
-        return Future.value(false); //false;
-      } else {
-        logger.finest('exist account(email:$email)');
-        return Future.value(true); //true;
-      }
-    });
-    logger.finest('not exist account(email:$email)');
-    return Future.value(false); //false;
+    throw HycopUtils.getHycopException(error: error, defaultMessage: 'not exist account(email:$email) !!!'));
+    //     .then((value) {
+    //   if (value.isEmpty) {
+    //     logger.finest('not exist account(email:$email) !!!');
+    //     //throw HycopException(message: 'not exist account(email:$email) !!!');
+    //     return Future.value(false); //false;
+    //   } else {
+    //     logger.finest('exist account(email:$email)');
+    //     return Future.value(true); //true;
+    //   }
+    // });
+    // logger.finest('not exist account(email:$email)');
+    // return Future.value(false); //false;
+    if (getUserData.isEmpty) {
+      return false;
+    }
+    return true;
   }
 
   @override
