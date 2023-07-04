@@ -1,72 +1,87 @@
 import 'package:flutter/material.dart';
 
-
 MouseTracer? mouseTracerHolder;
-
 class MouseTracer extends ChangeNotifier {
 
   String methodFlag = '';
   String targetUserEmail = '';
   String targetUserName = '';
 
-  List<MouseModel> mouseModelList = [];
-  List<Map<String, String>> focusFrameList = [];
+  List<MouseModel> userMouseList = [];
 
 
-  void joinUser(List<dynamic> userList) {
+  void initialize() {
+    methodFlag = '';
+    targetUserEmail = '';
+    targetUserName = '';
+    userMouseList = [];
+  }
+
+  void receiveOtherInfo(List<dynamic> userList) {
     for(var user in userList) {
-      if(mouseModelList.where((element) => element.socketID == user["socketID"]).isEmpty) {
-        mouseModelList.add(MouseModel(user["socketID"], user["userID"], user["userName"], 0.0, 0.0));
+      // 중복 체크
+      if(userMouseList.where((element) => element.userId == user['userId']).isEmpty) {
+        userMouseList.add(MouseModel(
+          user['socketId'], 
+          user['userId'], 
+          user['userName'], 
+          0.0, 
+          0.0
+        ));
       }
     }
+    if(userMouseList.isNotEmpty) {
+      methodFlag = 'joinUser';
+      targetUserEmail = userMouseList.last.userId;
+      targetUserName = userMouseList.last.userName;
+    }
+    notifyListeners();
+  }
+
+  void receiveNewInfo(dynamic newUserInfo) {
+    if(userMouseList.where((element) => element.userId == newUserInfo['userId']).isEmpty) {
+      userMouseList.add(MouseModel(
+        newUserInfo['socketId'], 
+        newUserInfo['userId'], 
+        newUserInfo['userName'], 
+        0.0, 
+        0.0
+      ));
+    }
     methodFlag = 'joinUser';
-    targetUserEmail = mouseModelList.last.userID;
-    targetUserName = mouseModelList.last.userName;
+    targetUserEmail = userMouseList.last.userId;
+    targetUserName = userMouseList.last.userName;
     notifyListeners();
   }
 
-  void leaveUser(String socketID) {
-    MouseModel targetModel = mouseModelList.firstWhere((userCursor) => userCursor.socketID == socketID);
+  void leaveUser(String socketId) {
+    MouseModel leaveUser = userMouseList.firstWhere((userMouse) => userMouse.socketId == socketId);
     methodFlag = 'leaveUser';
-    targetUserEmail = targetModel.userID;
-    targetUserName = targetModel.userName;
-    mouseModelList.remove(targetModel);
+    targetUserEmail = leaveUser.userId;
+    targetUserName = leaveUser.userName;
+    userMouseList.remove(leaveUser);
     notifyListeners();
   }
 
-  void changePosition(int index, double dx, double dy) {
-    mouseModelList[index].cursorX = dx;
-    mouseModelList[index].cursorY = dy;
+  void updateCursor(Map<String, dynamic> data) {
+    userMouseList[getIndex(data["userId"])].cursorX = data["dx"];
+    userMouseList[getIndex(data["userId"])].cursorY = data["dy"];
     notifyListeners();
   }
 
-  void focusFrame(String userID, String frameID) {
-    focusFrameList.add({"userID" : userID, "frameID" : frameID});
-    notifyListeners();
+  int getIndex(String userId) { // 이메일
+    return userMouseList.indexWhere((userCursor) => userCursor.userId == userId);
   }
 
-  void unFocusFrame(String userID) {
-    focusFrameList.removeWhere((element) => element["userID"] == userID);
-    notifyListeners();
-  }
-
-  int getIndex(String userID) {
-    return mouseModelList.indexWhere((userCursor) => userCursor.userID == userID);
-  }
 }
 
-
 class MouseModel {
-  String socketID = "";
-  String userID = "";
+  String socketId = "";
+  String userId = "";
   String userName = "";
   double cursorX = 0.0;
   double cursorY = 0.0;
 
-  MouseModel(this.socketID, this.userID, this.userName, this.cursorX, this.cursorY);
+  MouseModel(this.socketId, this.userId, this.userName, this.cursorX, this.cursorY);
 
-  void changePosition(double dx, double dy) {
-    cursorX = dx;
-    cursorY = dy;
-  }
 }

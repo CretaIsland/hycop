@@ -1,134 +1,64 @@
-
-import 'package:hycop/hycop/account/account_manager.dart';
-import '../../hycop/utils/hycop_exceptions.dart';
-import '../../common/util/logger.dart';
-import 'mouse_tracer.dart';
 // ignore: depend_on_referenced_packages
 import 'package:socket_io_client/socket_io_client.dart';
+import 'package:hycop/hycop/socket/mouse_tracer.dart';
+import 'package:hycop/hycop/account/account_manager.dart';
 
 
 class SocketClient {
 
   late Socket socket;
-  late String roomID;
+  late String roomId;
 
-  
   void initialize(String serverUrl) {
     socket = io(
-      //"ws://localhost:4432",
       serverUrl,
       <String, dynamic> {
-        "transports" : ['websocket'],
+        "transports" : ["websocket"],
         "autoConnect" : false
       }
     );
   }
 
-  Future<void> connectServer(String contentBookID) async {
+  Future<void> connectServer(String socketRoomId) async {
 
-    roomID = contentBookID;
+    roomId = socketRoomId;
 
-    socket.connect().onConnectError((err) => 
-      throw HycopException(message: err.toString())
-    );
-
+    socket.connect().onError((err) => throw Exception());
     socket.emit("join", {
-      "roomID" : roomID, 
-      "userID" : AccountManager.currentLoginUser.email, 
+      "roomId" : roomId,
+      "userId" : AccountManager.currentLoginUser.email,
       "userName" : AccountManager.currentLoginUser.name
     });
 
-
     socket.on("connect", (data) {
-      logger.finest("connect");
     });
     socket.on("disconnect", (data) {
-      logger.finest("disconnect");
-      disconnect();
+      socket.dispose();
     });
-    socket.on("joinUser", (data) {
-      joinUser(data);
+    socket.on("receiveOtherInfo", (data) {
+      mouseTracerHolder!.receiveOtherInfo(data["userList"]);
     });
+    socket.on("receiveNewInfo", (data) {
+      mouseTracerHolder!.receiveNewInfo(data["userInfo"]);
+    }); 
     socket.on("leaveUser", (data) {
-      leaveUser(data);
+      mouseTracerHolder!.leaveUser(data["socketId"]);
+    }); 
+    socket.on("updateCursor", (data) {
+      mouseTracerHolder!.updateCursor(data);
     });
-    socket.on("changeData", (data) {
-      changeData();
-    });
-    socket.on("changeCursor", (data) {
-      changeCursor(data);
-    });
-    socket.on("focusFrameData", (data) {
-      mouseTracerHolder!.focusFrame(data["userID"], data["frameID"]);
-    });
-    socket.on("unFocusFrameData", (data) {
-      mouseTracerHolder!.unFocusFrame(data["userID"]);
-    });
-    
-  }
-
-
-  void joinUser(Map<String, dynamic> data) {
-    mouseTracerHolder!.joinUser(data["userList"]);
-  }
-
-  void leaveUser(Map<String, dynamic> data) {
-    mouseTracerHolder!.unFocusFrame(data["socketID"]);
-    mouseTracerHolder!.leaveUser(data["socketID"]);
-  }
-
-  void updateData() {
-    socket.emit("updateData", {
-      "roomID" : roomID,
-      "userID" : AccountManager.currentLoginUser.email,
-      "message" : "",
-      "changeDate" : DateTime.now().toString().substring(0, 16)
-    });
-  }
-
-  void changeData() {
-    // reload Data
   }
 
   void moveCursor(double dx, double dy) {
-    socket.emit("moveCursor", {
-      "roomID" : roomID,
-      "userID" : AccountManager.currentLoginUser.email,
-      "cursor_x" : dx,
-      "cursor_y" : dy
-    });
-  }
-
-  void changeCursor(Map<String, dynamic> data) {
-    mouseTracerHolder!.changePosition(
-      mouseTracerHolder!.getIndex(data["userID"]),
-      data["cursor_x"],
-      data["cursor_y"]
-    );
-  }
-
-  void focusFrame(String frameID) {
-    mouseTracerHolder!.focusFrame(AccountManager.currentLoginUser.email, frameID);
-    socket.emit("focusFrame", {
-      "roomID" : roomID,
-      "userID" : AccountManager.currentLoginUser.email,
-      "frameID" : frameID,
-      "changeDate" : DateTime.now().toString().substring(0, 16)
-    });
-  }
-
-  void unFocusFrame() {
-    mouseTracerHolder!.unFocusFrame(AccountManager.currentLoginUser.email);
-    socket.emit("unFocusFrame", {
-      "roomID" : roomID,
-      "userID" : AccountManager.currentLoginUser.email
+  socket.emit("moveCursor", {
+      "userId" : AccountManager.currentLoginUser.email,
+      "dx" : dx,
+      "dy" : dy
     });
   }
 
   void disconnect() {
-    socket.disconnect().onError((err) {
-      throw HycopException(message: err.toString());
-    });
+    socket.disconnect().onError((err) => throw Exception());
     socket.destroy();
   }
 
