@@ -2,12 +2,15 @@
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:hycop/hycop/socket/mouse_tracer.dart';
 import 'package:hycop/hycop/account/account_manager.dart';
+import 'dart:async';
 
 
 class SocketClient {
 
   late Socket socket;
   late String roomId;
+  Timer? healthCheckTimer;
+
 
   void initialize(String serverUrl) {
     socket = io(
@@ -24,11 +27,13 @@ class SocketClient {
     roomId = socketRoomId;
 
     socket.connect().onError((err) => throw Exception());
+    startHealthCheckTimer();
     socket.emit("join", {
       "roomId" : roomId,
       "userId" : AccountManager.currentLoginUser.email,
       "userName" : AccountManager.currentLoginUser.name
     });
+    
 
     socket.on("connect", (data) {
     });
@@ -58,8 +63,18 @@ class SocketClient {
   }
 
   void disconnect() {
+    healthCheckTimer?.cancel();
     socket.disconnect().onError((err) => throw Exception());
     socket.destroy();
+  }
+
+  void startHealthCheckTimer() {
+    healthCheckTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      if (!socket.connected) {
+        disconnect();
+        connectServer(roomId);
+      }
+    });
   }
 
 
