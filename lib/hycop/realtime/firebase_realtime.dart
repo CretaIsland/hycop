@@ -13,7 +13,7 @@ class FirebaseRealtime extends AbsRealtime {
   DatabaseReference? _db;
   StreamSubscription<DatabaseEvent>? _deltaStream;
   bool isListenComplete = true;
-  Timer? _listenTimer;
+  //Timer? _listenTimer;
 
   @override
   Future<void> initialize() async {
@@ -43,21 +43,21 @@ class FirebaseRealtime extends AbsRealtime {
     realTimeKey = null;
     await initialize();
     logger.finest('FirebaseRealtime start()');
-    if (_listenTimer != null) return;
+    //if (_listenTimer != null) return;
     logger.finest('FirebaseRealtime start...()');
-    _listenTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      if (isListenComplete) {
-        isListenComplete = false;
-        logger.finest('listener restart $lastUpdateTimeStr');
-        _deltaStream?.cancel();
-        _deltaStream = _db!
-            .child('hycop_delta')
-            .orderByChild('updateTime')
-            .startAfter(lastUpdateTimeStr)
-            .onValue
-            .listen((event) => _listenCallback(event, ''));
-      }
-    });
+    //_listenTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+    if (isListenComplete) {
+      isListenComplete = false;
+      logger.finest('listener restart $lastUpdateTimeStr');
+      _deltaStream?.cancel();
+      _deltaStream = _db!
+          .child('hycop_delta')
+          .orderByChild('updateTime')
+          .startAfter(lastUpdateTimeStr)
+          .onValue
+          .listen((event) => _listenCallback(event, ''));
+    }
+    //});
   }
 
   @override
@@ -70,24 +70,24 @@ class FirebaseRealtime extends AbsRealtime {
     await initialize();
 
     logger.finest('FirebaseRealtime startTemp()');
-    if (_listenTimer != null) return;
+    //if (_listenTimer != null) return;
     logger.finest('FirebaseRealtime startTemp...()');
-    _listenTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      if (isListenComplete) {
-        isListenComplete = false;
-        logger.finest('listener restart $realTimeKey, $lastUpdateTimeStr');
-        _deltaStream?.cancel();
-        _deltaStream = _db!
-            .child('hycop_delta')
-            // .orderByChild('updateTime')
-            // .startAfter(lastUpdateTimeStr)
-            .orderByChild('realTimeKey')
-            //.startAfter('$realTimeKey-$lastUpdateTimeStr')
-            .equalTo(realTimeKey)
-            .onValue
-            .listen((event) => _listenCallback(event, ''));
-      }
-    });
+    //_listenTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+    if (isListenComplete) {
+      isListenComplete = false;
+      logger.finest('listener restart $realTimeKey, $lastUpdateTimeStr');
+      _deltaStream?.cancel();
+      _deltaStream = _db!
+          .child('hycop_delta')
+          // .orderByChild('updateTime')
+          // .startAfter(lastUpdateTimeStr)
+          .orderByChild('realTimeKey')
+          //.startAfter('$realTimeKey-$lastUpdateTimeStr')
+          .equalTo(realTimeKey)
+          .onValue
+          .listen((event) => _listenCallback(event, ''));
+    }
+    //});
   }
 
   void _listenCallback(DatabaseEvent event, String hint) {
@@ -115,8 +115,8 @@ class FirebaseRealtime extends AbsRealtime {
     logger.finest('listener stop...');
     isListenComplete = true;
     _deltaStream?.cancel();
-    _listenTimer?.cancel();
-    _listenTimer = null;
+    //_listenTimer?.cancel();
+    //_listenTimer = null;
   }
 
   @override
