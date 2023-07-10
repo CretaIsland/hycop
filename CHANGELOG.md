@@ -1,5 +1,13 @@
-## 0.2.8
+## 0.2.12
 - change realtime bug
+## 0.2.11
+- add SocketClient health check
+## 0.2.10
+- change SocketClient
+## 0.2.9
+- change FirebaseStorage, SocketClient
+## 0.2.8
+- change FirebaseAccount.isExistAccount
 ## 0.2.7
 - change realtime bug
 ## 0.2.6
