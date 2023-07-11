@@ -1,3 +1,5 @@
+## 0.2.13
+- change webrtc version, fix socket error
 ## 0.2.12
 - change realtime bug
 ## 0.2.11

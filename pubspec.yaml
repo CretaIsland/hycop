@@ -1,6 +1,6 @@
 name: hycop
 description: Hycop Framework
-version: 0.2.12
+version: 0.2.13
 homepage: http://www.sqisoft.com
 
 environment:
@@ -43,11 +43,10 @@ dependencies:
   http: ^0.13.5
   extension_google_sign_in_as_googleapis_auth: ^2.0.7
   google_sign_in: ^5.4.2
-  flutter_webrtc: ^0.8.12
-  webrtc_interface: 1.0.5
+  flutter_webrtc: ^0.9.35
   firebase_core_platform_interface: 4.5.2
-  mediasoup_client_flutter: ^0.8.0
-  protoo_client: ^0.3.1
+  mediasoup_client_flutter: ^0.8.5
+  protoo_client: ^0.3.3
   flutter_bloc: ^7.0.1
   collection: ^1.17.0
 

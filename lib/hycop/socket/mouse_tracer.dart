@@ -64,6 +64,8 @@ class MouseTracer extends ChangeNotifier {
   }
 
   void updateCursor(Map<String, dynamic> data) {
+    if(getIndex(data["userId"]) < 0) return;
+    
     userMouseList[getIndex(data["userId"])].cursorX = data["dx"];
     userMouseList[getIndex(data["userId"])].cursorY = data["dy"];
     notifyListeners();
