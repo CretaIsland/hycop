@@ -47,11 +47,21 @@ class FirebaseAppStorage extends AbsStorage {
   }
 
   @override
-  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes, {bool makeThumbnail = true}) async {
+  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes, {bool makeThumbnail = true, String folderName = "content/"}) async {
     await initialize();
 
     fileName = fileName.replaceAll(" ", "_");
-    final uploadFile = _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
+    if(folderName == "content/") {
+      if(fileType.contains("image")) {
+        folderName = "${folderName}image/";
+      } else if(fileType.contains("video")) {
+        folderName = "${folderName}video/";
+      } else {
+        folderName = "${folderName}etc/";
+      }
+    }
+
+    final uploadFile = _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$folderName$fileName");
 
     try {
       FileModel uploadedFile = await getFileInfo(uploadFile.fullPath);
@@ -59,7 +69,7 @@ class FirebaseAppStorage extends AbsStorage {
         throw "diffError";
       } else {
         if(makeThumbnail && (fileType.contains("video") || fileType.contains("image")) && uploadedFile.thumbnailUrl == "") {
-          await createThumbnail(fileName, fileType);
+          await createThumbnail(folderName, fileName, fileType);
           return await getFileInfo(uploadFile.fullPath);
         }
         return uploadedFile;
@@ -73,9 +83,9 @@ class FirebaseAppStorage extends AbsStorage {
 
         // 썸네일 생성 여부가 true라면
         if(makeThumbnail && (fileType.contains("video") || fileType.contains("image"))) {
-          await createThumbnail(fileName, fileType);
+          await createThumbnail(folderName, fileName, fileType);
         }
-        return await getFileInfo("${myConfig!.serverConfig!.storageConnInfo.bucketId}$fileName");
+        return await getFileInfo("${myConfig!.serverConfig!.storageConnInfo.bucketId}$folderName$fileName");
       } catch (uploadError) {
         return null;
       }
@@ -208,13 +218,14 @@ class FirebaseAppStorage extends AbsStorage {
         "${HycopUtils.genBucketId(AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId)}/";
   }
 
-  Future<void> createThumbnail(String fileName, String fileType) async {
+  Future<void> createThumbnail(String folderName, String fileName, String fileType) async {
     try {
       await http.post(
         Uri.parse("https://devcreta.com/createThumbnail"),
         headers: {"Content-type": "application/json"},
         body: jsonEncode({
           "userId" : myConfig!.serverConfig!.storageConnInfo.bucketId,
+          "folderName" : folderName,
           "fileName" : fileName,
           "fileType" : fileType
         })

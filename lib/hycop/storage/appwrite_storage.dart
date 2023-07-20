@@ -47,7 +47,7 @@ class AppwriteStorage extends AbsStorage {
   }
 
   @override
-  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes, {bool makeThumbnail = false}) async {
+  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes, {bool makeThumbnail = false, String folderName = "content/"}) async {
     await initialize();
 
     String fileId =

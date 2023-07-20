@@ -1,3 +1,5 @@
+## 0.2.14
+- fix storage file path
 ## 0.2.13
 - change webrtc version, fix socket error
 ## 0.2.12
