@@ -1,4 +1,6 @@
 ## 0.2.14
+- update webrtc version, fix logic
+## 0.2.14
 - fix storage file path
 ## 0.2.13
 - change webrtc version, fix socket error

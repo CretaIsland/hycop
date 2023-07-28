@@ -69,9 +69,9 @@ class MediaDeviceData extends ChangeNotifier {
         selectedVideoInput = videoInputDevices.first;
         videoInputs = videoInputDevices;
       }
-      notifyListeners();
     } catch (error) {
       //print(error);
     }
+    notifyListeners();
   }
 }

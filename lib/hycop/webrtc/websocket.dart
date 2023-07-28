@@ -27,8 +27,7 @@ class WebSocket {
     _protoo.on('failed', () => this.onFail?.call());
     _protoo.on('disconnected', () => this.onClose?.call());
     _protoo.on('close', () => this.onClose?.call());
-    _protoo.on(
-        'request', (request, accept, reject) => this.onRequest?.call(request, accept, reject));
+    _protoo.on('request', (request, accept, reject) => this.onRequest?.call(request, accept, reject));
     _protoo.on('notification', (request, accept, reject) => onNotification?.call(request));
   }
 

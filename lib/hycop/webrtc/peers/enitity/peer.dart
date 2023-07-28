@@ -1,4 +1,3 @@
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:hycop/hycop/webrtc/peers/enitity/peer_device.dart';
 import 'package:mediasoup_client_flutter/mediasoup_client_flutter.dart';
 

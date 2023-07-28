@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:mediasoup_client_flutter/mediasoup_client_flutter.dart';
 
-
 ProducerData? producerDataHolder;
 class ProducerData extends ChangeNotifier {
 
   Producer? mic;
   Producer? webcam;
-  
+
   ProducerData({this.mic, this.webcam});
+  void notify() => notifyListeners();
 
 
   void producerAdd(Producer producer) {
-    switch (producer.source) {
-      case 'mic' :
+    switch(producer.source) {
+      case 'mic':
         mic = producer;
         break;
-      case 'webcam': 
+      case 'webcam':
         webcam = producer;
         break;
       default:
         break;
     }
-    notifyListeners();
+    notify();
   }
 
   void producerRemove(String source) {
@@ -38,7 +38,7 @@ class ProducerData extends ChangeNotifier {
       default:
         break;
     }
-    notifyListeners();
+    notify();
   }
 
   void producerResume(String source) {
@@ -52,7 +52,7 @@ class ProducerData extends ChangeNotifier {
       default :
         break;
     }
-    notifyListeners();
+    notify();
   }
 
   void producerPause(String source) {
@@ -66,7 +66,7 @@ class ProducerData extends ChangeNotifier {
       default :
         break;
     }
-    notifyListeners();
+    notify();
   }
 
 
