@@ -127,8 +127,8 @@ class FirebaseAppStorage extends AbsStorage {
     String fileView = await _storage!.ref().child(res.fullPath).getDownloadURL();
 
     if(res.contentType!.contains("video") || res.contentType!.contains("image")) {
-      String fileName = fileId.substring(fileId.indexOf("/")+1, fileId.lastIndexOf("."));
-      final thumbnailRes = await _storage!.ref().child("${fileId.substring(0, fileId.indexOf("/"))}/thumbnail/$fileName.jpg").getMetadata().onError((error, stackTrace) async {
+      String fileName = fileId.substring(fileId.lastIndexOf("/")+1, fileId.lastIndexOf("."));
+      final thumbnailRes = await _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}content/thumbnail/$fileName.jpg").getMetadata().onError((error, stackTrace) async {
         return FullMetadata({"fullPath" : ""});
       });
 
@@ -181,10 +181,9 @@ class FirebaseAppStorage extends AbsStorage {
 
       // 파일이 썸네일을 가지는 형태일 때
       if(fileData.contentType!.contains("video") || fileData.contentType!.contains("image")) {
-        String folderName = fileData.fullPath.substring(0, fileData.fullPath.indexOf("/"));
-        String fileName = fileData.fullPath.substring(fileData.fullPath.indexOf("/")+1, fileData.fullPath.lastIndexOf("."));
+        String fileName = fileData.fullPath.substring(fileData.fullPath.lastIndexOf("/")+1, fileData.fullPath.lastIndexOf("."));
         
-        final thumbnailRes = await _storage!.ref().child("$folderName/thumbnail/$fileName.jpg").getMetadata().onError((error, stackTrace) async {
+        final thumbnailRes = await _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}content/thumbnail/$fileName.jpg").getMetadata().onError((error, stackTrace) async {
           return FullMetadata({"fullPath" : ""});
         });
 

@@ -1,4 +1,6 @@
-## 0.2.14
+## 0.2.16
+- fix storage getFile method
+## 0.2.15
 - update webrtc version, fix logic
 ## 0.2.14
 - fix storage file path
