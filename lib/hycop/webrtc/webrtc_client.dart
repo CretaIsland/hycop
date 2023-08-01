@@ -314,7 +314,7 @@ class WebRTCClient {
         //   videoGoogleStartBitrate: 1000
         // ),
         // encodings: [ RtpEncodingParameters(scalabilityMode: "L1T3", scaleResolutionDownBy: 1.0) ],
-        // appData: {"source" : "webcam"},
+        appData: {"source" : "webcam"},
         source: "webcam"
       );
     } catch (error) {
@@ -339,7 +339,7 @@ class WebRTCClient {
         //   opusStereo: 1,
         //   opusDtx: 1
         // ),
-        // appData: {"source" : "mic"},
+        appData: {"source" : "mic"},
         source: "mic"
       );
     } catch (error) {
