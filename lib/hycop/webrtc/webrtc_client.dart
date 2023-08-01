@@ -299,22 +299,22 @@ class WebRTCClient {
     MediaStreamTrack? track;
 
     try {
-      const videoVPVersion = 8;
-      RtpCodecCapability? codec = _mediaDevice!.rtpCapabilities.codecs.firstWhere((RtpCodecCapability c) => 
-        c.mimeType.toLowerCase() == 'video/vp$videoVPVersion', orElse: () => throw "desired vp$videoVPVersion codec+configuration is not supported"
-      );
+      //const videoVPVersion = 8;
+      // RtpCodecCapability? codec = _mediaDevice!.rtpCapabilities.codecs.firstWhere((RtpCodecCapability c) => 
+      //   c.mimeType.toLowerCase() == 'video/vp$videoVPVersion', orElse: () => throw "desired vp$videoVPVersion codec+configuration is not supported"
+      // );
       videoStream = await createVideoStream();
       track = videoStream!.getVideoTracks().first;
 
       _sendTransport!.produce(
         track: track, 
         stream: videoStream, 
-        codec: codec,
-        codecOptions: ProducerCodecOptions(
-          videoGoogleStartBitrate: 1000
-        ),
-        encodings: [ RtpEncodingParameters(scalabilityMode: "L1T3", scaleResolutionDownBy: 1.0) ],
-        appData: {"source" : "webcam"},
+        // codec: codec,
+        // codecOptions: ProducerCodecOptions(
+        //   videoGoogleStartBitrate: 1000
+        // ),
+        // encodings: [ RtpEncodingParameters(scalabilityMode: "L1T3", scaleResolutionDownBy: 1.0) ],
+        // appData: {"source" : "webcam"},
         source: "webcam"
       );
     } catch (error) {
@@ -335,11 +335,11 @@ class WebRTCClient {
       _sendTransport!.produce(
         track: track, 
         stream: audioStream, 
-        codecOptions: ProducerCodecOptions(
-          opusStereo: 1,
-          opusDtx: 1
-        ),
-        appData: {"source" : "mic"},
+        // codecOptions: ProducerCodecOptions(
+        //   opusStereo: 1,
+        //   opusDtx: 1
+        // ),
+        // appData: {"source" : "mic"},
         source: "mic"
       );
     } catch (error) {

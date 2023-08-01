@@ -1,3 +1,5 @@
+## 0.2.17
+- fix webrtc produce option
 ## 0.2.16
 - fix storage getFile method
 ## 0.2.15
