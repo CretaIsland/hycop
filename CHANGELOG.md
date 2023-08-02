@@ -1,3 +1,5 @@
+## 0.2.19
+- add create thumbnail for pdf
 ## 0.2.18
 - add webrtc produce option
 ## 0.2.17

@@ -68,7 +68,7 @@ class FirebaseAppStorage extends AbsStorage {
       if(uploadedFile.fileSize != fileBytes.length) { // 기존에 있는 파일과 같은 파일인지 검사
         throw "diffError";
       } else {
-        if(makeThumbnail && (fileType.contains("video") || fileType.contains("image")) && uploadedFile.thumbnailUrl == "") {
+        if(makeThumbnail && (fileType.contains("video") || (fileType.contains("image") && !fileType.contains("png")) || fileType.contains("pdf")) && uploadedFile.thumbnailUrl == "") {
           await createThumbnail(folderName, fileName, fileType);
           return await getFileInfo(uploadFile.fullPath);
         }
@@ -82,7 +82,7 @@ class FirebaseAppStorage extends AbsStorage {
         );
 
         // 썸네일 생성 여부가 true라면
-        if(makeThumbnail && (fileType.contains("video") || fileType.contains("image"))) {
+        if(makeThumbnail && (fileType.contains("video") || (fileType.contains("image") && !fileType.contains("png")) || fileType.contains("pdf"))) {
           await createThumbnail(folderName, fileName, fileType);
         }
         return await getFileInfo("${myConfig!.serverConfig!.storageConnInfo.bucketId}$folderName$fileName");
@@ -126,7 +126,20 @@ class FirebaseAppStorage extends AbsStorage {
     });
     String fileView = await _storage!.ref().child(res.fullPath).getDownloadURL();
 
-    if(res.contentType!.contains("video") || res.contentType!.contains("image")) {
+
+    // 이미지 파일이 png라면
+    if(res.contentType!.contains("png")) {
+      return FileModel(
+        fileId: res.fullPath,
+        fileName: res.name,
+        fileView: fileView,
+        thumbnailUrl: fileView,
+        fileMd5: res.md5Hash!,
+        fileSize: res.size!,
+        fileType: ContentsType.getContentTypes(res.contentType!));
+    }
+
+    if(res.contentType!.contains("video") || (res.contentType!.contains("image"))) {
       String fileName = fileId.substring(fileId.lastIndexOf("/")+1, fileId.lastIndexOf("."));
       final thumbnailRes = await _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}content/thumbnail/$fileName.jpg").getMetadata().onError((error, stackTrace) async {
         return FullMetadata({"fullPath" : ""});
@@ -179,8 +192,19 @@ class FirebaseAppStorage extends AbsStorage {
       var fileData = await element.getMetadata();
       String fileView = await _storage!.ref().child(fileData.fullPath).getDownloadURL();
 
+
       // 파일이 썸네일을 가지는 형태일 때
-      if(fileData.contentType!.contains("video") || fileData.contentType!.contains("image")) {
+      if(fileData.contentType!.contains("png")) {
+        fileInfoList.add(FileModel(
+          fileId: fileData.fullPath,
+          fileName: fileData.name,
+          fileView: fileView,
+          thumbnailUrl: fileView,
+          fileMd5: fileData.md5Hash!,
+          fileSize: fileData.size!,
+          fileType: ContentsType.getContentTypes(fileData.contentType!)));
+        continue;
+      } else if(fileData.contentType!.contains("video") || (fileData.contentType!.contains("image") && !fileData.contentType!.contains("png"))) {
         String fileName = fileData.fullPath.substring(fileData.fullPath.lastIndexOf("/")+1, fileData.fullPath.lastIndexOf("."));
         
         final thumbnailRes = await _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}content/thumbnail/$fileName.jpg").getMetadata().onError((error, stackTrace) async {
