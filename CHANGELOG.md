@@ -1,3 +1,5 @@
+## 0.2.20
+- fix get file data logic
 ## 0.2.19
 - add create thumbnail for pdf
 ## 0.2.18
