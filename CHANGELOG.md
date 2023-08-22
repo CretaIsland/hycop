@@ -1,3 +1,7 @@
+## 0.2.21
+- add updateToDB-func on abs_ex_model_manager.dart
+- add updateData on abs_database.dart
+- add ExModelType.depot on model_enums.dart
 ## 0.2.20
 - fix get file data logic
 ## 0.2.19

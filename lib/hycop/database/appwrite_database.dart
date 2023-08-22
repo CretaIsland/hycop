@@ -103,6 +103,31 @@ class AppwriteDatabase extends AbsDatabase {
   }
 
   @override
+  Future<void> updateData(String collectionId, String mid, Object data) async {
+    await initialize();
+
+    try {
+      String key = HycopUtils.midToKey(mid);
+      logger.finest('setData($key)');
+      await database!.updateDocument(
+        databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
+        collectionId: collectionId,
+        documentId: key,
+        data: data as Map<String, dynamic>,
+      ); // merge 되는지 확인 필요!!!
+    } on AppwriteException catch (e) {
+      if (e.code == 404) {
+        logger.finest(e.message!);
+        return;
+      }
+      if (e.message != null) {
+        throw HycopException(message: e.message!, code: e.code);
+      }
+      throw HycopException(message: 'Appwrite error', code: e.code);
+    }
+  }
+
+  @override
   Future<void> createData(String collectionId, String mid, Map<dynamic, dynamic> data) async {
     await initialize();
 

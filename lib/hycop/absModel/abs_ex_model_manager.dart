@@ -110,6 +110,16 @@ abstract class AbsExModelManager extends ChangeNotifier {
     }
   }
 
+  Future<void> updateToDB(String mid, Map<String, dynamic> updateDataMap) async {
+    try {
+      //await HycopFactory.dataBase!.setData(collectionId, model.mid, model.toMap());
+      await HycopFactory.dataBase!.updateData(collectionId, mid, updateDataMap);
+    } catch (e) {
+      logger.severe('databaseError', e);
+      throw HycopException(message: 'databaseError', exception: e as Exception);
+    }
+  }
+
   Future<void> setToDBByMid(String mid) async {
     try {
       //await HycopFactory.dataBase!.setData(collectionId, model.mid, model.toMap());

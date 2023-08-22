@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../hycop/utils/hycop_exceptions.dart';
 import '../../common/util/logger.dart';
 import '../../hycop/absModel/abs_ex_model.dart';
+import '../../hycop/utils/hycop_utils.dart';
 import '../hycop_factory.dart';
 
 enum OrderDirection {
@@ -78,6 +79,7 @@ abstract class AbsDatabase {
       List<Object?>? startAfter}); // firebase onlu
 
   Future<void> setData(String collectionId, String mid, Map<dynamic, dynamic> data);
+  Future<void> updateData(String collectionId, String mid, Map<dynamic, dynamic> data);
   Future<void> createData(String collectionId, String mid, Map<dynamic, dynamic> data);
   Future<void> removeData(String collectionId, String mid);
 
