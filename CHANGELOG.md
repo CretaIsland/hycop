@@ -1,3 +1,5 @@
+## 0.2.22
+- modify my_encrypt.dart for applying flutter-3.13.x
 ## 0.2.21
 - add updateToDB-func on abs_ex_model_manager.dart
 - add updateData on abs_database.dart
