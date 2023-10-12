@@ -1,4 +1,5 @@
 // ignore: depend_on_referenced_packages
+import 'package:hycop/common/util/logger.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:hycop/hycop/socket/mouse_tracer.dart';
 import 'package:hycop/hycop/account/account_manager.dart';
@@ -13,20 +14,24 @@ class SocketClient {
 
 
   void initialize(String serverUrl) {
-    socket = io(
-      serverUrl,
-      <String, dynamic> {
-        "transports" : ["websocket"],
-        "autoConnect" : false
-      }
-    );
+    try {
+       socket = io(
+        serverUrl,
+        <String, dynamic> {
+          "transports" : ["websocket"],
+          "autoConnect" : false
+        }
+      );
+    } catch (error) {
+      logger.severe("error during initialize socket server >> $error");
+    }
   }
 
   Future<void> connectServer(String socketRoomId) async {
 
     roomId = socketRoomId;
 
-    socket.connect().onError((err) => throw Exception());
+    socket.connect().onError((error) => logger.severe("error during connect socket server >> $error"));
     startHealthCheckTimer();
     socket.emit("join", {
       "roomId" : roomId,
@@ -64,7 +69,7 @@ class SocketClient {
 
   void disconnect() {
     healthCheckTimer?.cancel();
-    socket.disconnect().onError((err) => throw Exception());
+    socket.disconnect().onError((error) => logger.severe("error during disconnect socket server >> $error"));
     socket.destroy();
   }
 

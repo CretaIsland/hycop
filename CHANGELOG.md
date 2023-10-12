@@ -1,3 +1,5 @@
+## 0.2.23
+- add socket function exception handling
 ## 0.2.22
 - modify my_encrypt.dart for applying flutter-3.13.x
 ## 0.2.21

@@ -244,7 +244,7 @@ class FirebaseAppStorage extends AbsStorage {
   Future<void> createThumbnail(String folderName, String fileName, String fileType) async {
     try {
       await http.post(
-        Uri.parse("https://devcreta.com/createThumbnail"),
+        Uri.parse("https://devcreta.com:444/createThumbnail"),
         headers: {"Content-type": "application/json"},
         body: jsonEncode({
           "userId" : myConfig!.serverConfig!.storageConnInfo.bucketId,
