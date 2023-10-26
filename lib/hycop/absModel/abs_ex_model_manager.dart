@@ -42,6 +42,7 @@ abstract class AbsExModelManager extends ChangeNotifier {
         //offset: 1, // appwrite only
         //startAfter: [DateTime.parse('2022-08-04 12:00:01.000')], //firebase only
       );
+      if (resultList.isEmpty) return [];
       return resultList.map((ele) {
         AbsExModel model = newModel(ele['mid'] ?? '');
         model.fromMap(ele);
@@ -49,19 +50,26 @@ abstract class AbsExModelManager extends ChangeNotifier {
         return model;
       }).toList();
     } catch (e) {
-      logger.severe('databaseError', e);
-      throw HycopException(message: 'databaseError', exception: e as Exception);
+      logger.severe('databaseError $e');
+      //throw HycopException(message: 'databaseError', exception: e as Exception);
+      return [];
     }
   }
 
-  Future<AbsExModel> getFromDB(String mid) async {
+  Future<AbsExModel?> getFromDB(String mid) async {
     try {
       AbsExModel model = newModel(mid);
-      model.fromMap(await HycopFactory.dataBase!.getData(collectionId, mid));
+      Map<String, dynamic> data = await HycopFactory.dataBase!.getData(collectionId, mid);
+      if (data.isEmpty) {
+        logger.severe('data not found $mid');
+        return null;
+      }
+      model.fromMap(data);
       return model;
     } catch (e) {
-      logger.severe('databaseError', e);
-      throw HycopException(message: 'databaseError', exception: e as Exception);
+      logger.severe('databaseError $e');
+      //throw HycopException(message: 'databaseError', exception: e as Exception);
+      return null;
     }
   }
 
@@ -78,6 +86,7 @@ abstract class AbsExModelManager extends ChangeNotifier {
         //offset: 1, // appwrite only
         //startAfter: [DateTime.parse('2022-08-04 12:00:01.000')], //firebase only
       );
+      if (resultList.isEmpty) return [];
       return resultList.map((ele) {
         AbsExModel model = newModel(ele['mid'] ?? '');
         model.fromMap(ele);
@@ -85,8 +94,9 @@ abstract class AbsExModelManager extends ChangeNotifier {
         return model;
       }).toList();
     } catch (e) {
-      logger.severe('databaseError', e);
-      throw HycopException(message: 'databaseError', exception: e as Exception);
+      logger.severe('databaseError $e');
+      //throw HycopException(message: 'databaseError', exception: e as Exception);
+      return [];
     }
   }
 

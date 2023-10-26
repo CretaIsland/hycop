@@ -1,3 +1,5 @@
+## 0.2.24
+- getFromDB can return null
 ## 0.2.23
 - add socket function exception handling
 ## 0.2.22
