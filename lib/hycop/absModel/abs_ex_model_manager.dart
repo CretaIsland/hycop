@@ -61,7 +61,7 @@ abstract class AbsExModelManager extends ChangeNotifier {
       AbsExModel model = newModel(mid);
       Map<String, dynamic> data = await HycopFactory.dataBase!.getData(collectionId, mid);
       if (data.isEmpty) {
-        logger.severe('data not found $mid');
+        logger.warning('data not found $mid');
         return null;
       }
       model.fromMap(data);

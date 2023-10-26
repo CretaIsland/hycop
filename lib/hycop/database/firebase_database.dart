@@ -36,11 +36,12 @@ class FirebaseDatabase extends AbsDatabase {
   @override
   Future<Map<String, dynamic>> getData(String collectionId, String mid) async {
     await initialize();
-
     CollectionReference collectionRef = _db!.collection(collectionId);
-
     DocumentSnapshot<Object?> result = await collectionRef.doc(mid).get();
-    return result.data() as Map<String, dynamic>;
+    if (result.data() != null) {
+      return result.data() as Map<String, dynamic>;
+    }
+    return {};
   }
 
   @override
