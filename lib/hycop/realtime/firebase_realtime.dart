@@ -12,7 +12,7 @@ import 'abs_realtime.dart';
 class FirebaseRealtime extends AbsRealtime {
   DatabaseReference? _db;
   StreamSubscription<DatabaseEvent>? _deltaStream;
-  bool isListenComplete = true;
+  bool _isListenComplete = true;
   //Timer? _listenTimer;
 
   @override
@@ -46,8 +46,8 @@ class FirebaseRealtime extends AbsRealtime {
     //if (_listenTimer != null) return;
     logger.finest('FirebaseRealtime start...()');
     //_listenTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-    if (isListenComplete) {
-      isListenComplete = false;
+    if (_isListenComplete) {
+      _isListenComplete = false;
       logger.finest('listener restart $lastUpdateTimeStr');
       _deltaStream?.cancel();
       _deltaStream = _db!
@@ -73,8 +73,8 @@ class FirebaseRealtime extends AbsRealtime {
     //if (_listenTimer != null) return;
     logger.finest('FirebaseRealtime startTemp...()');
     //_listenTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-    if (isListenComplete) {
-      isListenComplete = false;
+    if (_isListenComplete) {
+      _isListenComplete = false;
       logger.finest('listener restart $realTimeKey, $lastUpdateTimeStr');
       _deltaStream?.cancel();
       _deltaStream = _db!
@@ -107,13 +107,13 @@ class FirebaseRealtime extends AbsRealtime {
       logger.finest('[$hint end $lastUpdateTimeStr]-------------------------------------');
     }
 
-    isListenComplete = true;
+    _isListenComplete = true;
   }
 
   @override
   void stop() {
     logger.finest('listener stop...');
-    isListenComplete = true;
+    _isListenComplete = true;
     _deltaStream?.cancel();
     //_listenTimer?.cancel();
     //_listenTimer = null;

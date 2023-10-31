@@ -34,6 +34,40 @@ class AppwriteRealtime extends AbsRealtime {
   }
 
   @override
+  Future<void> startTemp(String? rtKey) async {
+    realTimeKey = rtKey;
+    if (realTimeKey == null || realTimeKey!.isEmpty) {
+      return;
+    }
+
+    await initialize();
+
+    logger.finest('AppwriteRealtime startTemp()');
+   
+      logger.finest('listener restart $realTimeKey, $lastUpdateTimeStr');
+      if (subscription != null) {
+        return;
+      }
+      String dbId = myConfig!.serverConfig!.dbConnInfo.appId;
+      String ch = 'databases.$dbId.collections.hycop_delta.documents';
+      subscription = Realtime(AbsDatabase.awDBConn!).subscribe([ch]);
+      realtimeListener = subscription!.stream.listen((event) {
+        // appwrite 는 아마도 lastUpdateTime 을 기록할 필요가 없는 것으로 보인다.
+        // 어차피 새로워진 것만 도착하기 때문인것 같다.
+        // 여기서 realTimeKey 가 다르면 버린다.
+        String? eventRealTimeKey = event.payload['realTimeKey'];
+        if (eventRealTimeKey == null) {
+          return;
+        }
+        if (eventRealTimeKey != realTimeKey) {
+          return;
+        }
+        processEvent(event.payload);
+      });
+    //});
+  }
+
+  @override
   void stop() {
     subscription?.close();
     realtimeListener?.cancel();
