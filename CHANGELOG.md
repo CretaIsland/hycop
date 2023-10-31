@@ -1,5 +1,7 @@
-## 0.2.26
+## 0.2.27
 - Appwrite sdk, Dart-Appwrite sdk version up
+## 0.2.26
+-
 ## 0.2.25
 - getFromDB can return null
 ## 0.2.24
