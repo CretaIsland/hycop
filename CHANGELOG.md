@@ -1,3 +1,5 @@
+## 0.2.28
+- Appwrite realtime realTimeKey apply
 ## 0.2.27
 - Appwrite sdk, Dart-Appwrite sdk version up
 ## 0.2.26
