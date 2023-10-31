@@ -1,7 +1,9 @@
 ## 0.2.27
 - Appwrite sdk, Dart-Appwrite sdk version up
 ## 0.2.26
--
+- fix bug of google-accounts
+- fix bug of isExistAccount
+- fix bug of password when createAccount
 ## 0.2.25
 - getFromDB can return null
 ## 0.2.24

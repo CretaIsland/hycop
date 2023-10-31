@@ -1,5 +1,6 @@
 //import 'package:appwrite/appwrite.dart';
 import 'package:http/browser_client.dart';
+import 'package:hycop/hycop.dart';
 
 import '../../../hycop/hycop_factory.dart';
 import '../../common/util/config.dart';
@@ -36,9 +37,7 @@ class AccountManager {
   }
 
   static Future<bool> getSession() async {
-    if (myConfig == null ||
-        myConfig!.serverConfig == null ||
-        myConfig!.config.sessionServerUrl.isEmpty) return false;
+    if (myConfig == null || myConfig!.serverConfig == null || myConfig!.config.sessionServerUrl.isEmpty) return false;
     final url = Uri.parse('${myConfig!.config.sessionServerUrl}/getSession/');
     // <!-- http.Response response = await htt!p.get(url);
     http.Client client = http.Client();
@@ -46,9 +45,12 @@ class AccountManager {
       logger.finest('client.withCredentials');
       client.withCredentials = true;
     }
-    http.Response response = await client.get(url).catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'client.get(getSession) Failed !!!'));
+    http.Response response = await client.get(url).catchError(
+          (error, stackTrace) => throw HycopUtils.getHycopException(
+            error: error,
+            defaultMessage: 'client.get(getSession) Failed !!!',
+          ),
+        );
     // -->
     var responseBody = utf8.decode(response.bodyBytes);
     var jsonData = jsonDecode(responseBody);
@@ -88,8 +90,12 @@ class AccountManager {
           'user_id': _currentLoginUser.userId,
           'server_type': HycopFactory.serverType.name,
         },
-      ).catchError((error, stackTrace) => throw HycopUtils.getHycopException(
-          error: error, defaultMessage: 'client.post(createSession) Failed !!!'));
+      ).catchError(
+        (error, stackTrace) => throw HycopUtils.getHycopException(
+          error: error,
+          defaultMessage: 'client.post(createSession) Failed !!!',
+        ),
+      );
       // -->
       var responseBody = utf8.decode(response.bodyBytes);
       var jsonData = jsonDecode(responseBody);
@@ -106,9 +112,12 @@ class AccountManager {
       logger.finest('client.withCredentials');
       client.withCredentials = true;
     }
-    http.Response response = await client.get(url).catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'client.get(deleteSession) Failed !!!'));
+    http.Response response = await client.get(url).catchError(
+          (error, stackTrace) => throw HycopUtils.getHycopException(
+            error: error,
+            defaultMessage: 'client.get(deleteSession) Failed !!!',
+          ),
+        );
     // -->
 
     var responseBody = utf8.decode(response.bodyBytes);
@@ -119,9 +128,44 @@ class AccountManager {
   static Future<void> createAccount(Map<String, dynamic> userData) async {
     await initialize();
     logger.finest('createAccount start');
+    // accountSignUpType
+    var accountSignUpType = AccountSignUpType.hycop;
+    if (userData['accountSignUpType'] == null) {
+      userData['accountSignUpType'] = accountSignUpType.index;
+    } else {
+      accountSignUpType = AccountSignUpType.fromInt(int.parse(userData['accountSignUpType'].toString()));
+      if (accountSignUpType == AccountSignUpType.none) {
+        logger.severe('invalid sign-up type !!!');
+        throw HycopUtils.getHycopException(defaultMessage: 'invalid sign-up type !!!');
+      }
+    }
+    logger.info('accountSignUpType($accountSignUpType)');
+    // password
+    String password = userData['password'] ?? '';
+    if (password.isEmpty && accountSignUpType == AccountSignUpType.hycop) {
+      // hycop-service need password !!!
+      logger.severe('password is empty !!!');
+      throw HycopUtils.getHycopException(defaultMessage: 'password is empty !!!');
+    }
+    String passwordSha1 = '';
+    if (accountSignUpType == AccountSignUpType.hycop) {
+      // hycop-service's password = sha1-hash of password
+      passwordSha1 = HycopUtils.stringToSha1(password);
+    } else {
+      // not hycop-service's password = sha1-hash of email
+      String email = userData['email'] ?? '';
+      if (email.isEmpty) {
+        logger.severe('email is empty !!!');
+        throw HycopUtils.getHycopException(defaultMessage: 'email is empty !!!');
+      }
+      passwordSha1 = HycopUtils.stringToSha1(email);
+      password = passwordSha1;
+    }
+    userData['password'] = passwordSha1;
+    logger.finest('password resetting to [$password] (${accountSignUpType.name}');
+    // createAccount
     await HycopFactory.account!.createAccount(userData).catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'AccountManager.createAccount Failed !!!'));
+        throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.createAccount Failed !!!'));
     logger.finest('createAccount end');
     _currentLoginUser = UserModel(userData: userData);
     await createSession();
@@ -159,16 +203,15 @@ class AccountManager {
           throw HycopUtils.getHycopException(defaultMessage: 'login cancel!!!');
         }
       }
-      bool alreadyExistAccount = false;
-      await AccountManager.isExistAccount(_googleAccount!.email).catchError((error, stackTrace) {
-        throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'isExistAccount error !!!');
-      }).then((value) {
+      bool alreadyExistAccount =
+          await AccountManager.isExistAccount(_googleAccount!.email).catchError((error, stackTrace) {
+        throw HycopUtils.getHycopException(error: error, defaultMessage: 'isExistAccount error !!!');
+      }); /*.then((value) {
         if (value == true) {
           alreadyExistAccount = true;
           //throw HycopUtils.getHycopException(defaultMessage: 'already exist account !!!');
         }
-      });
+      });*/
 
       if (alreadyExistAccount == false) {
         Map<String, dynamic> userData = {};
@@ -178,8 +221,7 @@ class AccountManager {
         userData['accountSignUpType'] = AccountSignUpType.google.index;
         userData['imagefile'] = _googleAccount!.photoUrl;
         await createAccount(userData).then((value) {}).onError((error, stackTrace) {
-          throw HycopUtils.getHycopException(
-              error: error, defaultMessage: 'createAccount error !!!');
+          throw HycopUtils.getHycopException(error: error, defaultMessage: 'createAccount error !!!');
         });
       }
 
@@ -187,24 +229,22 @@ class AccountManager {
         await loginByService(_googleAccount!.email, AccountSignUpType.google)
             .then((value) {})
             .onError((error, stackTrace) {
-          throw HycopUtils.getHycopException(
-              error: error, defaultMessage: 'loginByService error !!!');
+          throw HycopUtils.getHycopException(error: error, defaultMessage: 'loginByService error !!!');
         });
       }
     } catch (error) {
-      throw HycopUtils.getHycopException(
-          error: error, defaultMessage: 'unknown google-account error !!!');
+      throw HycopUtils.getHycopException(error: error, defaultMessage: 'unknown google-account error !!!');
     }
   }
 
   static Future<bool> isExistAccount(String email) async {
     await initialize();
     logger.finest('isExistAccount');
-    return HycopFactory.account!.isExistAccount(email).catchError((error, stackTrace) {
+    bool isExistAccount = await HycopFactory.account!.isExistAccount(email).catchError((error, stackTrace) {
       logger.severe('isExistAccount failed (${error.toString()})');
-      throw HycopUtils.getHycopException(
-          error: error, defaultMessage: 'AccountManager.isExistAccount Failed !!!');
+      throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.isExistAccount Failed !!!');
     });
+    return isExistAccount;
   }
 
   static Future<void> getCurrentUserInfo() async {
@@ -215,9 +255,8 @@ class AccountManager {
     }
     await initialize();
     Map<String, dynamic> userData = {};
-    await HycopFactory.account!.getAccountInfo(_currentLoginUser.userId, userData).catchError(
-        (error, stackTrace) => throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'AccountManager.updateAccount Failed !!!'));
+    await HycopFactory.account!.getAccountInfo(_currentLoginUser.userId, userData).catchError((error, stackTrace) =>
+        throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.updateAccount Failed !!!'));
     _currentLoginUser = UserModel(userData: userData);
   }
 
@@ -231,8 +270,7 @@ class AccountManager {
     newUserData.addAll(_currentLoginUser.getValueMap);
     newUserData.addAll(updateUserData);
     await HycopFactory.account!.updateAccountInfo(newUserData).catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'AccountManager.updateAccount Failed !!!'));
+        throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.updateAccount Failed !!!'));
     _currentLoginUser = UserModel(userData: newUserData);
   }
 
@@ -245,9 +283,8 @@ class AccountManager {
     Map<String, dynamic> newUserData = {};
     newUserData.addAll(_currentLoginUser.getValueMap);
     newUserData['password'] = HycopUtils.stringToSha1(newPassword);
-    await HycopFactory.account!.updateAccountPassword(newPassword, oldPassword).catchError(
-        (error, stackTrace) => throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'AccountManager.updateAccount Failed !!!'));
+    await HycopFactory.account!.updateAccountPassword(newPassword, oldPassword).catchError((error, stackTrace) =>
+        throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.updateAccount Failed !!!'));
     _currentLoginUser = UserModel(userData: newUserData);
   }
 
@@ -256,11 +293,11 @@ class AccountManager {
       // already login !!!
       throw HycopUtils.getHycopException(defaultMessage: 'already logined !!!');
     }
+    String passwordSha1 = HycopUtils.stringToSha1(password);
     await initialize();
     Map<String, dynamic> userData = {};
-    await HycopFactory.account!.login(email, password, returnUserData: userData).catchError(
-        (error, stackTrace) => throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'AccountManager.loginByEmail Failed !!!'));
+    await HycopFactory.account!.login(email, passwordSha1, returnUserData: userData).catchError((error, stackTrace) =>
+        throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.loginByEmail Failed !!!'));
     _currentLoginUser = UserModel(userData: userData);
     await createSession();
   }
@@ -271,11 +308,12 @@ class AccountManager {
       throw HycopUtils.getHycopException(defaultMessage: 'already logined !!!');
     }
     await initialize();
+    String password = HycopUtils.stringToSha1(email); // set password from email
     Map<String, dynamic> userData = {};
     await HycopFactory.account!
-        .login(email, email, returnUserData: userData, accountSignUpType: accountSignUpType)
-        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'AccountManager.loginByEmail Failed !!!'));
+        .login(email, password, returnUserData: userData, accountSignUpType: accountSignUpType)
+        .catchError((error, stackTrace) =>
+            throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.loginByEmail Failed !!!'));
     _currentLoginUser = UserModel(userData: userData);
     await createSession();
   }
@@ -314,12 +352,10 @@ class AccountManager {
         await _googleSignIn?.disconnect();
         _googleSignIn = null;
         _googleAccount = null;
-        throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'loginByService error !!!');
+        throw HycopUtils.getHycopException(error: error, defaultMessage: 'loginByService error !!!');
       });
     } catch (error) {
-      throw HycopUtils.getHycopException(
-          error: error, defaultMessage: 'unknown google-account error !!!');
+      throw HycopUtils.getHycopException(error: error, defaultMessage: 'unknown google-account error !!!');
     }
   }
 
@@ -330,8 +366,7 @@ class AccountManager {
     }
     await initialize();
     await HycopFactory.account!.deleteAccount().catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'AccountManager.deleteAccount Failed !!!'));
+        throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.deleteAccount Failed !!!'));
     await logout();
   }
 
@@ -342,8 +377,7 @@ class AccountManager {
     }
     await initialize();
     await HycopFactory.account!.logout().catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'AccountManager.logout Failed !!!'));
+        throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.logout Failed !!!'));
     if (_currentLoginUser.accountSignUpType == AccountSignUpType.google) {
       logger.finest('_googleSignIn?.signOut()');
       await _googleSignIn?.signOut();
@@ -360,15 +394,13 @@ class AccountManager {
   static Future<void> resetPassword(String email) async {
     await initialize();
     await HycopFactory.account!.resetPassword(email).catchError((error, stackTrace) =>
-        throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'AccountManager.resetPassword Failed !!!'));
+        throw HycopUtils.getHycopException(error: error, defaultMessage: 'AccountManager.resetPassword Failed !!!'));
   }
 
   static Future<void> resetPasswordConfirm(String userId, String secret, String newPassword) async {
     await initialize();
-    await HycopFactory.account!
-        .resetPasswordConfirm(HycopUtils.midToKey(userId), secret, newPassword)
-        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
+    await HycopFactory.account!.resetPasswordConfirm(HycopUtils.midToKey(userId), secret, newPassword).catchError(
+        (error, stackTrace) => throw HycopUtils.getHycopException(
             error: error, defaultMessage: 'AccountManager.resetPassword Failed !!!'));
   }
 

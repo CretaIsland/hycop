@@ -25,16 +25,16 @@ class FirebaseAccount extends AbsAccount {
   Future<void> createAccount(Map<String, dynamic> createUserData) async {
     logger.finest('createAccount($createUserData)');
     // accountSignUpType
-    var accountSignUpType = AccountSignUpType.hycop;
-    if (createUserData['accountSignUpType'] == null) {
-      createUserData['accountSignUpType'] = accountSignUpType.index;
-    } else {
-      accountSignUpType = AccountSignUpType.fromInt(int.parse(createUserData['accountSignUpType'].toString()));
-      if (accountSignUpType == AccountSignUpType.none) {
-        logger.severe('invalid sign-up type !!!');
-        throw HycopUtils.getHycopException(defaultMessage: 'invalid sign-up type !!!');
-      }
-    }
+    // var accountSignUpType = AccountSignUpType.hycop;
+    // if (createUserData['accountSignUpType'] == null) {
+    //   createUserData['accountSignUpType'] = accountSignUpType.index;
+    // } else {
+    //   accountSignUpType = AccountSignUpType.fromInt(int.parse(createUserData['accountSignUpType'].toString()));
+    //   if (accountSignUpType == AccountSignUpType.none) {
+    //     logger.severe('invalid sign-up type !!!');
+    //     throw HycopUtils.getHycopException(defaultMessage: 'invalid sign-up type !!!');
+    //   }
+    // }
     // userId
     String userId = createUserData['userId'] ?? '';
     if (userId.isEmpty) {
@@ -49,25 +49,25 @@ class FirebaseAccount extends AbsAccount {
       throw HycopUtils.getHycopException(defaultMessage: 'email is empty !!!');
     }
     // password
-    String password = createUserData['password'] ?? '';
-    if (password.isEmpty && accountSignUpType == AccountSignUpType.hycop) {
-      // hycop-service need password !!!
-      logger.severe('password is empty !!!');
-      throw HycopUtils.getHycopException(defaultMessage: 'password is empty !!!');
-    }
-    String passwordSha1 = '';
-    if (accountSignUpType == AccountSignUpType.hycop) {
-      // hycop-service's password = sha1-hash of password
-      passwordSha1 = HycopUtils.stringToSha1(password);
-    } else {
-      // hycop-service's password = sha1-hash of email
-      passwordSha1 = HycopUtils.stringToSha1(email); //sha1.convert(bytes).toString();
-      password = passwordSha1;
-    }
-    logger.finest('password resetting to [$password] (${accountSignUpType.name}');
-    createUserData['password'] = passwordSha1;
+    // String password = createUserData['password'] ?? '';
+    // if (password.isEmpty && accountSignUpType == AccountSignUpType.hycop) {
+    //   // hycop-service need password !!!
+    //   logger.severe('password is empty !!!');
+    //   throw HycopUtils.getHycopException(defaultMessage: 'password is empty !!!');
+    // }
+    // String passwordSha1 = '';
+    // if (accountSignUpType == AccountSignUpType.hycop) {
+    //   // hycop-service's password = sha1-hash of password
+    //   passwordSha1 = HycopUtils.stringToSha1(password);
+    // } else {
+    //   // hycop-service's password = sha1-hash of email
+    //   passwordSha1 = HycopUtils.stringToSha1(email); //sha1.convert(bytes).toString();
+    //   password = passwordSha1;
+    // }
+    // createUserData['password'] = passwordSha1;
+    // logger.finest('password resetting to [$password] (${accountSignUpType.name}');
     logger.finest('createAccount($createUserData)');
-    HycopFactory.dataBase!.createData('hycop_users', 'user=$userId', createUserData).catchError((error, stackTrace) =>
+    await HycopFactory.dataBase!.createData('hycop_users', 'user=$userId', createUserData).catchError((error, stackTrace) =>
         throw HycopUtils.getHycopException(error: error, defaultMessage: 'loginByEmail Error !!!'));
     logger.finest('createAccount($createUserData) success');
   }
@@ -182,9 +182,8 @@ class FirebaseAccount extends AbsAccount {
   Future<void> login(String email, String password,
       {Map<String, dynamic>? returnUserData, AccountSignUpType accountSignUpType = AccountSignUpType.hycop}) async {
     logger.finest('loginByEmail($email, $password)');
-    String passwordSha1 = HycopUtils.stringToSha1(password);
     var getUserData = await HycopFactory.dataBase!
-        .queryData('hycop_users', where: {'email': email, 'password': passwordSha1}, orderBy: 'name')
+        .queryData('hycop_users', where: {'email': email, 'password': password}, orderBy: 'name')
         .catchError((error, stackTrace) =>
             throw HycopUtils.getHycopException(error: error, defaultMessage: 'not exist account(email:$email) !!!'));
     if (getUserData.isEmpty) {

@@ -163,18 +163,27 @@ class AppwriteStorage extends AbsStorage {
     logger.info('-----setBucketId()');
     String bucketId = HycopUtils.genBucketId(
         AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId);
-    final res = await _serverStorage.listBuckets();
-
-    for (var element in res.buckets) {
-      if (element.name == bucketId) {
-        myConfig!.serverConfig!.storageConnInfo.bucketId = element.$id;
+    // final res = await _serverStorage.listBuckets();
+    //
+    // for (var element in res.buckets) {
+    //   if (element.name == bucketId) {
+    //     myConfig!.serverConfig!.storageConnInfo.bucketId = element.$id;
+    //     return;
+    //   }
+    // }
+    try {
+      final res = await _serverStorage.getBucket(bucketId: bucketId);
+      if (res.name.isNotEmpty) {
+        myConfig!.serverConfig!.storageConnInfo.bucketId = bucketId;
         return;
       }
+    } catch (e) {
+      // not exist bucketId ==> createBucket
     }
     logger.info('-----try to create bucket=$bucketId');
     Bucket bucket = await _serverStorage.createBucket(
       bucketId: bucketId,
-      name: bucketId,
+      name: AccountManager.currentLoginUser.email,
       //skpark 20231031 new version 에서 permitisions format  이 바뀜.
       permissions: [
         Permission.read(Role.users()), //  이 부분을 user 로 바꿔야 할 가능성이 많다.

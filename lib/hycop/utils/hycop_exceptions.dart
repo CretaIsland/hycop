@@ -5,7 +5,12 @@ import 'dart:async';
 import '../../common/util/logger.dart';
 
 class HycopException implements Exception {
-  const HycopException({required this.message, this.code, this.exception, this.stackTrace});
+  const HycopException({
+    required this.message,
+    this.code,
+    this.exception,
+    this.stackTrace,
+  });
 
   final String message;
   final Exception? exception;

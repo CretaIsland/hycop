@@ -6,11 +6,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
-// import '../../common/util/config.dart';
+import '../../common/util/config.dart';
 // import '../../common/util/logger.dart';
 import '../enum/model_enums.dart';
 //import 'abs_database.dart';
 import 'hycop_exceptions.dart';
+import '../hycop_factory.dart';
 
 class HycopUtils {
   static String midToKey(String mid) {
@@ -77,23 +78,27 @@ class HycopUtils {
   }
 
   // <!--- new add
-  static HycopException getHycopException({dynamic error, required String defaultMessage}) {
+  static HycopException getHycopException({
+    dynamic error,
+    required String defaultMessage,
+    int? code,
+  }) {
     String defMsg;
     if (error is HycopException) {
       return error;
     } else if (error is AppwriteException) {
       AppwriteException ex = error;
-      defMsg = '${ex.message} (${ex.code})';
+      defMsg = '${ex.message} (${ex.code}:$defaultMessage)';
     } else if (error is FirebaseException) {
       FirebaseException ex = error;
-      defMsg = '${ex.message} (${ex.code})';
+      defMsg = '${ex.message} (${ex.code}:$defaultMessage)';
     } else if (error is Exception) {
       Exception ex = error;
       defMsg = '$defaultMessage (${ex.toString()})'; //ex.toString();
     } else {
       defMsg = defaultMessage;
     }
-    return HycopException(message: defMsg, exception: error);
+    return HycopException(message: defMsg, exception: error, code: code,);
   }
 
   //static HycopException throwHycopException({dynamic error, required String defaultMessage}) => throw getHycopException(defaultMessage: defaultMessage);
@@ -105,10 +110,20 @@ class HycopUtils {
   // 사용자의 email과 userId를 토대로 bucketId 생성
   static String genBucketId(String email, String userId) {
     String replaceEmail = email.replaceAll(RegExp(r'[!@#$%^&*(),.?":{}|<>]'), "-");
-    if(replaceEmail.length > 30) {
-      return "$replaceEmail.${userId.substring(0, 63-replaceEmail.length)}";
+    String bucketId = '$replaceEmail.$userId';
+    if (HycopFactory.serverType == ServerType.appwrite) {
+      // appwrite (bucketId is max 36 char)
+      if (bucketId.length > 36) {
+        return bucketId.substring(0, 36);
+      }
     }
-    return "$replaceEmail.$userId";
+    else {
+      // firebase
+      if(replaceEmail.length > 30) {
+        return "$replaceEmail.${userId.substring(0, 63-replaceEmail.length)}";
+      }
+    }
+    return bucketId;
   }
 
 }

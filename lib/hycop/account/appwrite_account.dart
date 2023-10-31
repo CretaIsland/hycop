@@ -22,18 +22,18 @@ class AppwriteAccount extends AbsAccount {
   Future<void> createAccount(Map<String, dynamic> createUserData) async {
     logger.finest('createAccount($createUserData)');
     // accountSignUpType
-    var accountSignUpType = AccountSignUpType.hycop;
-    if (createUserData['accountSignUpType'] == null) {
-      createUserData['accountSignUpType'] = accountSignUpType.index;
-    } else {
-      accountSignUpType =
+    // var accountSignUpType = AccountSignUpType.hycop;
+    // if (createUserData['accountSignUpType'] == null) {
+    //   createUserData['accountSignUpType'] = accountSignUpType.index;
+    // } else {
+      var accountSignUpType =
           AccountSignUpType.fromInt(int.parse(createUserData['accountSignUpType'].toString()));
-      if (accountSignUpType == AccountSignUpType.none) {
-        logger.severe('invalid sign-up type !!!');
-        throw HycopUtils.getHycopException(defaultMessage: 'invalid sign-up type !!!');
-      }
-    }
-    logger.info('accountSignUpType($accountSignUpType)');
+    //   if (accountSignUpType == AccountSignUpType.none) {
+    //     logger.severe('invalid sign-up type !!!');
+    //     throw HycopUtils.getHycopException(defaultMessage: 'invalid sign-up type !!!');
+    //   }
+    // }
+    // logger.info('accountSignUpType($accountSignUpType)');
     // userId
     String userId = createUserData['userId'] ?? '';
     if (userId.isEmpty) {
@@ -50,22 +50,22 @@ class AppwriteAccount extends AbsAccount {
     }
     // password
     String password = createUserData['password'] ?? '';
-    if (password.isEmpty && accountSignUpType == AccountSignUpType.hycop) {
-      // hycop-service need password !!!
-      logger.severe('password is empty !!!');
-      throw HycopUtils.getHycopException(defaultMessage: 'password is empty !!!');
-    }
-    String passwordSha1 = '';
-    if (accountSignUpType == AccountSignUpType.hycop) {
-      // hycop-service's password = sha1-hash of password
-      passwordSha1 = HycopUtils.stringToSha1(password);
-    } else {
-      // not hycop-service's password = sha1-hash of email
-      passwordSha1 = HycopUtils.stringToSha1(email);
-      password = passwordSha1;
-    }
-    createUserData['password'] = passwordSha1;
-    logger.finest('password resetting to [$password] (${accountSignUpType.name}');
+    // if (password.isEmpty && accountSignUpType == AccountSignUpType.hycop) {
+    //   // hycop-service need password !!!
+    //   logger.severe('password is empty !!!');
+    //   throw HycopUtils.getHycopException(defaultMessage: 'password is empty !!!');
+    // }
+    // String passwordSha1 = '';
+    // if (accountSignUpType == AccountSignUpType.hycop) {
+    //   // hycop-service's password = sha1-hash of password
+    //   passwordSha1 = HycopUtils.stringToSha1(password);
+    // } else {
+    //   // not hycop-service's password = sha1-hash of email
+    //   passwordSha1 = HycopUtils.stringToSha1(email);
+    //   password = passwordSha1;
+    // }
+    // createUserData['password'] = passwordSha1;
+    // logger.finest('password resetting to [$password] (${accountSignUpType.name}');
 
     String userForeignKey = const Uuid().v4().replaceAll('-', '');
     logger.finest(
@@ -102,21 +102,28 @@ class AppwriteAccount extends AbsAccount {
 
   @override
   Future<bool> isExistAccount(String email) async {
-    await HycopFactory.dataBase!
+    List result = await HycopFactory.dataBase!
         .simpleQueryData('hycop_users', name: 'email', value: email, orderBy: 'email')
         .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'not exist account(email:$email) !!!'))
-        .then((value) {
-      if (value.isEmpty) {
-        logger.finest('not exist account(email:$email) !!!');
-        return Future.value(false);
-      } else {
-        logger.finest('exist account(email:$email)');
-        return Future.value(true);
-      }
-    });
-    logger.finest('unknown error !!!');
-    return Future.value(false);
+            error: error, defaultMessage: 'not exist account(email:$email) !!!'));
+    //     .then((value) {
+    //   if (value.isEmpty) {
+    //     logger.finest('not exist account(email:$email) !!!');
+    //     return Future.value(false);
+    //   } else {
+    //     logger.finest('exist account(email:$email)');
+    //     return Future.value(true);
+    //   }
+    // });
+    // logger.finest('unknown error !!!');
+    // return Future.value(false);
+    if (result.isEmpty) {
+      logger.finest('not exist account(email:$email) !!!');
+      return false;
+    } else {
+      logger.finest('exist account(email:$email)');
+      return true;
+    }
   }
 
   @override
