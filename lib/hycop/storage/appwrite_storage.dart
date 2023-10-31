@@ -47,7 +47,8 @@ class AppwriteStorage extends AbsStorage {
   }
 
   @override
-  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes, {bool makeThumbnail = false, String folderName = "content/"}) async {
+  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes,
+      {bool makeThumbnail = false, String folderName = "content/"}) async {
     await initialize();
 
     String fileId =
@@ -57,7 +58,8 @@ class AppwriteStorage extends AbsStorage {
         .createFile(
             bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId,
             fileId: fileId,
-            file: InputFile(filename: fileName, contentType: fileType, bytes: fileBytes))
+            //skpark 20231031 InputFile --> InputFile.fromBytes
+            file: InputFile.fromBytes(filename: fileName, contentType: fileType, bytes: fileBytes))
         .onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
 
     return await getFileInfo(fileId);
@@ -92,7 +94,8 @@ class AppwriteStorage extends AbsStorage {
     return FileModel(
         fileId: res.$id,
         fileName: res.name,
-        fileView: await _storage!.getFileView(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: res.$id),
+        fileView: await _storage!.getFileView(
+            bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: res.$id),
         thumbnailUrl: "",
         fileMd5: res.signature,
         fileSize: res.sizeOriginal,
@@ -170,11 +173,17 @@ class AppwriteStorage extends AbsStorage {
     }
     logger.info('-----try to create bucket=$bucketId');
     Bucket bucket = await _serverStorage.createBucket(
-        bucketId: bucketId,
-        name: bucketId,
-        permission: 'bucket',
-        read: ['role:member'],
-        write: ['role:member']);
+      bucketId: bucketId,
+      name: bucketId,
+      //skpark 20231031 new version 에서 permitisions format  이 바뀜.
+      permissions: [
+        Permission.read(Role.users()), //  이 부분을 user 로 바꿔야 할 가능성이 많다.
+        Permission.write(Role.users()), // 이 부분을  user 로 바꿔야 할 가능서이 많다.
+      ],
+    );
+    // permission: 'bucket',
+    // read: ['role:member'],
+    // write: ['role:member']);
 
     logger.info('-----bucket newly created=${bucket.$id}');
 
