@@ -1,3 +1,5 @@
+## 0.2.29
+- Appwrite sdk, Dart-Appwrite sdk down grade
 ## 0.2.28
 - Appwrite realtime realTimeKey apply
 ## 0.2.27

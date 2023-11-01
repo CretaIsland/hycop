@@ -40,13 +40,12 @@ class AppwriteFunction extends AbsFunction {
     }
     logger.info('$functionId executed with $realParams');
 
-    //skpark 20231031  data --> body 로 바꿈.
-    // final result =
-    //     await functions!.createExecution(functionId: functionId, data: realParams, xasync: false);
     final result =
-        await functions!.createExecution(functionId: functionId, body: realParams, xasync: false);
-    logger.info('$functionId finished, ${result.responseStatusCode}, ${result.responseBody}');
+        await functions!.createExecution(functionId: functionId, data: realParams, xasync: false);
+    //final result =
+    //     await functions!.createExecution(functionId: functionId, body: realParams, xasync: false);
+    logger.info('$functionId finished, ${result.response}, ${result.statusCode}');
 
-    return result.responseBody;
+    return result.response;
   }
 }
