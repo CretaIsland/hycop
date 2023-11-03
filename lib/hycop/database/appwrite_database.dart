@@ -245,6 +245,13 @@ class AppwriteDatabase extends AbsDatabase {
     }
   }
 
+  void printQuery(String attrName, QueryValue value, List<dynamic> queryList) {
+    logger.info(attrName);
+    for (var ele in queryList) {
+      logger.info('${value.operType}, ${ele.toString()}');
+    }
+  }
+
   void queryMaker(String mid, QueryValue value, List<dynamic> queryList) {
     switch (value.operType) {
       case OperType.isEqualTo:
@@ -268,11 +275,12 @@ class AppwriteDatabase extends AbsDatabase {
       case OperType.arrayContains:
         queryList.add(Query.search(mid, value.value));
         break;
-      case OperType.arrayContainsAny: // equal 로 대체
-        queryList.add(Query.equal(mid, value.value));
+      case OperType.arrayContainsAny: // search 로 대체
+        queryList.add(Query.search(mid, value.value));
         break;
-      case OperType.whereIn: // equal 로 대체
+      case OperType.whereIn: // search 로 대체
         queryList.add(Query.equal(mid, value.value));
+        //queryList.add(Query.search(mid, value.value));
         break;
       case OperType.whereNotIn: // appwrite에서는 해당 쿼리가 없음
         assert(true);
@@ -307,6 +315,7 @@ class AppwriteDatabase extends AbsDatabase {
       List<dynamic> queryList = [];
       where.map((mid, value) {
         queryMaker(mid, value, queryList);
+        printQuery(mid, value, queryList);
         //queryList.add(Query.equal(mid, value));
         return MapEntry(mid, value);
       });

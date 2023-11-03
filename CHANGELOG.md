@@ -1,3 +1,5 @@
+## 0.3.11
+- appwrite queryMaker  arrayContainsAny --> search
 ## 0.3.1
 - appwrite packages version are fixed in pubspecs.yaml (appwrite is 11.0.0 & dart-appwrite is 11.0.0)
 ## 0.3.0
