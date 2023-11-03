@@ -184,14 +184,14 @@ class AppwriteStorage extends AbsStorage {
     Bucket bucket = await _serverStorage.createBucket(
       bucketId: bucketId,
       name: AccountManager.currentLoginUser.email,
-      permission: 'bucket',
-      read: ['role:member'],
-      write: ['role:member'],
+      // permission: 'bucket',
+      // read: ['role:member'],
+      // write: ['role:member'],
       //skpark 20231031 new version 에서 permitisions format  이 바뀜.
-      // permissions: [
-      //   Permission.read(Role.users()), //  이 부분을 user 로 바꿔야 할 가능성이 많다.
-      //   Permission.write(Role.users()), // 이 부분을  user 로 바꿔야 할 가능서이 많다.
-      // ],
+      permissions: [
+        Permission.read(Role.users()), //  이 부분을 user 로 바꿔야 할 가능성이 많다.
+        Permission.write(Role.users()), // 이 부분을  user 로 바꿔야 할 가능서이 많다.
+      ],
     );
 
     logger.info('-----bucket newly created=${bucket.$id}');

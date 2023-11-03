@@ -1,3 +1,5 @@
+## 0.3.0
+- firebase & appwrite packages are updated to newer versions
 ## 0.2.29
 - Appwrite sdk, Dart-Appwrite sdk down grade
 ## 0.2.28

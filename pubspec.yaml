@@ -1,6 +1,6 @@
 name: hycop
 description: Hycop Framework
-version: 0.2.29
+version: 0.3.0
 homepage: http://www.sqisoft.com
 
 environment:
@@ -19,32 +19,32 @@ dependencies:
   logging: ^1.0.2
   flutter_riverpod: ^1.0.4
   synchronized: ^3.0.0
-  uuid: ^3.0.5
+  uuid: ^4.1.0
   equatable: ^2.0.3
-  firebase_database: ^10.0.9
-  firebase: ^9.0.2
-  firebase_core: ^2.4.1
+  firebase_database: ^10.3.3
+  #firebase: ^9.0.2
+  firebase_core: ^2.21.0
   cloud_firestore: ^4.3.1
   cloud_firestore_web: ^3.2.1
-  appwrite: ^8.1.0
+  appwrite: ^11.0.0
   routemaster: ^1.0.1
   provider: ^6.0.1
   font_awesome_flutter: ^10.1.0
   shimmer: ^2.0.0
   random_string: ^2.3.1
   encrypt: ^5.0.1
-  firebase_storage: ^11.0.10
-  dart_appwrite: ^6.0.0
+  firebase_storage: ^11.4.1
+  dart_appwrite: ^10.0.0
   md5_file_checksum: ^1.0.3
   convert: ^3.0.2
   crypto: ^3.0.2
   flutter_dropzone: ^3.0.5
   socket_io_client: ^2.0.0
-  http: ^0.13.5
+  http: ^1.1.0
   extension_google_sign_in_as_googleapis_auth: ^2.0.7
   google_sign_in: ^5.4.2
   flutter_webrtc: ^0.9.35
-  firebase_core_platform_interface: 4.5.2
+  firebase_core_platform_interface: ^5.0.0
   mediasoup_client_flutter: ^0.8.5
   protoo_client: ^0.3.3
   flutter_bloc: ^7.0.1

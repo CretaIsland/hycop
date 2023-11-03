@@ -40,12 +40,12 @@ class AppwriteFunction extends AbsFunction {
     }
     logger.info('$functionId executed with $realParams');
 
-    final result =
-        await functions!.createExecution(functionId: functionId, data: realParams, xasync: false);
     //final result =
-    //     await functions!.createExecution(functionId: functionId, body: realParams, xasync: false);
-    logger.info('$functionId finished, ${result.response}, ${result.statusCode}');
+    //    await functions!.createExecution(functionId: functionId, data: realParams, xasync: false);
+    final result =
+         await functions!.createExecution(functionId: functionId, body: realParams, xasync: false);
+    logger.info('$functionId finished, ${result.responseBody}, ${result.responseStatusCode}');
 
-    return result.response;
+    return result.responseBody;
   }
 }
