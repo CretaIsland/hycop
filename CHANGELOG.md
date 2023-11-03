@@ -1,3 +1,5 @@
+## 0.3.12
+- appwrite queryMaker  arrayContains with double quote.
 ## 0.3.11
 - appwrite queryMaker  arrayContainsAny --> search
 ## 0.3.1

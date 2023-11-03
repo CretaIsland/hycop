@@ -273,10 +273,20 @@ class AppwriteDatabase extends AbsDatabase {
         queryList.add(Query.notEqual(mid, value.value));
         break;
       case OperType.arrayContains:
-        queryList.add(Query.search(mid, value.value));
+        if (value.value is String) {
+          String temp = '"${value.value}"'; // 쌍따옴표로 묶어 주어야 한다.
+          queryList.add(Query.search(mid, temp));
+        } else {
+          queryList.add(Query.search(mid, value.value));
+        }
         break;
       case OperType.arrayContainsAny: // search 로 대체
-        queryList.add(Query.search(mid, value.value));
+        if (value.value is String) {
+          String temp = '"${value.value}"'; // 쌍따옴표로 묶어 주어야 한다.
+          queryList.add(Query.search(mid, temp));
+        } else {
+          queryList.add(Query.search(mid, value.value));
+        }
         break;
       case OperType.whereIn: // search 로 대체
         queryList.add(Query.equal(mid, value.value));
