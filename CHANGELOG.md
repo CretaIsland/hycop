@@ -1,3 +1,5 @@
+## 0.3.13
+- appwrite realtime modify.
 ## 0.3.12
 - appwrite queryMaker  arrayContains with double quote.
 ## 0.3.11
