@@ -1,3 +1,11 @@
+## 0.3.17
+- appwrite dontRealTime option in save_manager, abs_database, abs_ex_model_manager, undo.
+## 0.3.16
+- appwrite dontRealTime option in save_manager, abs_database, abs_ex_model_manager, undo.
+## 0.3.15
+- appwrite dontRealTime option in save_manager, abs_database, abs_ex_model_manager, undo.
+## 0.3.14
+- appwrite dontRealTime option in save_manager, abs_database, abs_ex_model_manager, undo.
 ## 0.3.13
 - appwrite realtime modify.
 ## 0.3.12

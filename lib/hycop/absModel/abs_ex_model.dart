@@ -77,10 +77,10 @@ class AbsExModel extends Equatable {
     _updateTime = HycopUtils.dateTimeFromDB(map["updateTime"]);
     _createTime =
         map["createTime"] == null ? _updateTime : HycopUtils.dateTimeFromDB(map["createTime"]);
-    parentMid.set(map["parentMid"] ?? '', save: false, noUndo: true);
-    order.set(map["order"] ?? 1, save: false, noUndo: true);
-    hashTag.set(map["hashTag"] ?? '', save: false, noUndo: true);
-    isRemoved.set(map["isRemoved"] ?? false, save: false, noUndo: true);
+    parentMid.setDD(map["parentMid"] ?? '', save: false, noUndo: true);
+    order.setDD(map["order"] ?? 1, save: false, noUndo: true);
+    hashTag.setDD(map["hashTag"] ?? '', save: false, noUndo: true);
+    isRemoved.setDD(map["isRemoved"] ?? false, save: false, noUndo: true);
     String? rtKey = map["realTimeKey"];
     if (rtKey != null && rtKey.isNotEmpty) _realTimeKey = rtKey;
   }

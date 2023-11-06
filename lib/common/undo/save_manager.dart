@@ -13,12 +13,18 @@ import '../util/logger.dart';
 
 SaveManager? saveManagerHolder;
 
+class QueData {
+  final String mid;
+  final bool dontRealTime;
+  QueData({required this.mid, this.dontRealTime = false});
+}
+
 //자동 저장 , 변경이 있을 때 마다 저장되게 된다.
 class SaveManager extends ChangeNotifier {
   final Lock _datalock = Lock();
   final Lock _dataCreatedlock = Lock();
 
-  final Queue<String> _dataChangedQue = Queue<String>();
+  final Queue<QueData> _dataChangedQue = Queue<QueData>();
   final Queue<AbsExModel> _dataCreatedQue = Queue<AbsExModel>();
 
   final Map<String, Map<String, AbsExModelManager>> _managerMap = {};
@@ -94,16 +100,26 @@ class SaveManager extends ChangeNotifier {
       if (_defaultBook != null) {
         //print('shouldBookSave^^^^^^^^^^^^^^');
         _defaultBook!.setUpdateTime();
-        _dataChangedQue.add(_defaultBook!.mid);
+        _dataChangedQue.add(QueData(mid: _defaultBook!.mid));
       }
     }
   }
 
-  Future<void> pushChanged(String mid, String hint, {bool dontChangeBookTime = false}) async {
+  bool isContanedInQue(String mid) {
+    for (var ele in _dataChangedQue) {
+      if (mid == ele.mid) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Future<void> pushChanged(String mid, String hint,
+      {bool dontChangeBookTime = false, bool dontRealTime = false}) async {
     await _datalock.synchronized(() async {
-      if (!_dataChangedQue.contains(mid)) {
+      if (!isContanedInQue(mid)) {
         logger.info('changed:$mid, via $hint');
-        _dataChangedQue.add(mid);
+        _dataChangedQue.add(QueData(mid: mid, dontRealTime: dontRealTime));
         notifyListeners();
         if (dontChangeBookTime == false) {
           logger.finest('shouldBookSave');
@@ -127,15 +143,15 @@ class SaveManager extends ChangeNotifier {
       await _datalock.synchronized(() async {
         if (_dataChangedQue.isNotEmpty) {
           while (_dataChangedQue.isNotEmpty) {
-            final mid = _dataChangedQue.first;
+            final data = _dataChangedQue.first;
             // Save here !!!!
             //('saveTimer $mid');
-            Map<String, AbsExModelManager>? managerMap = _getManager(mid);
+            Map<String, AbsExModelManager>? managerMap = _getManager(data.mid);
             if (managerMap != null) {
               //for (AbsExModelManager manager in managerMap.values) {
               for (String key in managerMap.keys) {
                 AbsExModelManager? manager = managerMap[key];
-                manager?.setToDBByMid(mid);
+                manager?.setToDBByMid(data.mid, dontRealTime: data.dontRealTime);
                 //print('$mid saved, managerKey=$key');
                 _somethingSaved = true;
               }

@@ -83,16 +83,19 @@ abstract class AbsDatabase {
   Future<void> createData(String collectionId, String mid, Map<dynamic, dynamic> data);
   Future<void> removeData(String collectionId, String mid);
 
-  Future<void> setModel(String collectionId, AbsExModel model) async {
+  Future<void> setModel(String collectionId, AbsExModel model, {bool dontRealTime = false}) async {
     try {
       await setData(collectionId, model.mid, model.toMap());
       // Delta 를 저장한다.
-      HycopFactory.realtime!.setDelta(directive: 'set', mid: model.mid, delta: model.toMap());
+      if (!dontRealTime) {
+        HycopFactory.realtime!.setDelta(directive: 'set', mid: model.mid, delta: model.toMap());
+      }
     } catch (e) {
       logger.severe("setModel(set) error", e);
       throw HycopException(message: "setModel(set) error", exception: e as Exception);
     }
   }
+
 
   Future<void> createModel(String collectionId, AbsExModel model) async {
     try {

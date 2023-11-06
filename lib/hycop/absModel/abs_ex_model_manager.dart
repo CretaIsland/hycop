@@ -110,10 +110,10 @@ abstract class AbsExModelManager extends ChangeNotifier {
     }
   }
 
-  Future<void> setToDB(AbsExModel model) async {
+  Future<void> setToDB(AbsExModel model, {bool dontRealTime = false}) async {
     try {
       //await HycopFactory.dataBase!.setData(collectionId, model.mid, model.toMap());
-      await HycopFactory.dataBase!.setModel(collectionId, model);
+      await HycopFactory.dataBase!.setModel(collectionId, model, dontRealTime: dontRealTime);
     } catch (e) {
       logger.severe('databaseError', e);
       throw HycopException(message: 'databaseError', exception: e as Exception);
@@ -130,13 +130,13 @@ abstract class AbsExModelManager extends ChangeNotifier {
     }
   }
 
-  Future<void> setToDBByMid(String mid) async {
+  Future<void> setToDBByMid(String mid, {bool dontRealTime = false}) async {
     try {
       //await HycopFactory.dataBase!.setData(collectionId, model.mid, model.toMap());
       AbsExModel? model = getModel(mid);
 
       if (model != null) {
-        await HycopFactory.dataBase!.setModel(collectionId, model);
+        await HycopFactory.dataBase!.setModel(collectionId, model, dontRealTime: dontRealTime);
       } else {
         logger.finest('model not found($collectionId, $mid) in this manager');
       }

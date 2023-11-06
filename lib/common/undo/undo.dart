@@ -33,10 +33,29 @@ class UndoAble<T> {
     logger.finest('value mid = $_mid');
   }
 
+  void setDD(T val,
+      {bool save = true,
+      bool noUndo = false,
+      bool dontChangeBookTime = false,
+      void Function(T val)? doComplete,
+      void Function(T val)? undoComplete}) {
+    // set Dont Delta 라는 뜻, Delta 를 저장하지 않는  set
+    set(
+      val,
+      save: save,
+      noUndo: noUndo,
+      dontChangeBookTime: dontChangeBookTime,
+      dontRealTime: true,
+      doComplete: doComplete,
+      undoComplete: undoComplete,
+    );
+  }
+
   void set(T val,
       {bool save = true,
       bool noUndo = false,
       bool dontChangeBookTime = false,
+      bool dontRealTime = false,
       void Function(T val)? doComplete,
       void Function(T val)? undoComplete}) {
     if (val == _value) return; // 값이 동일하다면, 할 필요가 없다.
@@ -45,8 +64,12 @@ class UndoAble<T> {
       _value = val;
       if (save && saveManagerHolder != null && _mid.isNotEmpty) {
         //print('noUndo pushChanged $hint');
-        saveManagerHolder!
-            .pushChanged(_mid, 'execute $hint', dontChangeBookTime: dontChangeBookTime);
+        saveManagerHolder!.pushChanged(
+          _mid,
+          'execute $hint',
+          dontChangeBookTime: dontChangeBookTime,
+          dontRealTime: dontRealTime,
+        );
       }
       return;
     }
