@@ -1,3 +1,5 @@
+## 0.3.18
+- saveManager,  Dont write delta when Book change time changes. 
 ## 0.3.17
 - appwrite dontRealTime option in save_manager, abs_database, abs_ex_model_manager, undo.
 ## 0.3.16

@@ -100,7 +100,7 @@ class SaveManager extends ChangeNotifier {
       if (_defaultBook != null) {
         //print('shouldBookSave^^^^^^^^^^^^^^');
         _defaultBook!.setUpdateTime();
-        _dataChangedQue.add(QueData(mid: _defaultBook!.mid));
+        _dataChangedQue.add(QueData(mid: _defaultBook!.mid, dontRealTime: true));
       }
     }
   }
