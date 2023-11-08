@@ -28,35 +28,38 @@ class SocketClient {
   }
 
   Future<void> connectServer(String socketRoomId) async {
+    try {
+      roomId = socketRoomId;
 
-    roomId = socketRoomId;
-
-    socket.connect().onError((error) => logger.severe("error during connect socket server >> $error"));
-    startHealthCheckTimer();
-    socket.emit("join", {
-      "roomId" : roomId,
-      "userId" : AccountManager.currentLoginUser.email,
-      "userName" : AccountManager.currentLoginUser.name
-    });
+      socket.connect().onError((error) => logger.severe("error during connect socket server >> $error"));
+      startHealthCheckTimer();
+      socket.emit("join", {
+        "roomId" : roomId,
+        "userId" : AccountManager.currentLoginUser.email,
+        "userName" : AccountManager.currentLoginUser.name
+      });
     
 
-    socket.on("connect", (data) {
-    });
-    socket.on("disconnect", (data) {
-      socket.dispose();
-    });
-    socket.on("receiveOtherInfo", (data) {
-      mouseTracerHolder!.receiveOtherInfo(data["userList"]);
-    });
-    socket.on("receiveNewInfo", (data) {
-      mouseTracerHolder!.receiveNewInfo(data["userInfo"]);
-    }); 
-    socket.on("leaveUser", (data) {
-      mouseTracerHolder!.leaveUser(data["socketId"]);
-    }); 
-    socket.on("updateCursor", (data) {
-      mouseTracerHolder!.updateCursor(data);
-    });
+      socket.on("connect", (data) {
+      });
+      socket.on("disconnect", (data) {
+        socket.dispose();
+      }); 
+      socket.on("receiveOtherInfo", (data) {
+        mouseTracerHolder!.receiveOtherInfo(data["userList"]);
+      });
+      socket.on("receiveNewInfo", (data) {
+        mouseTracerHolder!.receiveNewInfo(data["userInfo"]);
+      }); 
+      socket.on("leaveUser", (data) {
+        mouseTracerHolder!.leaveUser(data["socketId"]);
+      }); 
+      socket.on("updateCursor", (data) {
+        mouseTracerHolder!.updateCursor(data);
+      });
+    } catch (error) {
+      logger.severe(error);
+    }
   }
 
   void moveCursor(double dx, double dy) {

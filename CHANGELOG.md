@@ -1,3 +1,5 @@
+## 0.3.21
+- fix hycop thumbnail logic.
 ## 0.3.20
 - appwrite realtime ping for every minitue.
 ## 0.3.19

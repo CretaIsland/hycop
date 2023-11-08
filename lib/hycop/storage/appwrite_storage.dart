@@ -19,7 +19,7 @@ class AppwriteStorage extends AbsStorage {
 
   Storage? _storage;
   late dart_appwrite.Storage _awStorage;
-  String fileUrl = "${myConfig!.serverConfig!.storageConnInfo.storageURL}/storage/buckets/{BUCKET_ID}/files/{FILE_ID}/view?project=${myConfig!.serverConfig!.storageConnInfo.projectId}}";
+  String fileUrl = "${myConfig!.serverConfig!.storageConnInfo.storageURL}/storage/buckets/{BUCKET_ID}/files/{FILE_ID}/view?project=${myConfig!.serverConfig!.storageConnInfo.projectId}";
 
 
   @override
@@ -51,7 +51,7 @@ class AppwriteStorage extends AbsStorage {
       } else {
         fileUsage = "etc-";
       }
-    } else if (fileUsage == "profile") {
+    } else if (fileUsage == "profile/") {
       fileUsage = "pic-";
     } else { //banner
       fileUsage = "ad-";
@@ -104,7 +104,7 @@ class AppwriteStorage extends AbsStorage {
 
       var targetFile = await _storage!.getFile(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: fileId);
       try {
-        var thumbnailFile = await _storage!.getFile(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: "cov${fileId.substring(4)}");
+        var thumbnailFile = await _storage!.getFile(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: "cov-${fileId.substring(4)}");
         return FileModel(
           id: targetFile.$id,
           name: targetFile.name,
@@ -118,7 +118,7 @@ class AppwriteStorage extends AbsStorage {
           id: targetFile.$id,
           name: targetFile.name,
           url: fileUrl.replaceAll("{BUCKET_ID}", myConfig!.serverConfig!.storageConnInfo.bucketId).replaceAll("{FILE_ID}", targetFile.$id),
-          thumbnailUrl: "",
+          thumbnailUrl: fileUrl.replaceAll("{BUCKET_ID}", myConfig!.serverConfig!.storageConnInfo.bucketId).replaceAll("{FILE_ID}", targetFile.$id),
           size: targetFile.sizeOriginal,
           contentType: ContentsType.getContentTypes(targetFile.mimeType)
         );
@@ -159,7 +159,7 @@ class AppwriteStorage extends AbsStorage {
             id: targetFile.$id, 
             name: targetFile.name, 
             url: fileUrl.replaceAll("{BUCKET_ID}", myConfig!.serverConfig!.storageConnInfo.bucketId).replaceAll("{FILE_ID}", targetFile.$id), 
-            thumbnailUrl: "", 
+            thumbnailUrl: fileUrl.replaceAll("{BUCKET_ID}", myConfig!.serverConfig!.storageConnInfo.bucketId).replaceAll("{FILE_ID}", targetFile.$id), 
             size: targetFile.sizeOriginal, 
             contentType: ContentsType.getContentTypes(targetFile.mimeType)
           ));

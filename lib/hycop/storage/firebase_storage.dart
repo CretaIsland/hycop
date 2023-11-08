@@ -21,8 +21,6 @@ class FirebaseAppStorage extends AbsStorage {
   FirebaseStorage? _storage;
 
 
-
-
   @override
   Future<void> initialize() async {
     if(AbsStorage.fbStorageConn == null) {
@@ -118,7 +116,7 @@ class FirebaseAppStorage extends AbsStorage {
         .child("${myConfig!.serverConfig!.storageConnInfo.bucketId}content/thumbnail/${fileId.substring(fileId.lastIndexOf("/")+1, fileId.lastIndexOf("."))}.jpg")
         .getDownloadURL().onError((error, stackTrace) async {
           logger.severe(error);
-          return "";
+          return targetFileUrl;
         });
 
       return FileModel(
@@ -149,18 +147,18 @@ class FirebaseAppStorage extends AbsStorage {
       final targetFileList = await _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$search").listAll();
       for(var targetFile in targetFileList.items) {
         var targetFileMetaData = await targetFile.getMetadata();
+        var targetFileUrl = await targetFile.getDownloadURL();
         var targetFileThumbnail = await _storage!.ref()
           .child("${myConfig!.serverConfig!.storageConnInfo.bucketId}content/thumbnail/${targetFile.fullPath.substring(targetFile.fullPath.lastIndexOf("/")+1, targetFile.fullPath.lastIndexOf("."))}.jpg")
           .getDownloadURL().onError((error, stackTrace) {
             logger.severe(error);
-            return "";
+            return targetFileUrl;
           });
-
 
         fileList.add(FileModel(
           id: targetFile.fullPath,
           name: targetFileMetaData.name,
-          url: await targetFile.getDownloadURL(),
+          url: targetFileUrl,
           thumbnailUrl: targetFileThumbnail,
           size: targetFileMetaData.size!,
           contentType: ContentsType.getContentTypes(targetFileMetaData.contentType!)
