@@ -12,6 +12,7 @@ import 'abs_realtime.dart';
 class AppwriteRealtime extends AbsRealtime {
   StreamSubscription<dynamic>? realtimeListener;
   RealtimeSubscription? subscription;
+  Function? funa;
 
   @override
   Future<void> initialize() async {
@@ -77,46 +78,62 @@ class AppwriteRealtime extends AbsRealtime {
     String ch = 'databases.$dbId.collections.hycop_delta.documents';
     logger.info('---- RealTime subscription !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ----');
     subscription = Realtime(AbsDatabase.awDBConn!).subscribe([ch]);
-    realtimeListener = subscription!.stream.listen((event) {
-      // appwrite 는 아마도 lastUpdateTime 을 기록할 필요가 없는 것으로 보인다.
-      // 어차피 새로워진 것만 도착하기 때문인것 같다.
-      // 여기서 realTimeKey 가 다르면 버린다.
-      logger.info('event myinfo=${AbsRealtime.myDeviceId}, $realTimeKey');
-      String? eventRealTimeKey = event.payload['realTimeKey'];
-      if (eventRealTimeKey == null) {
-        return;
-      }
-      if (eventRealTimeKey != realTimeKey) {
-        logger.info('!!! realTimeKey defferent !!! $eventRealTimeKey != $realTimeKey');
-        return;
-      }
-      String? deviceId = event.payload['deviceId'];
-      if (deviceId == null) {
-        logger.info('!!! deviceId is null !!! ');
-        return;
-      }
-      if (deviceId == AbsRealtime.myDeviceId) {
-        logger.info('!!! deviceId same !!! $deviceId');
-        return;
-      }
-      //  최근 15초 이내의 데이터만 받는다.
-      String seconsAgo = _getTimeStrSecondsAgo(15);
-      String? updateTime = event.payload['updateTime'];
-      if (updateTime == null) {
-        logger.info('!!! updateTime is null !!! ');
-        return;
-      }
-      if (updateTime.compareTo(seconsAgo) < 0) {
-        logger.info('!!! old data  !!! $updateTime < $seconsAgo');
-        return;
-      }
-
-      logger.info('event.payload=${event.payload}');
-      logger.info('---- matched !!!  ----');
-      logger.info('event received=$deviceId, $eventRealTimeKey');
-      processEvent(event.payload);
-    });
+    realtimeListener = subscription!.stream.listen(
+      _listenCallback,
+      // onDone: () {
+      //   logger.info('realtime listen is done');
+      // },
+      onError: (error, stackTrace) {
+        // 에러 객체와 스택 트레이스 모두를 처리하는 함수를 사용
+        logger.severe('realtime listen is fail : $error, $stackTrace');
+      },
+    );
     //});
+  }
+
+  void _listenCallback(RealtimeMessage event) {
+    // appwrite 는 아마도 lastUpdateTime 을 기록할 필요가 없는 것으로 보인다.
+    // 어차피 새로워진 것만 도착하기 때문인것 같다.
+    // 여기서 realTimeKey 가 다르면 버린다.
+    logger.info('event myinfo=${AbsRealtime.myDeviceId}, $realTimeKey');
+    String? directive = event.payload['directive'];
+    if (directive == null || directive == "ping") {
+      logger.info("It's ping");
+      return;
+    }
+    String? eventRealTimeKey = event.payload['realTimeKey'];
+    if (eventRealTimeKey == null) {
+      return;
+    }
+    if (eventRealTimeKey != realTimeKey) {
+      logger.info('!!! realTimeKey defferent !!! $eventRealTimeKey != $realTimeKey');
+      return;
+    }
+    String? deviceId = event.payload['deviceId'];
+    if (deviceId == null) {
+      logger.info('!!! deviceId is null !!! ');
+      return;
+    }
+    if (deviceId == AbsRealtime.myDeviceId) {
+      logger.info('!!! deviceId same !!! $deviceId');
+      return;
+    }
+    //  최근 15초 이내의 데이터만 받는다.
+    String seconsAgo = _getTimeStrSecondsAgo(15);
+    String? updateTime = event.payload['updateTime'];
+    if (updateTime == null) {
+      logger.info('!!! updateTime is null !!! ');
+      return;
+    }
+    if (updateTime.compareTo(seconsAgo) < 0) {
+      logger.info('!!! old data  !!! $updateTime < $seconsAgo');
+      return;
+    }
+
+    logger.info('event.payload=${event.payload}');
+    logger.info('---- matched !!!  ----');
+    logger.info('event received=$deviceId, $eventRealTimeKey');
+    processEvent(event.payload);
   }
 
   @override
