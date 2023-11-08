@@ -1,262 +1,212 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+
+import 'package:http/browser_client.dart';
 import 'package:http/http.dart' as http;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:hycop/common/util/config.dart';
 import 'package:hycop/common/util/logger.dart';
 import 'package:hycop/hycop/account/account_manager.dart';
-// import 'package:logging/logging.dart';
+import 'package:hycop/hycop/enum/model_enums.dart';
+import 'package:hycop/hycop/model/file_model.dart';
+import 'package:hycop/hycop/storage/abs_storage.dart';
+import 'package:hycop/hycop/utils/hycop_utils.dart';
 
-import '../../common/util/config.dart';
-import '../../hycop/utils/hycop_exceptions.dart';
-import '../enum/model_enums.dart';
-import '../../hycop/storage/abs_storage.dart';
-//import '../hycop_factory.dart';
-import '../model/file_model.dart';
-
-// ignore: depend_on_referenced_packages
-import 'package:firebase_core/firebase_core.dart';
-// ignore: depend_on_referenced_packages
-import 'package:firebase_storage/firebase_storage.dart';
-
-import '../utils/hycop_utils.dart';
 
 class FirebaseAppStorage extends AbsStorage {
+
+
   FirebaseStorage? _storage;
+
+
+
 
   @override
   Future<void> initialize() async {
-    if (AbsStorage.fbStorageConn == null) {
-      //await HycopFactory.initAll();
+    if(AbsStorage.fbStorageConn == null) {
       logger.info("storage initialize");
-
       AbsStorage.setFirebaseApp(await Firebase.initializeApp(
-          name: 'storage',
-          options: FirebaseOptions(
-              apiKey: myConfig!.serverConfig!.storageConnInfo.apiKey,
-              appId: myConfig!.serverConfig!.storageConnInfo.appId,
-              messagingSenderId: myConfig!.serverConfig!.storageConnInfo.messagingSenderId,
-              projectId: myConfig!.serverConfig!.storageConnInfo.projectId,
-              storageBucket: myConfig!.serverConfig!.storageConnInfo.storageURL)));
+        name: 'storage',
+        options: FirebaseOptions(
+          apiKey: myConfig!.serverConfig!.storageConnInfo.apiKey,
+          appId: myConfig!.serverConfig!.storageConnInfo.appId,
+          messagingSenderId: myConfig!.serverConfig!.storageConnInfo.messagingSenderId,
+          projectId: myConfig!.serverConfig!.storageConnInfo.projectId,
+          storageBucket: myConfig!.serverConfig!.storageConnInfo.storageURL
+        )
+      ));
     }
-
-    // ignore: prefer_conditional_assignment, unnecessary_null_comparison
-    if (_storage == null) {
+    if(_storage == null) {
       logger.info("_storage init");
       _storage = FirebaseStorage.instanceFor(app: AbsStorage.fbStorageConn);
     }
   }
-
+ 
+ 
   @override
-  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes, {bool makeThumbnail = true, String folderName = "content/"}) async {
+  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes, {bool makeThumbnail = false, String fileUsage = "content"}) async {
     await initialize();
 
-    fileName = fileName.replaceAll(" ", "_");
-    if(folderName == "content/") {
+    fileName = fileName.replaceAll(RegExp(r'[^a-zA-Z0-9가-힣.]'), "_");
+    String folderName = "";
+    if(fileUsage == "content") {
       if(fileType.contains("image")) {
-        folderName = "${folderName}image/";
+        folderName = "$fileUsage/image/";
       } else if(fileType.contains("video")) {
-        folderName = "${folderName}video/";
+        folderName = "$fileUsage/video/";
       } else {
-        folderName = "${folderName}etc/";
+        folderName = "$fileUsage/etc/";
       }
     }
-
-    final uploadFile = _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$folderName$fileName");
 
     try {
-      FileModel uploadedFile = await getFileInfo(uploadFile.fullPath);
-      if(uploadedFile.fileSize != fileBytes.length) { // 기존에 있는 파일과 같은 파일인지 검사
-        throw "diffError";
+      var targetFile = _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$folderName$fileName");
+      var uploadFile = await getFile(targetFile.fullPath);
+
+
+      if(uploadFile != null) {
+        if(uploadFile.thumbnailUrl == "" && (makeThumbnail || fileType.contains("video") || fileType.contains("pdf"))) {
+          await createThumbnail(folderName, fileName, fileType);
+        }
+        return await getFile(targetFile.fullPath);
       } else {
-        if(makeThumbnail && (fileType.contains("video") || (fileType.contains("image") && !fileType.contains("png")) || fileType.contains("pdf")) && uploadedFile.thumbnailUrl == "") {
-          await createThumbnail(folderName, fileName, fileType);
-          return await getFileInfo(uploadFile.fullPath);
-        }
-        return uploadedFile;
-      }
-    } catch (getError) { 
-      try {
-        await uploadFile.putData(fileBytes).onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
-        await uploadFile.updateMetadata(SettableMetadata(contentType: fileType)).onError((error, stackTrace) 
-          => throw HycopException(message: stackTrace.toString()) 
-        );
-
-        // 썸네일 생성 여부가 true라면
-        if(makeThumbnail && (fileType.contains("video") || (fileType.contains("image") && !fileType.contains("png")) || fileType.contains("pdf"))) {
+        await targetFile.putData(fileBytes);
+        await targetFile.updateMetadata(SettableMetadata(contentType: fileType));
+        if(makeThumbnail || fileType.contains("video") || fileType.contains("pdf")) {
           await createThumbnail(folderName, fileName, fileType);
         }
-        return await getFileInfo("${myConfig!.serverConfig!.storageConnInfo.bucketId}$folderName$fileName");
-      } catch (uploadError) {
-        return null;
+        return await getFile(targetFile.fullPath);
       }
+    } catch (error) {
+      logger.severe(error);
     }
-
+    return null;
   }
 
-  @override
-  Future<Uint8List> downloadFile(String fileId) async {
-    await initialize();
-
-    Uint8List? fileBytes = await _storage!
-        .ref()
-        .child(fileId)
-        .getData()
-        .onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
-
-    return fileBytes!;
-  }
 
   @override
   Future<void> deleteFile(String fileId) async {
     await initialize();
-
-    await _storage!
-        .ref()
-        .child(fileId)
-        .delete()
-        .onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
+    await _storage!.ref().child(fileId).delete().onError((error, stackTrace) => logger.severe(error));
   }
 
+
   @override
-  Future<FileModel> getFileInfo(String fileId) async {
-    await initialize();
-
-    final res = await _storage!.ref().child(fileId).getMetadata().onError((error, stackTrace) {
-      throw HycopException(message: stackTrace.toString());
-    });
-    String fileView = await _storage!.ref().child(res.fullPath).getDownloadURL();
-
-
-    // 이미지 파일이 png라면
-    if(res.contentType!.contains("png")) {
-      return FileModel(
-        fileId: res.fullPath,
-        fileName: res.name,
-        fileView: fileView,
-        thumbnailUrl: fileView,
-        fileMd5: res.md5Hash!,
-        fileSize: res.size!,
-        fileType: ContentsType.getContentTypes(res.contentType!));
+  Future<Uint8List?> getFileBytes(String fileId) async {
+    try {
+      await initialize();
+      return await _storage!.ref().child(fileId).getData();
+    } catch (error) {
+      logger.severe(error);
+      return null;
     }
-
-    if(res.contentType!.contains("pdf") || res.contentType!.contains("video") || (res.contentType!.contains("image"))) {
-      String fileName = fileId.substring(fileId.lastIndexOf("/")+1, fileId.lastIndexOf("."));
-      final thumbnailRes = await _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}content/thumbnail/$fileName.jpg").getMetadata().onError((error, stackTrace) async {
-        return FullMetadata({"fullPath" : ""});
-      });
-
-      return FileModel(
-        fileId: res.fullPath,
-        fileName: res.name,
-        fileView: fileView,
-        thumbnailUrl: thumbnailRes.fullPath == "" ? "" : await _storage!.ref().child(thumbnailRes.fullPath).getDownloadURL(),
-        fileMd5: res.md5Hash!,
-        fileSize: res.size!,
-        fileType: ContentsType.getContentTypes(res.contentType!));
-    }
-  
-    return FileModel(
-      fileId: res.fullPath,
-      fileName: res.name,
-      fileView: fileView,
-      thumbnailUrl: "",
-      fileMd5: res.md5Hash!,
-      fileSize: res.size!,
-      fileType: ContentsType.getContentTypes(res.contentType!));
-   
   }
 
+
   @override
-  Future<List<FileModel>> getFileInfoList(
-      {String? search,
-      int? limit,
-      int? offset,
-      String? cursor,
-      String? cursorDirection = "after",
-      String? orderType = "DESC"}) async {
-    List<FileModel> fileInfoList = [];
+  Future<FileModel?> getFile(String fileId) async {
+    try {
+      await initialize();
 
-    await initialize();
+      var targetFile = _storage!.ref().child(fileId);
+      var targetFileMetaData = await targetFile.getMetadata();
+      var targetFileUrl = await targetFile.getDownloadURL();
 
-    final res = await _storage!
-        .ref()
-        .child(myConfig!.serverConfig!.storageConnInfo.bucketId)
-        .list(ListOptions(maxResults: limit))
-        .onError((error, stackTrace) {
-      throw HycopException(
-          message:
-              '${myConfig!.serverConfig!.storageConnInfo.bucketId}:${error.toString()},\n${stackTrace.toString()}');
-    });
-
-    for (var element in res.items) {
-      var fileData = await element.getMetadata();
-      String fileView = await _storage!.ref().child(fileData.fullPath).getDownloadURL();
-
-
-      // 파일이 썸네일을 가지는 형태일 때
-      if(fileData.contentType!.contains("png")) {
-        fileInfoList.add(FileModel(
-          fileId: fileData.fullPath,
-          fileName: fileData.name,
-          fileView: fileView,
-          thumbnailUrl: fileView,
-          fileMd5: fileData.md5Hash!,
-          fileSize: fileData.size!,
-          fileType: ContentsType.getContentTypes(fileData.contentType!)));
-        continue;
-      } else if(fileData.contentType!.contains("pdf") || fileData.contentType!.contains("video") || (fileData.contentType!.contains("image") && !fileData.contentType!.contains("png"))) {
-        String fileName = fileData.fullPath.substring(fileData.fullPath.lastIndexOf("/")+1, fileData.fullPath.lastIndexOf("."));
-        
-        final thumbnailRes = await _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}content/thumbnail/$fileName.jpg").getMetadata().onError((error, stackTrace) async {
-          return FullMetadata({"fullPath" : ""});
+      var fileThumbnailUrl = await _storage!.ref()
+        .child("${myConfig!.serverConfig!.storageConnInfo.bucketId}content/thumbnail/${fileId.substring(fileId.lastIndexOf("/")+1, fileId.lastIndexOf("."))}.jpg")
+        .getDownloadURL().onError((error, stackTrace) async {
+          logger.severe(error);
+          return "";
         });
 
-        fileInfoList.add(FileModel(
-          fileId: fileData.fullPath,
-          fileName: fileData.name,
-          fileView: fileView,
-          thumbnailUrl: thumbnailRes.fullPath == "" ? "" : await _storage!.ref().child(thumbnailRes.fullPath).getDownloadURL(),
-          fileMd5: fileData.md5Hash!,
-          fileSize: fileData.size!,
-          fileType: ContentsType.getContentTypes(fileData.contentType!)));
-
-      } else {
-        fileInfoList.add(FileModel(
-          fileId: fileData.fullPath,
-          fileName: fileData.name,
-          fileView: fileView,
-          thumbnailUrl: "",
-          fileMd5: fileData.md5Hash!,
-          fileSize: fileData.size!,
-          fileType: ContentsType.getContentTypes(fileData.contentType!)));
-      }
+      return FileModel(
+        id: targetFileMetaData.fullPath,
+        name: targetFileMetaData.name,
+        url: targetFileUrl,
+        thumbnailUrl: fileThumbnailUrl,
+        size: targetFileMetaData.size!,
+        contentType: ContentsType.getContentTypes(targetFileMetaData.contentType!)
+      );
+    } catch(error) {
+      logger.severe(error);
+      return null;
     }
-    return fileInfoList;
   }
+
+
+
 
   @override
-  Future<void> setBucketId() async {
-    // await initialize();
-    myConfig!.serverConfig!.storageConnInfo.bucketId =
-        "${HycopUtils.genBucketId(AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId)}/";
-  }
+  Future<List<FileModel>?> getFileList({String search = "", int limit = 99, int? offset, String? cursor, String cursorDirection = "after", String orderType = "DESC"}) async {
+    List<FileModel> fileList = [];
 
-  Future<void> createThumbnail(String folderName, String fileName, String fileType) async {
     try {
-      await http.post(
-        Uri.parse("https://devcreta.com:444/createThumbnail"),
-        headers: {"Content-type": "application/json"},
+      await initialize();
+
+      // search 파라미터에는 조회하고 싶은 폴더명 입력 (ex. content/image/)
+      final targetFileList = await _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$search").listAll();
+      for(var targetFile in targetFileList.items) {
+        var targetFileMetaData = await targetFile.getMetadata();
+        var targetFileThumbnail = await _storage!.ref()
+          .child("${myConfig!.serverConfig!.storageConnInfo.bucketId}content/thumbnail/${targetFile.fullPath.substring(targetFile.fullPath.lastIndexOf("/")+1, targetFile.fullPath.lastIndexOf("."))}.jpg")
+          .getDownloadURL().onError((error, stackTrace) {
+            logger.severe(error);
+            return "";
+          });
+
+
+        fileList.add(FileModel(
+          id: targetFile.fullPath,
+          name: targetFileMetaData.name,
+          url: await targetFile.getDownloadURL(),
+          thumbnailUrl: targetFileThumbnail,
+          size: targetFileMetaData.size!,
+          contentType: ContentsType.getContentTypes(targetFileMetaData.contentType!)
+          )
+        );
+      }
+      return fileList;
+    } catch (error) {
+      logger.severe(error);
+      return null;
+    }
+  }
+ 
+ 
+  @override
+  Future<void> setBucket() async {
+    myConfig!.serverConfig!.storageConnInfo.bucketId = "${HycopUtils.genBucketId(AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId)}/";
+  }
+ 
+ 
+  @override
+  Future<void> createThumbnail(String sourceFileId, String sourceFileName, String sourceFileType) async {
+    try {
+      http.Client client = http.Client();
+      if (client is BrowserClient) {
+        client.withCredentials = true;
+      }
+
+      await client.post(
+        Uri.parse("https://devcreta.com:553/createThumbnail"),
+        headers: {
+          "Content-type": "application/json"
+        },
         body: jsonEncode({
-          "userId" : myConfig!.serverConfig!.storageConnInfo.bucketId,
-          "folderName" : folderName,
-          "fileName" : fileName,
-          "fileType" : fileType
+          "bucketId" : myConfig!.serverConfig!.storageConnInfo.bucketId.substring(0, myConfig!.serverConfig!.storageConnInfo.bucketId.length -1),
+          "folderName" : sourceFileId.replaceAll("/", "%2F"),
+          "fileName" : sourceFileName,
+          "fileType": sourceFileType,
+          "cloudType" : "firebase"
         })
       );
     } catch (error) {
-      logger.info(error);
+      logger.severe(error);
     }
   }
+ 
 
 
 }

@@ -1,13 +1,7 @@
-
-// ignore: depend_on_referenced_packages
-import 'dart:typed_data';
-
-import '../model/file_model.dart';
-// ignore: depend_on_referenced_packages
-import 'package:firebase_core/firebase_core.dart';
-// ignore: depend_on_referenced_packages
 import 'package:appwrite/appwrite.dart';
-import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:hycop/hycop/model/file_model.dart';
 
 
 abstract class AbsStorage {
@@ -16,8 +10,10 @@ abstract class AbsStorage {
   static Client? _awStorageConn;
   static FirebaseApp? _fbStorageConn;
 
+
   static Client? get awStorageConn => _awStorageConn;
   static FirebaseApp? get fbStorageConn => _fbStorageConn;
+
 
   @protected
   static void setAppwriteApp(Client client) => _awStorageConn = client;
@@ -25,29 +21,15 @@ abstract class AbsStorage {
 
 
 
+
   Future<void> initialize();
-
-  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes, {bool makeThumbnail = true, String folderName = "content/"});
-
-  Future<Uint8List> downloadFile(String fileId);
-
+  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes, {bool makeThumbnail = false, String fileUsage = "content"});
   Future<void> deleteFile(String fileId);
-
-  Future<FileModel> getFileInfo(String fileId);
-
-  Future<List<FileModel>> getFileInfoList(
-    {
-      String? search,
-      int? limit,
-      int? offset,
-      String? cursor,
-      String? cursorDirection = "after",
-      String? orderType = "DESC"
-    }
-  );
-
-  Future<void> setBucketId();
-   
+  Future<Uint8List?> getFileBytes(String fileId);
+  Future<FileModel?> getFile(String fileId);
+  Future<List<FileModel>?> getFileList({String search = "", int limit = 99, int? offset, String? cursor, String cursorDirection = "after", String orderType = "DESC"});
+  Future<void> setBucket();
+  Future<void> createThumbnail(String sourceFileId, String sourceFileName, String sourceFileType);
 
 
 }

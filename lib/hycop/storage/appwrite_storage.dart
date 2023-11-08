@@ -1,201 +1,220 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:dart_appwrite/models.dart';
-import 'package:hycop/hycop/account/account_manager.dart';
-//import 'package:hycop/hycop/hycop_factory.dart';
-import 'package:hycop/hycop/utils/hycop_utils.dart';
 
-import '../../common/util/config.dart';
-import '../../common/util/logger.dart';
-import '../../hycop/utils/hycop_exceptions.dart';
-import '../enum/model_enums.dart';
-import '../../hycop/storage/abs_storage.dart';
-import '../../hycop/storage/storage_utils.dart';
-import '../model/file_model.dart';
-
-// ignore: depend_on_referenced_packages
+import 'package:http/browser_client.dart';
+import 'package:http/http.dart' as http;
 import 'package:appwrite/appwrite.dart';
-// ignore: depend_on_referenced_packages
-import 'package:dart_appwrite/dart_appwrite.dart' as aw_server;
+import 'package:dart_appwrite/dart_appwrite.dart' as dart_appwrite;
+import 'package:hycop/common/util/config.dart';
+import 'package:hycop/common/util/logger.dart';
+import 'package:hycop/hycop/account/account_manager.dart';
+import 'package:hycop/hycop/enum/model_enums.dart';
+import 'package:hycop/hycop/model/file_model.dart';
+import 'package:hycop/hycop/storage/abs_storage.dart';
+import 'package:hycop/hycop/storage/storage_utils.dart';
+
 
 class AppwriteStorage extends AbsStorage {
+
   Storage? _storage;
-  late aw_server.Storage _serverStorage;
+  late dart_appwrite.Storage _awStorage;
+  String fileUrl = "${myConfig!.serverConfig!.storageConnInfo.storageURL}/storage/buckets/{BUCKET_ID}/files/{FILE_ID}/view?project=${myConfig!.serverConfig!.storageConnInfo.projectId}}";
+
 
   @override
   Future<void> initialize() async {
-    if (AbsStorage.awStorageConn == null) {
-      //await HycopFactory.initAll();
+    if(AbsStorage.awStorageConn == null) {
       AbsStorage.setAppwriteApp(Client()
         ..setEndpoint(myConfig!.serverConfig!.storageConnInfo.storageURL)
         ..setProject(myConfig!.serverConfig!.storageConnInfo.projectId)
-        ..setSelfSigned(status: true));
-      logger.info('aw_server storage initialize start--------------------');
-      _serverStorage = aw_server.Storage(aw_server.Client()
+        ..setSelfSigned(status: true)
+      );
+      _awStorage = dart_appwrite.Storage(dart_appwrite.Client()
         ..setEndpoint(myConfig!.serverConfig!.storageConnInfo.storageURL)
         ..setProject(myConfig!.serverConfig!.storageConnInfo.projectId)
-        ..setKey(myConfig!.serverConfig!.storageConnInfo.apiKey));
-      logger.info('aw_server storage initialize end--------------------');
+        ..setKey(myConfig!.serverConfig!.storageConnInfo.apiKey)
+      );
     }
-
-    // ignore: prefer_conditional_assignment, unnecessary_null_comparison
-    if (_storage == null) {
-      _storage = Storage(AbsStorage.awStorageConn!);
-    }
-
-    // setBucketId("userId");
+    _storage ??= Storage(AbsStorage.awStorageConn!);
   }
+
 
   @override
-  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes,
-      {bool makeThumbnail = false, String folderName = "content/"}) async {
-    await initialize();
+  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes, {bool makeThumbnail = false, String fileUsage = "content"}) async {
+    fileName = fileName.replaceAll(RegExp(r'[^a-zA-Z0-9가-힣.]'), "_");
+    if(fileUsage == "content") {
+      if(fileType.contains("image")) {
+        fileUsage = "img-";
+      } else if(fileType.contains("video")) {
+        fileUsage = "vid-";
+      } else {
+        fileUsage = "etc-";
+      }
+    } else if (fileUsage == "profile") {
+      fileUsage = "pic-";
+    } else { //banner
+      fileUsage = "ad-";
+    }
+    String fileId = fileUsage + StorageUtils.getMD5(fileBytes);
 
-    String fileId =
-        StorageUtils.cidToKey(StorageUtils.genCid(ContentsType.getContentTypes(fileType)));
 
-    await _storage!
-        .createFile(
-            bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId,
-            fileId: fileId,
-            //skpark 20231031 InputFile --> InputFile.fromBytes
-            file: InputFile.fromBytes(filename: fileName, contentType: fileType, bytes: fileBytes))
-        .onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
-
-    return await getFileInfo(fileId);
+    try {
+      var targetFile = await getFile(fileId);
+      if(targetFile != null) {
+        if(targetFile.thumbnailUrl == "" && (makeThumbnail || fileType.contains("video") || fileType.contains("pdf"))) {
+         await createThumbnail(fileId, fileName, fileType);
+        }
+        return await getFile(fileId);
+      } else {
+        await _storage!.createFile(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: fileId, file: InputFile.fromBytes(bytes: fileBytes, filename: fileName));
+        if(makeThumbnail || fileType.contains("video") || fileType.contains("pdf")) {
+          await createThumbnail(fileId, fileName, fileType);
+        }
+        return await getFile(fileId);
+      }
+    } catch (error) {
+      logger.severe(error);
+    }
+    return null;
   }
 
-  @override
-  Future<Uint8List> downloadFile(String fileId) async {
-    await initialize();
-
-    return await _storage!
-        .getFileDownload(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: fileId)
-        .onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
-  }
 
   @override
   Future<void> deleteFile(String fileId) async {
-    await initialize();
-
-    await _storage!
-        .deleteFile(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: fileId)
-        .onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
+    await _storage!.deleteFile(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: fileId).onError((error, stackTrace) => logger.severe(error));
   }
 
-  @override
-  Future<FileModel> getFileInfo(String fileId) async {
-    await initialize();
-
-    final res = await _storage!
-        .getFile(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: fileId)
-        .onError((error, stackTrace) => throw HycopException(message: stackTrace.toString()));
-
-    return FileModel(
-        fileId: res.$id,
-        fileName: res.name,
-        fileView: await _storage!.getFileView(
-            bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: res.$id),
-        thumbnailUrl: "",
-        fileMd5: res.signature,
-        fileSize: res.sizeOriginal,
-        fileType: ContentsType.getContentTypes(res.mimeType));
-  }
 
   @override
-  Future<List<FileModel>> getFileInfoList(
-      {String? search,
-      int? limit,
-      int? offset,
-      String? cursor,
-      String? cursorDirection = "after",
-      String? orderType = "DESC"}) async {
-    List<FileModel> fileInfoList = [];
-
-    await initialize();
-
-    List<String> queries = [];
-    if (limit != null) {
-      queries.add(Query.limit(limit));
-    }
-    if (offset != null) {
-      queries.add(Query.offset(offset));
-    }
-    if (cursor != null) {
-      queries
-          .add(cursorDirection == 'after' ? Query.cursorAfter(cursor) : Query.cursorBefore(cursor));
-    }
-    if (orderType != null) {
-      queries.add(
-          orderType == 'DESC' ? Query.orderDesc('\$updatedAt') : Query.orderAsc('\$updatedAt'));
-    }
-
-    final res = await _storage!.listFiles(
-      bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId,
-      search: search,
-      queries: queries,
-      //limit: limit,
-      //offset: offset,
-      //cursor: cursor,
-      //cursorDirection: cursorDirection,
-      //orderType: orderType
-    );
-
-    for (var element in res.files) {
-      Uint8List fileData = await _storage!.getFileView(
-          bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: element.$id);
-
-      fileInfoList.add(FileModel(
-          fileId: element.$id,
-          fileName: element.name,
-          fileView: fileData,
-          thumbnailUrl: "",
-          fileMd5: element.signature,
-          fileSize: element.sizeOriginal,
-          fileType: ContentsType.getContentTypes(element.mimeType)));
-    }
-    return fileInfoList;
-  }
-
-  @override
-  Future<void> setBucketId() async {
-    // await initialize();
-    logger.info('-----setBucketId()');
-    String bucketId = HycopUtils.genBucketId(
-        AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId);
-    // final res = await _serverStorage.listBuckets();
-    //
-    // for (var element in res.buckets) {
-    //   if (element.name == bucketId) {
-    //     myConfig!.serverConfig!.storageConnInfo.bucketId = element.$id;
-    //     return;
-    //   }
-    // }
+  Future<Uint8List?> getFileBytes(String fileId) async {
     try {
-      final res = await _serverStorage.getBucket(bucketId: bucketId);
-      if (res.name.isNotEmpty) {
-        myConfig!.serverConfig!.storageConnInfo.bucketId = bucketId;
-        return;
-      }
-    } catch (e) {
-      // not exist bucketId ==> createBucket
+      return await _storage!.getFileDownload(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: fileId);
+    } catch (error) {
+      logger.severe(error);
     }
-    logger.info('-----try to create bucket=$bucketId');
-    Bucket bucket = await _serverStorage.createBucket(
-      bucketId: bucketId,
-      name: AccountManager.currentLoginUser.email,
-      // permission: 'bucket',
-      // read: ['role:member'],
-      // write: ['role:member'],
-      //skpark 20231031 new version 에서 permitisions format  이 바뀜.
-      permissions: [
-        Permission.read(Role.users()), //  이 부분을 user 로 바꿔야 할 가능성이 많다.
-        Permission.write(Role.users()), // 이 부분을  user 로 바꿔야 할 가능서이 많다.
-      ],
-    );
-
-    logger.info('-----bucket newly created=${bucket.$id}');
-
-    myConfig!.serverConfig!.storageConnInfo.bucketId = bucketId;
+    return null;
   }
+
+
+  @override
+  Future<FileModel?> getFile(String fileId) async {
+    try {
+      await initialize();
+
+      var targetFile = await _storage!.getFile(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: fileId);
+      try {
+        var thumbnailFile = await _storage!.getFile(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: "cov${fileId.substring(4)}");
+        return FileModel(
+          id: targetFile.$id,
+          name: targetFile.name,
+          url: fileUrl.replaceAll("{BUCKET_ID}", myConfig!.serverConfig!.storageConnInfo.bucketId).replaceAll("{FILE_ID}", targetFile.$id),
+          thumbnailUrl: fileUrl.replaceAll("{BUCKET_ID}", myConfig!.serverConfig!.storageConnInfo.bucketId).replaceAll("{FILE_ID}", thumbnailFile.$id),
+          size: targetFile.sizeOriginal,
+          contentType: ContentsType.getContentTypes(targetFile.mimeType)
+        );
+      } catch (thumbnailError) {
+        return FileModel(
+          id: targetFile.$id,
+          name: targetFile.name,
+          url: fileUrl.replaceAll("{BUCKET_ID}", myConfig!.serverConfig!.storageConnInfo.bucketId).replaceAll("{FILE_ID}", targetFile.$id),
+          thumbnailUrl: "",
+          size: targetFile.sizeOriginal,
+          contentType: ContentsType.getContentTypes(targetFile.mimeType)
+        );
+      }
+    } catch (error) {
+      logger.severe(error);
+    }
+    return null;
+  }
+
+
+  @override
+  Future<List<FileModel>?> getFileList({String search = "", int limit = 99, int? offset, String? cursor, String cursorDirection = "after", String orderType = "DESC"}) async {
+    List<FileModel> fileList = [];
+
+    try {
+      await initialize();
+      List<String> queries = [];
+      queries.add(Query.limit(limit));
+      if(offset != null) queries.add(Query.offset(offset));
+      if(cursor != null) queries.add(cursorDirection == "after" ? Query.cursorAfter(cursor) : Query.cursorBefore(cursor));
+      queries.add(orderType == "DESC" ? Query.orderDesc("\$updateAt") : Query.orderAsc("\$updateAt"));
+
+      final targetFileList = await _storage!.listFiles(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, queries: queries, search: search);
+      for(var targetFile in targetFileList.files) {
+        try {
+          var thumbnailFile = await _storage!.getFile(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: "cov${targetFile.$id.substring(4)}");
+          fileList.add(FileModel(
+            id: targetFile.$id, 
+            name: targetFile.name, 
+            url: fileUrl.replaceAll("{BUCKET_ID}", myConfig!.serverConfig!.storageConnInfo.bucketId).replaceAll("{FILE_ID}", targetFile.$id), 
+            thumbnailUrl: fileUrl.replaceAll("{BUCKET_ID}", myConfig!.serverConfig!.storageConnInfo.bucketId).replaceAll("{FILE_ID}", thumbnailFile.$id),
+            size: targetFile.sizeOriginal, 
+            contentType: ContentsType.getContentTypes(targetFile.mimeType)
+          ));
+        } catch (thumbnailError) {
+          fileList.add(FileModel(
+            id: targetFile.$id, 
+            name: targetFile.name, 
+            url: fileUrl.replaceAll("{BUCKET_ID}", myConfig!.serverConfig!.storageConnInfo.bucketId).replaceAll("{FILE_ID}", targetFile.$id), 
+            thumbnailUrl: "", 
+            size: targetFile.sizeOriginal, 
+            contentType: ContentsType.getContentTypes(targetFile.mimeType)
+          ));
+        }
+      }
+    } catch (error) {
+      logger.severe(error);
+    }
+    return null;
+  }
+
+
+  @override
+  Future<void> setBucket() async {
+    try {
+      myConfig!.serverConfig!.storageConnInfo.bucketId = (await _awStorage.getBucket(bucketId: AccountManager.currentLoginUser.userId)).$id;
+    } catch (error) {
+      myConfig!.serverConfig!.storageConnInfo.bucketId = (await _awStorage.createBucket(
+        bucketId: AccountManager.currentLoginUser.userId,
+        name: AccountManager.currentLoginUser.email,
+        permissions: [
+          Permission.create(Role.any()),
+          Permission.read(Role.any()),
+          Permission.update(Role.any()),
+          Permission.delete(Role.any())
+        ]
+      )).$id;
+    }
+  }
+
+
+  @override
+  Future<void> createThumbnail(String sourceFileId, String sourceFileName, String sourceFileType) async {
+    try {
+      http.Client client = http.Client();
+      if (client is BrowserClient) {
+        client.withCredentials = true;
+      }
+
+      await client.post(
+        Uri.parse("https://devcreta.com:553/createThumbnail"),
+        headers: {
+          "Content-type": "application/json"
+        },
+        body: jsonEncode({
+          "bucketId" : myConfig!.serverConfig!.storageConnInfo.bucketId,
+          "folderName" : sourceFileId,
+          "fileName" : sourceFileName,
+          "fileType": sourceFileType,
+          "cloudType" : "appwrite"
+        })
+      );
+    } catch (error) {
+      logger.severe(error);
+    }
+  }
+
 }

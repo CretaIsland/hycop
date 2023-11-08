@@ -1,46 +1,47 @@
+import 'package:hycop/hycop/enum/model_enums.dart';
 
-import '../enum/model_enums.dart';
 
 class FileModel {
 
-  late String fileId;
-  late String fileName;
-  late dynamic fileView;
+
+  late String id;
+  late String name;
+  late String url;
   late String thumbnailUrl;
-  late String fileMd5;
-  late int fileSize;
-  late ContentsType fileType;
+  late int size;
+  late ContentsType contentType;
+
 
   FileModel({
-    required this.fileId,
-    required this.fileName,
-    required this.fileView,
+    required this.id,
+    required this.name,
+    required this.url,
     required this.thumbnailUrl,
-    required this.fileMd5,
-    required this.fileSize,
-    required this.fileType
+    required this.size,
+    required this.contentType
   });
+
 
   Map<String, dynamic> toMap() {
     return {
-      'fileId' : fileId,
-      'fileName' : fileName,
-      'fileView' : fileView,
+      'id' : id,
+      'name' : name,
+      'url' : url,
       'thumbnailUrl' : thumbnailUrl,
-      'fileMd5' : fileMd5,
-      'fileSize' : fileSize,
-      'fileType' : fileType
+      'size' : size,
+      'contentType' : contentType
     };
   }
 
+
   void fromMap(Map<String, dynamic> map) {
-    fileId = map['fileId'];
-    fileName = map['fileName'];
-    fileView = map['fileView'];
+    id = map['id'];
+    name = map['name'];
+    url = map['url'];
     thumbnailUrl = map['thumbnailUrl'];
-    fileMd5 = map['fileMd5'];
-    fileSize = map['fileSize'];
-    fileType = map['fileType'];
+    size = map['size'];
+    contentType = map['contentType'];
   }
+
 
 }

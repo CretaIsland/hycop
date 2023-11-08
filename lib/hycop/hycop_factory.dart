@@ -68,7 +68,7 @@ class HycopFactory {
 
   static void setBucketId() {
     if (AccountManager.currentLoginUser.isLoginedUser && HycopFactory.storage != null) {
-      storage!.setBucketId();
+      storage!.setBucket();
     }
   }
 
