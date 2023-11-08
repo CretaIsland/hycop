@@ -1,3 +1,5 @@
+## 0.3.22
+- appwrite realtime ping for every minitue and healthChecker.
 ## 0.3.21
 - fix hycop thumbnail logic.
 ## 0.3.20
