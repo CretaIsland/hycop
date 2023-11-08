@@ -12,7 +12,8 @@ import 'abs_realtime.dart';
 class AppwriteRealtime extends AbsRealtime {
   StreamSubscription<dynamic>? realtimeListener;
   RealtimeSubscription? subscription;
-  Function? funa;
+  Timer? _timer;
+  DateTime _lastUpdateTime = DateTime.now();
 
   @override
   Future<void> initialize() async {
@@ -59,14 +60,31 @@ class AppwriteRealtime extends AbsRealtime {
     return name;
   }
 
+  void _startPingTimer(String rtKey) {
+    _timer = Timer.periodic(const Duration(seconds: 30), (Timer t) {
+      DateTime now = DateTime.now();
+      Duration difference = now.difference(_lastUpdateTime);
+      if (difference.inMinutes >= 1) {
+        logger.warning('_lastUpdateTime 1 min passed, Re-subscribe !!!!!!');
+        _subscribe(rtKey);
+      }
+    });
+  }
+
   @override
   Future<void> startTemp(String? rtKey) async {
     realTimeKey = rtKey;
     if (realTimeKey == null || realTimeKey!.isEmpty) {
       return;
     }
-
     await initialize();
+    await _subscribe(rtKey!);
+    _startPingTimer(rtKey);
+  }
+
+  Future<void> _subscribe(String rtKey) async {
+    // unsubscribe first
+    subscription?.close();
 
     logger.finest('AppwriteRealtime startTemp()');
 
@@ -97,8 +115,9 @@ class AppwriteRealtime extends AbsRealtime {
     // 여기서 realTimeKey 가 다르면 버린다.
     logger.info('event myinfo=${AbsRealtime.myDeviceId}, $realTimeKey');
     String? directive = event.payload['directive'];
+    _lastUpdateTime = DateTime.now();
     if (directive == null || directive == "ping") {
-      logger.info("It's ping");
+      logger.info("It's ping (${_lastUpdateTime.toIso8601String()})");
       return;
     }
     String? eventRealTimeKey = event.payload['realTimeKey'];
@@ -140,6 +159,7 @@ class AppwriteRealtime extends AbsRealtime {
   void stop() {
     logger.info('---- RealTime stopped !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ----');
     subscription?.close();
+    _timer?.cancel();
     realtimeListener?.cancel();
     realtimeListener = null;
     subscription = null;
