@@ -1,3 +1,5 @@
+## 0.3.19
+- fix hycop storage logic
 ## 0.3.18
 - saveManager,  Dont write delta when Book change time changes. 
 ## 0.3.17
