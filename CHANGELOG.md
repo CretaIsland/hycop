@@ -1,3 +1,5 @@
+## 0.3.20
+- appwrite realtime ping for every minitue.
 ## 0.3.19
 - fix hycop storage logic
 ## 0.3.18
