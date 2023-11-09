@@ -115,7 +115,7 @@ class FirebaseAppStorage extends AbsStorage {
       var fileThumbnailUrl = await _storage!.ref()
         .child("${myConfig!.serverConfig!.storageConnInfo.bucketId}content/thumbnail/${fileId.substring(fileId.lastIndexOf("/")+1, fileId.lastIndexOf("."))}.jpg")
         .getDownloadURL().onError((error, stackTrace) async {
-          logger.severe(error);
+          logger.info(error);
           return targetFileUrl;
         });
 
@@ -128,7 +128,7 @@ class FirebaseAppStorage extends AbsStorage {
         contentType: ContentsType.getContentTypes(targetFileMetaData.contentType!)
       );
     } catch(error) {
-      logger.severe(error);
+      logger.info(error);
       return null;
     }
   }
@@ -151,7 +151,7 @@ class FirebaseAppStorage extends AbsStorage {
         var targetFileThumbnail = await _storage!.ref()
           .child("${myConfig!.serverConfig!.storageConnInfo.bucketId}content/thumbnail/${targetFile.fullPath.substring(targetFile.fullPath.lastIndexOf("/")+1, targetFile.fullPath.lastIndexOf("."))}.jpg")
           .getDownloadURL().onError((error, stackTrace) {
-            logger.severe(error);
+            logger.info(error);
             return targetFileUrl;
           });
 
@@ -167,7 +167,7 @@ class FirebaseAppStorage extends AbsStorage {
       }
       return fileList;
     } catch (error) {
-      logger.severe(error);
+      logger.info(error);
       return null;
     }
   }
@@ -201,7 +201,7 @@ class FirebaseAppStorage extends AbsStorage {
         })
       );
     } catch (error) {
-      logger.severe(error);
+      logger.info(error);
     }
   }
  

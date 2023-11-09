@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 
+import 'package:appwrite/models.dart';
 import 'package:http/browser_client.dart';
 import 'package:http/http.dart' as http;
 import 'package:appwrite/appwrite.dart';
@@ -51,10 +52,22 @@ class AppwriteStorage extends AbsStorage {
       } else {
         fileUsage = "etc-";
       }
-    } else if (fileUsage == "profile/") {
+    } else if (fileUsage == "profile") {
       fileUsage = "pic-";
-    } else { //banner
+    } else if (fileUsage == "banner") {
       fileUsage = "ad-";
+    } else if (fileUsage == "bookThumbnail") {
+      var thumbnailFiles = await _storage!.listFiles(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, search: fileName).onError((error, stackTrace) {
+        return FileList(total: 0, files: List.empty());
+      });
+
+      for(var thumbnail in thumbnailFiles.files) {
+        await deleteFile(thumbnail.$id);
+      }
+
+      fileUsage = "img-";
+    } else { //banner
+      fileUsage = "";
     }
     String fileId = fileUsage + StorageUtils.getMD5(fileBytes);
 
@@ -124,7 +137,7 @@ class AppwriteStorage extends AbsStorage {
         );
       }
     } catch (error) {
-      logger.severe(error);
+      logger.info(error);
     }
     return null;
   }
@@ -166,7 +179,7 @@ class AppwriteStorage extends AbsStorage {
         }
       }
     } catch (error) {
-      logger.severe(error);
+      logger.info(error);
     }
     return null;
   }
