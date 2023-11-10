@@ -1,3 +1,5 @@
+## 0.3.26
+- mouse_tracer.dart try catch
 ## 0.3.25
 - appwrite realtime samedata check.
 ## 0.3.24

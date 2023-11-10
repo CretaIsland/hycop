@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
-MouseTracer? mouseTracerHolder;
-class MouseTracer extends ChangeNotifier {
+import '../../common/util/logger.dart';
 
+MouseTracer? mouseTracerHolder;
+
+class MouseTracer extends ChangeNotifier {
   String methodFlag = '';
   String targetUserEmail = '';
   String targetUserName = '';
 
   List<MouseModel> userMouseList = [];
-
 
   void initialize() {
     methodFlag = '';
@@ -18,19 +19,13 @@ class MouseTracer extends ChangeNotifier {
   }
 
   void receiveOtherInfo(List<dynamic> userList) {
-    for(var user in userList) {
+    for (var user in userList) {
       // 중복 체크
-      if(userMouseList.where((element) => element.userId == user['userId']).isEmpty) {
-        userMouseList.add(MouseModel(
-          user['socketId'], 
-          user['userId'], 
-          user['userName'], 
-          0.0, 
-          0.0
-        ));
+      if (userMouseList.where((element) => element.userId == user['userId']).isEmpty) {
+        userMouseList.add(MouseModel(user['socketId'], user['userId'], user['userName'], 0.0, 0.0));
       }
     }
-    if(userMouseList.isNotEmpty) {
+    if (userMouseList.isNotEmpty) {
       methodFlag = 'joinUser';
       targetUserEmail = userMouseList.last.userId;
       targetUserName = userMouseList.last.userName;
@@ -39,14 +34,9 @@ class MouseTracer extends ChangeNotifier {
   }
 
   void receiveNewInfo(dynamic newUserInfo) {
-    if(userMouseList.where((element) => element.userId == newUserInfo['userId']).isEmpty) {
+    if (userMouseList.where((element) => element.userId == newUserInfo['userId']).isEmpty) {
       userMouseList.add(MouseModel(
-        newUserInfo['socketId'], 
-        newUserInfo['userId'], 
-        newUserInfo['userName'], 
-        0.0, 
-        0.0
-      ));
+          newUserInfo['socketId'], newUserInfo['userId'], newUserInfo['userName'], 0.0, 0.0));
     }
     methodFlag = 'joinUser';
     targetUserEmail = userMouseList.last.userId;
@@ -55,26 +45,32 @@ class MouseTracer extends ChangeNotifier {
   }
 
   void leaveUser(String socketId) {
-    MouseModel leaveUser = userMouseList.firstWhere((userMouse) => userMouse.socketId == socketId);
-    methodFlag = 'leaveUser';
-    targetUserEmail = leaveUser.userId;
-    targetUserName = leaveUser.userName;
-    userMouseList.remove(leaveUser);
-    notifyListeners();
+    try {
+      //skpark add try catch !!!
+      MouseModel leaveUser =
+          userMouseList.firstWhere((userMouse) => userMouse.socketId == socketId);
+      methodFlag = 'leaveUser';
+      targetUserEmail = leaveUser.userId;
+      targetUserName = leaveUser.userName;
+      userMouseList.remove(leaveUser);
+      notifyListeners();
+    } catch (err) {
+      logger.warning('leaveUser error = $err');
+    }
   }
 
   void updateCursor(Map<String, dynamic> data) {
-    if(getIndex(data["userId"]) < 0) return;
-    
+    if (getIndex(data["userId"]) < 0) return;
+
     userMouseList[getIndex(data["userId"])].cursorX = data["dx"];
     userMouseList[getIndex(data["userId"])].cursorY = data["dy"];
     notifyListeners();
   }
 
-  int getIndex(String userId) { // 이메일
+  int getIndex(String userId) {
+    // 이메일
     return userMouseList.indexWhere((userCursor) => userCursor.userId == userId);
   }
-
 }
 
 class MouseModel {
@@ -85,5 +81,4 @@ class MouseModel {
   double cursorY = 0.0;
 
   MouseModel(this.socketId, this.userId, this.userName, this.cursorX, this.cursorY);
-
 }
