@@ -1,4 +1,6 @@
 import 'dart:convert';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html';
 import 'dart:typed_data';
 
 
@@ -186,6 +188,25 @@ class AppwriteStorage extends AbsStorage {
 
 
   @override
+  Future<bool> downloadFile(String fileId, String fileName) async {
+    try {
+      await initialize();
+
+      Uint8List targetFileBytes = await _storage!.getFileDownload(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: fileId);
+      final targetFileUrl = Url.createObjectUrlFromBlob(Blob([targetFileBytes]));
+      AnchorElement(href: targetFileUrl)
+        ..setAttribute("download", fileName)
+        ..click();
+      Url.revokeObjectUrl(targetFileUrl);
+      return true;
+    } catch (error) {
+      logger.severe(error);
+      return false;
+    }
+  }
+
+
+  @override
   Future<void> setBucket() async {
     try {
       myConfig!.serverConfig!.storageConnInfo.bucketId = (await _awStorage.getBucket(bucketId: AccountManager.currentLoginUser.userId)).$id;
@@ -229,5 +250,6 @@ class AppwriteStorage extends AbsStorage {
       logger.severe(error);
     }
   }
+  
 
 }
