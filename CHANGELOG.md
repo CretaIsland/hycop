@@ -1,3 +1,5 @@
+## 0.3.24
+- add file download function (storage).
 ## 0.3.23
 - appwrite storage file check logic.
 ## 0.3.22

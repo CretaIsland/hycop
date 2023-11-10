@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:html';
 import 'dart:typed_data';
 
 
@@ -171,6 +172,23 @@ class FirebaseAppStorage extends AbsStorage {
       return null;
     }
   }
+
+
+  @override
+  Future<bool> downloadFile(String fileId, String fileName) async {
+    try {
+      Uint8List? targetFileBytes = await _storage!.ref().child(fileId).getData();
+      final targetFileUrl = Url.createObjectUrlFromBlob(Blob([targetFileBytes!]));
+      AnchorElement(href: targetFileUrl)
+        ..setAttribute("download", fileName)
+        ..click();
+      Url.revokeObjectUrl(targetFileUrl);
+      return true;
+    } catch (error) {
+      logger.severe(error);
+      return false;
+    }
+  }
  
  
   @override
@@ -204,7 +222,6 @@ class FirebaseAppStorage extends AbsStorage {
       logger.info(error);
     }
   }
+
  
-
-
 }

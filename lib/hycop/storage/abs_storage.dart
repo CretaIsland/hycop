@@ -28,6 +28,7 @@ abstract class AbsStorage {
   Future<Uint8List?> getFileBytes(String fileId);
   Future<FileModel?> getFile(String fileId);
   Future<List<FileModel>?> getFileList({String search = "", int limit = 99, int? offset, String? cursor, String cursorDirection = "after", String orderType = "DESC"});
+  Future<bool> downloadFile(String fileId, String fileName);
   Future<void> setBucket();
   Future<void> createThumbnail(String sourceFileId, String sourceFileName, String sourceFileType);
 
