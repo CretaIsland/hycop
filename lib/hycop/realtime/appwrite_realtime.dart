@@ -149,9 +149,6 @@ class AppwriteRealtime extends AbsRealtime {
       return;
     }
 
-    logger.info('event.payload=${event.payload}');
-    logger.info('---- matched !!!  ----');
-    logger.info('event received=$deviceId, $eventRealTimeKey');
     processEvent(event.payload);
   }
 
@@ -181,6 +178,15 @@ class AppwriteRealtime extends AbsRealtime {
         return true;
       }
       logger.finest('setDelta = ${input.toString()}');
+
+      // delta 내용이 달라진게 없으면 쓰지 않는다.
+      String? orgDelta = target['delta'];
+      String? newDelta = input['delta'];
+      if (orgDelta != null && newDelta != null && orgDelta == newDelta) {
+        logger.info('!!!! same delta !!!!, setDelta skipped');
+        return false;
+      }
+
       HycopFactory.dataBase!.setData('hycop_delta', mid, input);
       return true;
     } catch (e) {

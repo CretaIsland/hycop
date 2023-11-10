@@ -1,3 +1,5 @@
+## 0.3.24
+- appwrite realtime samedata check.
 ## 0.3.23
 - appwrite storage file check logic.
 ## 0.3.22

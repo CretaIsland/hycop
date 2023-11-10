@@ -24,6 +24,20 @@ abstract class AbsRealtime {
   String collcetion_prefix = 'hycop';
   String? realTimeKey;
 
+  // 최근 수신된 15개의 delta 값들을 저장하는 리스트
+  final List<String> _recentDeltas = [];
+  bool isDuplicationEvent(String delta, {int maxDuration = 15}) {
+    bool retval = _recentDeltas.contains(delta);
+    if (retval == false) {
+      _recentDeltas.add(delta);
+      // 리스트가 15개를 넘으면 가장 오래된 항목 삭제
+      if (_recentDeltas.length > maxDuration) {
+        _recentDeltas.removeAt(0);
+      }
+    }
+    return retval;
+  }
+
   Future<void> initialize();
   Future<void> start();
   Future<void> startTemp(String? rtKey) async {
@@ -121,16 +135,32 @@ abstract class AbsRealtime {
         return;
       }
     }
-    String fromDeviceId = mapValue["deviceId"] ?? '';
+    String? fromDeviceId = mapValue["deviceId"];
+    if (fromDeviceId == null) {
+      logger.info('!!! deviceId is null !!! ');
+      return;
+    }
     if (fromDeviceId == myDeviceId) {
+      logger.info('!!! deviceId same !!! $myDeviceId');
       //print('same deviceId=$fromDeviceId &&&&&&&&&&&&&&&&&&&&&&&&');
       return;
     }
+
+    // mid 와 delta 가 이전 값과 완전히 동일한 데이터도 버려야 한다.
+    String? delta = mapValue["delta"];
+    if (delta == null || delta.isEmpty || isDuplicationEvent(delta) == true) {
+      logger.info('!!! same data  !!!');
+      return;
+    }
+
+    logger.info('event.payload=$mapValue');
+    logger.info('---- matched !!!  ----');
+    logger.info('event received=$fromDeviceId, $realTimeKey');
+
     String directive = mapValue["directive"] ?? '';
     // = mapValue["mid"] ?? '';
     String collectionId = mapValue["collectionId"] ?? '';
     String userId = mapValue["userId"] ?? '';
-    String delta = mapValue["delta"] ?? '';
     //print('$lastUpdateTimeStr,$directive,$collectionId,$userId -----------------------------');
 
     Map<String, dynamic> dataMap = json.decode(delta) as Map<String, dynamic>;
