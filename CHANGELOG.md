@@ -1,3 +1,5 @@
+## 0.3.27
+- appwrite setDelta  "_published" eliminate
 ## 0.3.26
 - mouse_tracer.dart try catch
 ## 0.3.25

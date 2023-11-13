@@ -87,7 +87,7 @@ abstract class AbsDatabase {
     try {
       await setData(collectionId, model.mid, model.toMap());
       // Delta 를 저장한다.
-      if (!dontRealTime) {
+      if (!dontRealTime && collectionId.contains('_published') == false) {
         HycopFactory.realtime!.setDelta(directive: 'set', mid: model.mid, delta: model.toMap());
       }
     } catch (e) {
@@ -96,13 +96,14 @@ abstract class AbsDatabase {
     }
   }
 
-
   Future<void> createModel(String collectionId, AbsExModel model) async {
     try {
       logger.finest('createModel(${model.mid})');
       await createData(collectionId, model.mid, model.toMap());
       // Delta 를 저장한다.
-      HycopFactory.realtime!.setDelta(directive: 'create', mid: model.mid, delta: model.toMap());
+      if (collectionId.contains('_published') == false) {
+        HycopFactory.realtime!.setDelta(directive: 'create', mid: model.mid, delta: model.toMap());
+      }
     } catch (e) {
       logger.severe("setModel(create) error", e);
       throw HycopException(message: "setModel(create) error", exception: e as Exception);
