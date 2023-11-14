@@ -1,3 +1,5 @@
+## 0.3.28
+- fix appwrite storage file id define logic
 ## 0.3.27
 - appwrite setDelta  "_published" eliminate
 ## 0.3.26

@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'dart:html';
 import 'dart:typed_data';
 
-
-import 'package:appwrite/models.dart';
 import 'package:http/browser_client.dart';
 import 'package:http/http.dart' as http;
 import 'package:appwrite/appwrite.dart';
@@ -59,20 +57,20 @@ class AppwriteStorage extends AbsStorage {
     } else if (fileUsage == "banner") {
       fileUsage = "ad-";
     } else if (fileUsage == "bookThumbnail") {
-      var thumbnailFiles = await _storage!.listFiles(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, search: fileName).onError((error, stackTrace) {
-        return FileList(total: 0, files: List.empty());
-      });
-
-      for(var thumbnail in thumbnailFiles.files) {
-        await deleteFile(thumbnail.$id);
+      try {
+        var thumbnailFile = await _storage!.getFile(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: fileName.substring(fileName.indexOf("book_") + 5, fileName.indexOf("_thumbnail")));
+        await deleteFile(thumbnailFile.$id);
+      } catch (error) {
+        logger.info("not exist book thumbnail");
       }
-
-      fileUsage = "img-";
     } else { //banner
       fileUsage = "";
     }
-    String fileId = fileUsage + StorageUtils.getMD5(fileBytes);
 
+    String fileId = fileUsage + StorageUtils.getMD5(fileBytes);
+    if(fileUsage == "bookThumbnail") {
+      fileId = fileName.substring(fileName.indexOf("book_") + 5, fileName.indexOf("_thumbnail"));
+    }
 
     try {
       var targetFile = await getFile(fileId);
@@ -89,7 +87,7 @@ class AppwriteStorage extends AbsStorage {
         return await getFile(fileId);
       }
     } catch (error) {
-      logger.severe(error);
+      logger.severe("error during uploadFile >> $error");
     }
     return null;
   }
@@ -106,7 +104,7 @@ class AppwriteStorage extends AbsStorage {
     try {
       return await _storage!.getFileDownload(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: fileId);
     } catch (error) {
-      logger.severe(error);
+      logger.severe("error during getFileBytes >> $error");
     }
     return null;
   }
@@ -139,7 +137,7 @@ class AppwriteStorage extends AbsStorage {
         );
       }
     } catch (error) {
-      logger.info(error);
+      logger.info("error during getFile >> $error");
     }
     return null;
   }
@@ -181,7 +179,7 @@ class AppwriteStorage extends AbsStorage {
         }
       }
     } catch (error) {
-      logger.info(error);
+      logger.info("error during getFileList >> $error");
     }
     return null;
   }
@@ -200,7 +198,7 @@ class AppwriteStorage extends AbsStorage {
       Url.revokeObjectUrl(targetFileUrl);
       return true;
     } catch (error) {
-      logger.severe(error);
+      logger.severe("error during downloadFile >> $error");
       return false;
     }
   }
