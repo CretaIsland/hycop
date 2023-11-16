@@ -1,6 +1,7 @@
 //import 'package:flutter/foundation.dart';
 // ignore_for_file: depend_on_referenced_packages
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'state.dart';
@@ -21,13 +22,15 @@ void setupLogger() {
   Logger.root.onRecord.listen((record) {
     String emoji = '';
     if (record.level == Level.INFO) {
-      emoji = 'ℹ️';
+      emoji = '';
     } else if (record.level == Level.WARNING) {
       emoji = '❗️';
     } else if (record.level == Level.SEVERE) {
       emoji = '⛔️';
     }
-    debugPrint('$emoji   ${record.level.name}: ${record.message}');
+    if (record.level == Level.SEVERE || !kReleaseMode) {
+      debugPrint('$emoji   ${record.level.name}: ${record.message}');
+    }
     if (record.error != null) {
       debugPrint('👉 ${record.error}');
     }
