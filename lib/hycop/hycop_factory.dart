@@ -98,4 +98,9 @@ class HycopFactory {
 
     return true;
   }
+
+  static String toServerTypeString() {
+    String temp = '${HycopFactory.serverType}';
+    return temp.substring("ServerType.".length);
+  }
 }

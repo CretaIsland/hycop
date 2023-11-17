@@ -94,7 +94,7 @@ class AppwriteRealtime extends AbsRealtime {
     }
     String dbId = myConfig!.serverConfig!.dbConnInfo.appId;
     String ch = 'databases.$dbId.collections.hycop_delta.documents';
-    logger.info('---- RealTime subscription !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ----');
+    //logger.info('---- RealTime subscription !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ----');
     subscription = Realtime(AbsDatabase.awDBConn!).subscribe([ch]);
     realtimeListener = subscription!.stream.listen(
       _listenCallback,
