@@ -87,7 +87,10 @@ abstract class AbsDatabase {
     try {
       await setData(collectionId, model.mid, model.toMap());
       // Delta 를 저장한다.
-      if (!dontRealTime && collectionId.contains('_published') == false) {
+      if (!dontRealTime &&
+          (collectionId.contains('_published') == false &&
+              collectionId.contains('hycop_') == false)) {
+        //print('setModel($collectionId, ${model.mid}, $dontRealTime)');
         HycopFactory.realtime!.setDelta(directive: 'set', mid: model.mid, delta: model.toMap());
       }
     } catch (e) {
@@ -101,7 +104,9 @@ abstract class AbsDatabase {
       logger.finest('createModel(${model.mid})');
       await createData(collectionId, model.mid, model.toMap());
       // Delta 를 저장한다.
-      if (collectionId.contains('_published') == false) {
+      if (collectionId.contains('_published') == false &&
+          collectionId.contains('hycop_') == false) {
+        //print('createModel()');
         HycopFactory.realtime!.setDelta(directive: 'create', mid: model.mid, delta: model.toMap());
       }
     } catch (e) {
@@ -116,6 +121,7 @@ abstract class AbsDatabase {
       // Delta 를 저장한다.
       Map<String, dynamic> delta = {};
       delta['mid'] = mid;
+      //print('removeModel()');
       HycopFactory.realtime!.setDelta(directive: 'remove', mid: mid, delta: delta);
     } catch (e) {
       logger.severe("setModel(remove) error", e);

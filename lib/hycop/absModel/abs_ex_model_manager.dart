@@ -132,6 +132,7 @@ abstract class AbsExModelManager extends ChangeNotifier {
 
   Future<void> setToDBByMid(String mid, {bool dontRealTime = false}) async {
     try {
+      //print('setToDBByMid()');
       //await HycopFactory.dataBase!.setData(collectionId, model.mid, model.toMap());
       AbsExModel? model = getModel(mid);
 

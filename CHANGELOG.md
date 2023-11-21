@@ -1,3 +1,5 @@
+## 0.3.30
+- realTime : "hyCop_" table should not use realTime.
 ## 0.3.29
 - add HycopFactory.toServerTypeString function
 ## 0.3.28
