@@ -48,6 +48,7 @@ enum ContentsType {
   none,
   video,
   image,
+  giphy,
   text,
   youtube,
   effect,
