@@ -1,3 +1,5 @@
+## 0.3.31
+- Fix enum
 ## 0.3.30
 - realTime : "hyCop_" table should not use realTime.
 ## 0.3.29
