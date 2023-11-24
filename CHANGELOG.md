@@ -1,3 +1,5 @@
+## 0.3.32
+- fix thumbnail url
 ## 0.3.31
 - Fix enum
 ## 0.3.30

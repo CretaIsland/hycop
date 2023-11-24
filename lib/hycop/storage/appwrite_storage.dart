@@ -131,7 +131,7 @@ class AppwriteStorage extends AbsStorage {
           id: targetFile.$id,
           name: targetFile.name,
           url: fileUrl.replaceAll("{BUCKET_ID}", myConfig!.serverConfig!.storageConnInfo.bucketId).replaceAll("{FILE_ID}", targetFile.$id),
-          thumbnailUrl: fileUrl.replaceAll("{BUCKET_ID}", myConfig!.serverConfig!.storageConnInfo.bucketId).replaceAll("{FILE_ID}", targetFile.$id),
+          thumbnailUrl: targetFile.$id.substring(0, 3) == "img" ? fileUrl.replaceAll("{BUCKET_ID}", myConfig!.serverConfig!.storageConnInfo.bucketId).replaceAll("{FILE_ID}", targetFile.$id) : "",
           size: targetFile.sizeOriginal,
           contentType: ContentsType.getContentTypes(targetFile.mimeType)
         );
@@ -172,7 +172,7 @@ class AppwriteStorage extends AbsStorage {
             id: targetFile.$id, 
             name: targetFile.name, 
             url: fileUrl.replaceAll("{BUCKET_ID}", myConfig!.serverConfig!.storageConnInfo.bucketId).replaceAll("{FILE_ID}", targetFile.$id), 
-            thumbnailUrl: fileUrl.replaceAll("{BUCKET_ID}", myConfig!.serverConfig!.storageConnInfo.bucketId).replaceAll("{FILE_ID}", targetFile.$id), 
+            thumbnailUrl: targetFile.$id.substring(0, 3) == "img" ? fileUrl.replaceAll("{BUCKET_ID}", myConfig!.serverConfig!.storageConnInfo.bucketId).replaceAll("{FILE_ID}", targetFile.$id) : "", 
             size: targetFile.sizeOriginal, 
             contentType: ContentsType.getContentTypes(targetFile.mimeType)
           ));
