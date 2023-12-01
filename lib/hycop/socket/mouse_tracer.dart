@@ -1,84 +1,92 @@
 import 'package:flutter/material.dart';
 
-import '../../common/util/logger.dart';
 
 MouseTracer? mouseTracerHolder;
-
 class MouseTracer extends ChangeNotifier {
-  String methodFlag = '';
-  String targetUserEmail = '';
-  String targetUserName = '';
 
-  List<MouseModel> userMouseList = [];
+  String flag = '';
+  List<Map<String, String>> targetUsers = []; // email
+  List<MouseCursorModel> mouseCursorList = [];
 
-  void initialize() {
-    methodFlag = '';
-    targetUserEmail = '';
-    targetUserName = '';
-    userMouseList = [];
-  }
 
-  void receiveOtherInfo(List<dynamic> userList) {
-    for (var user in userList) {
-      // 중복 체크
-      if (userMouseList.where((element) => element.userId == user['userId']).isEmpty) {
-        userMouseList.add(MouseModel(user['socketId'], user['userId'], user['userName'], 0.0, 0.0));
+  // 기존에 통신하고 있던 유저 추가
+  void addAlreadyConnectUser(List<dynamic> userList) {
+    for(Map<String, dynamic> user in userList) {
+      if(mouseCursorList.where((element) => element.userId == user["userId"]).isEmpty) {
+        mouseCursorList.add(MouseCursorModel(
+          user["socketId"], 
+          user["userId"], 
+          user["userName"],
+          0.0,
+          0.0,
+          Color(user["cursorColor"])
+        ));
+        flag = "connectUser";
+        targetUsers.add({"userId" : user["userId"], "userName": user["userName"]});
       }
     }
-    if (userMouseList.isNotEmpty) {
-      methodFlag = 'joinUser';
-      targetUserEmail = userMouseList.last.userId;
-      targetUserName = userMouseList.last.userName;
+    notifyListeners();
+  }
+
+  // 새로 통신에 접속한 유저 추가
+  void addNewConnectUser(Map<String, dynamic> user) {
+    if(mouseCursorList.where((element) => element.userId == user["userId"]).isEmpty) {
+      mouseCursorList.add(MouseCursorModel(
+        user["socketId"], 
+        user["userId"], 
+        user["userName"], 
+        0.0, 
+        0.0, 
+        Color(user["cursorColor"])
+      ));
+      flag = 'connectUser';
+      targetUsers.add({"userId" : user["userId"], "userName": user["userName"]});
     }
     notifyListeners();
   }
 
-  void receiveNewInfo(dynamic newUserInfo) {
-    if (userMouseList.where((element) => element.userId == newUserInfo['userId']).isEmpty) {
-      userMouseList.add(MouseModel(
-          newUserInfo['socketId'], newUserInfo['userId'], newUserInfo['userName'], 0.0, 0.0));
-    }
-    methodFlag = 'joinUser';
-    targetUserEmail = userMouseList.last.userId;
-    targetUserName = userMouseList.last.userName;
-    notifyListeners();
-  }
-
-  void leaveUser(String socketId) {
-    try {
-      //skpark add try catch !!!
-      MouseModel leaveUser =
-          userMouseList.firstWhere((userMouse) => userMouse.socketId == socketId);
-      methodFlag = 'leaveUser';
-      targetUserEmail = leaveUser.userId;
-      targetUserName = leaveUser.userName;
-      userMouseList.remove(leaveUser);
+  // 통신에 끊어진 유저 삭제
+  void removeDisConnectUser(String userId, String socketId) {
+    int targetIndex = mouseCursorList.indexWhere((element) => element.userId == userId && element.socketId == socketId);
+    if(targetIndex != -1) {
+      flag = 'disconnectUser';
+      targetUsers.add({"userId" : mouseCursorList[targetIndex].userId, "userName": mouseCursorList[targetIndex].userName});
+      mouseCursorList.removeAt(targetIndex);
       notifyListeners();
-    } catch (err) {
-      logger.warning('leaveUser error = $err');
     }
   }
 
-  void updateCursor(Map<String, dynamic> data) {
-    if (getIndex(data["userId"]) < 0) return;
-
-    userMouseList[getIndex(data["userId"])].cursorX = data["dx"];
-    userMouseList[getIndex(data["userId"])].cursorY = data["dy"];
+  // 접속 중인 사용자의 마우스 좌표 업데이트
+  void updateCursorPosition(Map<String, dynamic> cursorData) {
+    int targetIndex = getTargetIndex(cursorData["userId"]);
+    if(targetIndex == -1) return;
+    mouseCursorList[targetIndex].x = cursorData["dx"];
+    mouseCursorList[targetIndex].y = cursorData["dy"];
     notifyListeners();
   }
 
-  int getIndex(String userId) {
-    // 이메일
-    return userMouseList.indexWhere((userCursor) => userCursor.userId == userId);
+  // 사용자의 이메일로 index를 찾아 반환
+  int getTargetIndex(String userId) {
+    return mouseCursorList.indexWhere((element) => element.userId == userId);
+  }
+
+  // mouseTracer destroy
+  void destroy() {
+    mouseCursorList.clear();
+    notifyListeners();
+    mouseTracerHolder?.dispose();
   }
 }
 
-class MouseModel {
+
+// 마우스 포인터 객체 모델
+class MouseCursorModel {
   String socketId = "";
   String userId = "";
   String userName = "";
-  double cursorX = 0.0;
-  double cursorY = 0.0;
+  double x = 0.0;
+  double y = 0.0;
+  Color cursorColor = Colors.transparent;
 
-  MouseModel(this.socketId, this.userId, this.userName, this.cursorX, this.cursorY);
+  MouseCursorModel(this.socketId, this.userId, this.userName, this.x, this.y, this.cursorColor);
 }
