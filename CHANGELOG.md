@@ -1,3 +1,5 @@
+## 0.3.34
+- fix socket client mouse tracer error
 ## 0.3.33
 - fix socket client
 ## 0.3.32

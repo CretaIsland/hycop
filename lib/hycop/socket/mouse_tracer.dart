@@ -74,7 +74,7 @@ class MouseTracer extends ChangeNotifier {
   void destroy() {
     mouseCursorList.clear();
     notifyListeners();
-    mouseTracerHolder?.dispose();
+    //mouseTracerHolder?.dispose();
   }
 }
 
