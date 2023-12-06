@@ -1,3 +1,5 @@
+## 0.3.35
+- fix socket client mouse tracer error --> notify option
 ## 0.3.34
 - fix socket client mouse tracer error
 ## 0.3.33
