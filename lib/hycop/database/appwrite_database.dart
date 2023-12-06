@@ -306,6 +306,9 @@ class AppwriteDatabase extends AbsDatabase {
         //   }
         // }
         break;
+      case OperType.textSearch:
+        queryList.add(Query.search(mid, value.value));
+        break;
     }
   }
 

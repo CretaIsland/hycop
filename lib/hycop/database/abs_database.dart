@@ -27,6 +27,7 @@ enum OperType {
   whereIn,
   whereNotIn,
   isNull,
+  textSearch,
 }
 
 class QueryValue {

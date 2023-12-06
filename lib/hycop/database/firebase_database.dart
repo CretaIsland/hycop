@@ -204,6 +204,9 @@ class FirebaseDatabase extends AbsDatabase {
       case OperType.isNull:
         logger.finest('query=mid isNull ${value.value}');
         return query.where(mid, isNull: value.value);
+      case OperType.textSearch:
+        logger.severe('query=--- firebase IS NOT SUPPORT TextSearch !!! ---');
+        return query;
     }
   }
 
