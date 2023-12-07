@@ -59,8 +59,8 @@ class AbsModel {
   AbsModel({required this.type}) {
     _map['type'] = type.index;
     mid = genMid2(type);
-    createTime = DateTime.now().toString();
-    updateTime = DateTime.now().toString();
+    createTime = DateTime.now().toIso8601String();
+    updateTime = DateTime.now().toIso8601String();
   }
 
   void copyFrom(AbsModel src, {String? newMid}) {

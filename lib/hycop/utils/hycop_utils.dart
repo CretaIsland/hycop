@@ -47,7 +47,7 @@ class HycopUtils {
 
   static String dateTimeToDB(DateTime src) {
     //if (myConfig!.serverType == ServerType.appwrite) {
-    return src.toString(); // yyyy-mm-dd hh:mm:ss.sss
+    return src.toIso8601String(); // yyyy-mm-dd hh:mm:ss.sss
     //}
     //return src;
   }
