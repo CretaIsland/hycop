@@ -73,6 +73,36 @@ abstract class AbsExModelManager extends ChangeNotifier {
     }
   }
 
+  Future<bool> isNameExist(String value) async {
+    try {
+      return await HycopFactory.dataBase!.isNameExist(collectionId, value: value);
+    } catch (e) {
+      logger.severe('databaseError $e');
+      //throw HycopException(message: 'databaseError', exception: e as Exception);
+    }
+    return false;
+  }
+
+  Future<String> makeCopyName(String newName) async {
+    if (await isNameExist(newName) == false) {
+      return newName;
+    }
+    int count = 0;
+    String retval = '';
+    while (true) {
+      count++;
+      retval = '$newName($count)';
+      if (await isNameExist(retval) == false) {
+        return retval;
+      }
+      if (count > 100) {
+        // 같은 이름이 너무 많다. 그냥 마지막 이름을 쓴다.
+        break;
+      }
+    }
+    return retval;
+  }
+
   Future<List<AbsExModel>> getAllListFromDB() async {
     modelList.clear();
     try {

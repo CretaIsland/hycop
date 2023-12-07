@@ -79,6 +79,11 @@ abstract class AbsDatabase {
       int? offset, // appwrite only
       List<Object?>? startAfter}); // firebase onlu
 
+  Future<bool> isNameExist(
+    String collectionId, {
+    required String value,
+  });
+
   Future<void> setData(String collectionId, String mid, Map<dynamic, dynamic> data);
   Future<void> updateData(String collectionId, String mid, Map<dynamic, dynamic> data);
   Future<void> createData(String collectionId, String mid, Map<dynamic, dynamic> data);

@@ -1,3 +1,5 @@
+## 0.3.37
+- add makeCopyName in abs_model_manager.dart
 ## 0.3.36
 - add OperType.textSearch for FullTextSearching
 ## 0.3.35

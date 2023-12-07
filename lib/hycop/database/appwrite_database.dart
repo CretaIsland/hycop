@@ -245,6 +245,51 @@ class AppwriteDatabase extends AbsDatabase {
     }
   }
 
+  @override
+  Future<bool> isNameExist(
+    String collectionId, {
+    required String value,
+  }) async {
+    await initialize();
+
+    try {
+      //String orderType = descending ? 'DESC' : 'ASC';
+
+      List<String> queryList = [];
+      queryList.add(Query.equal('name', value));
+
+      final result = await database!.listDocuments(
+        databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
+        collectionId: collectionId,
+        queries: queryList,
+        // index 를 만들어줘야 함.
+        //orderAttributes: [orderBy],
+        //orderTypes: [orderType],
+        //limit: limit,
+        //offset: offset,
+      );
+      List<Map<String, dynamic>> retvalList = result.documents.map((doc) {
+        //logger.finest(doc.data.toString());
+        return doc.data;
+      }).toList();
+
+      if (retvalList.isEmpty) {
+        return false;
+      }
+      return true;
+    } on AppwriteException catch (e) {
+      if (e.code == 404) {
+        logger.finest(e.message!);
+        return false;
+      }
+      logger.severe('database error !!!');
+      if (e.message != null) {
+        throw HycopException(message: e.message!, code: e.code);
+      }
+      throw HycopException(message: 'Appwrite error', code: e.code);
+    }
+  }
+
   void printQuery(String attrName, QueryValue value, List<dynamic> queryList) {
     logger.info(attrName);
     for (var ele in queryList) {

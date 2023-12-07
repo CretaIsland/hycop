@@ -175,6 +175,30 @@ class FirebaseDatabase extends AbsDatabase {
     });
   }
 
+  @override
+  Future<bool> isNameExist(
+    String collectionId, {
+    required String value,
+  }) async {
+    await initialize();
+    logger.finest('after');
+    assert(_db != null);
+    CollectionReference collectionRef = _db!.collection(collectionId);
+    Query<Object?> query = collectionRef.where('name', isEqualTo: value);
+
+    QuerySnapshot<Object?> snapshot = await query.get();
+
+    List<Map<String, dynamic>> retvalList = snapshot.docs.map((doc) {
+      //logger.finest(doc.data()!.toString());
+      return doc.data()! as Map<String, dynamic>;
+    }).toList();
+
+    if (retvalList.isEmpty) {
+      return false;
+    }
+    return true;
+  }
+
   Query<Object?> queryMaker(String mid, QueryValue value, Query<Object?> query) {
     switch (value.operType) {
       case OperType.isEqualTo:
