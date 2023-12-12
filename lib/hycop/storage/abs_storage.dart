@@ -31,6 +31,7 @@ abstract class AbsStorage {
   Future<bool> downloadFile(String fileId, String fileName);
   Future<void> setBucket();
   Future<void> createThumbnail(String sourceFileId, String sourceFileName, String sourceFileType);
+  Future<FileModel?> copyFile(String targetFileurl, {String targetThumbnailUrl = ""});
 
 
 }

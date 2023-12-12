@@ -1,3 +1,5 @@
+## 0.3.39
+- add content copy func
 ## 0.3.38
 - HycopUtils  dateTimeToDB : toString() --> toIso8601String(); 
 ## 0.3.37

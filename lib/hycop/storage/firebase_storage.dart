@@ -223,6 +223,37 @@ class FirebaseAppStorage extends AbsStorage {
       logger.info(error);
     }
   }
+  
+  @override
+  Future<FileModel?> copyFile(String targetFileurl, {String targetThumbnailUrl = ""}) async {
+    try {
+      http.Client client = http.Client();
+      if (client is BrowserClient) {
+        client.withCredentials = true;
+      }
+
+      http.Response res = await client.post(
+        Uri.parse("https://devcreta.com:444/copyContent"),
+        headers: {
+          "Content-type": "application/json"
+        },
+        body: jsonEncode({
+          "sourceFileUrl" : targetFileurl,
+          "sourceThumbnailUrl" : targetThumbnailUrl,
+          "targetBucketId" : myConfig!.serverConfig!.storageConnInfo.bucketId,
+          "cloudType" : "firebase"
+        })
+      );
+
+      var resData = jsonDecode(utf8.decode(res.bodyBytes));
+      if(resData["status"] == "success") {
+        return await getFile(resData["fileId"]);
+      } 
+    } catch (error) {
+      logger.severe(error);
+    }
+    return null;
+  }
 
  
 }
