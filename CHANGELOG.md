@@ -1,4 +1,4 @@
-## 0.4.00
+## 0.4.01
 - saveMangaer have saveForcce function.
 ## 0.3.39
 - add content copy func
