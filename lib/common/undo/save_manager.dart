@@ -90,6 +90,7 @@ class SaveManager extends ChangeNotifier {
   Timer? _saveTimer;
 
   void stopTimer() {
+    logger.severe('SaveManager.stopTimer');
     _saveTimer?.cancel();
     _saveTimer = null;
   }
@@ -139,52 +140,103 @@ class SaveManager extends ChangeNotifier {
   }
 
   Future<void> runSaveTimer() async {
-    _saveTimer = Timer.periodic(Duration(milliseconds: myConfig!.config.savePeriod), (timer) async {
-      await _datalock.synchronized(() async {
-        if (_dataChangedQue.isNotEmpty) {
-          while (_dataChangedQue.isNotEmpty) {
-            final data = _dataChangedQue.first;
-            // Save here !!!!
-            //('saveTimer $mid');
-            Map<String, AbsExModelManager>? managerMap = _getManager(data.mid);
-            if (managerMap != null) {
-              //for (AbsExModelManager manager in managerMap.values) {
-              for (String key in managerMap.keys) {
-                AbsExModelManager? manager = managerMap[key];
-                manager?.setToDBByMid(data.mid, dontRealTime: data.dontRealTime);
-                //print('$mid saved, managerKey=$key');
-                _somethingSaved = true;
-              }
-            }
-            _dataChangedQue.removeFirst();
-          }
-          notifyListeners();
-          //logHolder.log('autoSave------------end', level: 5);
-        }
-      });
-      await _dataCreatedlock.synchronized(() async {
-        if (_dataCreatedQue.isNotEmpty) {
-          logger.finest('autoSaveCreated------------start(${_dataCreatedQue.length})');
-          while (_dataCreatedQue.isNotEmpty) {
-            final model = _dataCreatedQue.first;
-            // Save here !!!!
-            // _getManager(model.mid)?.createToDB(model);
-            // logger.finest('${model.mid} saved');
-            Map<String, AbsExModelManager>? managerMap = _getManager(model.mid);
-            if (managerMap != null) {
-              for (AbsExModelManager manager in managerMap.values) {
-                manager.createToDB(model);
-                logger.finest('${model.mid} created');
-                _somethingSaved = true;
-              }
-            }
+    logger.severe('SaveManager.runSaveTimer');
 
-            _dataCreatedQue.removeFirst();
+    _saveTimer = Timer.periodic(Duration(milliseconds: myConfig!.config.savePeriod), (timer) async {
+      await saveForce();
+      // await _datalock.synchronized(() async {
+      //   if (_dataChangedQue.isNotEmpty) {
+      //     while (_dataChangedQue.isNotEmpty) {
+      //       final data = _dataChangedQue.first;
+      //       // Save here !!!!
+      //       //('saveTimer $mid');
+      //       Map<String, AbsExModelManager>? managerMap = _getManager(data.mid);
+      //       if (managerMap != null) {
+      //         //for (AbsExModelManager manager in managerMap.values) {
+      //         for (String key in managerMap.keys) {
+      //           AbsExModelManager? manager = managerMap[key];
+      //           manager?.setToDBByMid(data.mid, dontRealTime: data.dontRealTime);
+      //           //print('$mid saved, managerKey=$key');
+      //           _somethingSaved = true;
+      //         }
+      //       }
+      //       _dataChangedQue.removeFirst();
+      //     }
+      //     notifyListeners();
+      //     //logHolder.log('autoSave------------end', level: 5);
+      //   }
+      // });
+      // await _dataCreatedlock.synchronized(() async {
+      //   if (_dataCreatedQue.isNotEmpty) {
+      //     logger.finest('autoSaveCreated------------start(${_dataCreatedQue.length})');
+      //     while (_dataCreatedQue.isNotEmpty) {
+      //       final model = _dataCreatedQue.first;
+      //       // Save here !!!!
+      //       // _getManager(model.mid)?.createToDB(model);
+      //       // logger.finest('${model.mid} saved');
+      //       Map<String, AbsExModelManager>? managerMap = _getManager(model.mid);
+      //       if (managerMap != null) {
+      //         for (AbsExModelManager manager in managerMap.values) {
+      //           manager.createToDB(model);
+      //           logger.finest('${model.mid} created');
+      //           _somethingSaved = true;
+      //         }
+      //       }
+
+      //       _dataCreatedQue.removeFirst();
+      //     }
+      //     notifyListeners();
+      //     logger.finest('autoSaveCreated------------end');
+      //   }
+      // });
+    });
+  }
+
+  Future<void> saveForce({bool notify = true}) async {
+    await _datalock.synchronized(() async {
+      if (_dataChangedQue.isNotEmpty) {
+        while (_dataChangedQue.isNotEmpty) {
+          final data = _dataChangedQue.first;
+          // Save here !!!!
+          //('saveTimer $mid');
+          Map<String, AbsExModelManager>? managerMap = _getManager(data.mid);
+          if (managerMap != null) {
+            //for (AbsExModelManager manager in managerMap.values) {
+            for (String key in managerMap.keys) {
+              AbsExModelManager? manager = managerMap[key];
+              manager?.setToDBByMid(data.mid, dontRealTime: data.dontRealTime);
+              //print('$mid saved, managerKey=$key');
+              _somethingSaved = true;
+            }
           }
-          notifyListeners();
-          logger.finest('autoSaveCreated------------end');
+          _dataChangedQue.removeFirst();
         }
-      });
+        notifyListeners();
+        //logHolder.log('autoSave------------end', level: 5);
+      }
+    });
+    await _dataCreatedlock.synchronized(() async {
+      if (_dataCreatedQue.isNotEmpty) {
+        logger.finest('autoSaveCreated------------start(${_dataCreatedQue.length})');
+        while (_dataCreatedQue.isNotEmpty) {
+          final model = _dataCreatedQue.first;
+          // Save here !!!!
+          // _getManager(model.mid)?.createToDB(model);
+          // logger.finest('${model.mid} saved');
+          Map<String, AbsExModelManager>? managerMap = _getManager(model.mid);
+          if (managerMap != null) {
+            for (AbsExModelManager manager in managerMap.values) {
+              manager.createToDB(model);
+              logger.finest('${model.mid} created');
+              _somethingSaved = true;
+            }
+          }
+
+          _dataCreatedQue.removeFirst();
+        }
+        notifyListeners();
+        logger.finest('autoSaveCreated------------end');
+      }
     });
   }
 }
