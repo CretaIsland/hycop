@@ -75,7 +75,7 @@ class AccountManager {
   }
 
   static Future<void> createSession() async {
-    if (_currentLoginUser.isLoginedUser) {
+    if (_currentLoginUser.isLoginedUser || _currentLoginUser.isGuestUser) {
       final url = Uri.parse('${myConfig!.config.sessionServerUrl}/createSession/');
       http.Client client = http.Client();
       if (client is BrowserClient) {
@@ -258,7 +258,7 @@ class AccountManager {
   }
 
   static Future<void> getCurrentUserInfo() async {
-    if (_currentLoginUser.isLoginedUser == false) {
+    if (_currentLoginUser.isLoginedUser == false && _currentLoginUser.isGuestUser == false) {
       // not login !!!
       //throw HycopUtils.getHycopException(defaultMessage: 'not login !!!');
       return;
@@ -302,7 +302,7 @@ class AccountManager {
   }
 
   static Future<void> login(String email, String password) async {
-    if (_currentLoginUser.isLoginedUser) {
+    if (_currentLoginUser.isLoginedUser || _currentLoginUser.isGuestUser) {
       // already login !!!
       throw HycopUtils.getHycopException(defaultMessage: 'already logined !!!');
     }
@@ -388,7 +388,7 @@ class AccountManager {
   }
 
   static Future<void> logout() async {
-    if (_currentLoginUser.isLoginedUser == false) {
+    if (_currentLoginUser.isLoginedUser == false && _currentLoginUser.isGuestUser == false) {
       // already logout !!!
       return;
     }

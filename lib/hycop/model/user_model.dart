@@ -1,16 +1,19 @@
 
 import '../enum/model_enums.dart';
 import '../absModel/abs_model.dart';
+import '../../common/util/config.dart';
 
 class UserModel extends AbsModel {
   // member
   bool _isLoginedUser = false;
+  bool _isGuestUser = false;
   //AccountSignUpType _accountSignUpType = AccountSignInType.none;
   //bool _isGoogleAccount = false;
   //Map<String, dynamic> _userData = {};
   //Map<String, dynamic> get allUserData => _userData;
 
   bool get isLoginedUser => _isLoginedUser;
+  bool get isGuestUser => _isGuestUser;
   AccountSignUpType get accountSignUpType => AccountSignUpType.fromInt(int.parse(
       getValue('accountSignUpType')?.toString() ?? AccountSignUpType.none.index.toString()));
   String get userId => getValue('userId') ?? '';
@@ -34,7 +37,13 @@ class UserModel extends AbsModel {
     if (userId.isEmpty) {
       return;
     }
-    _isLoginedUser = true;
+    String guestUserId = myConfig?.config.guestUserId ?? '';
+    if (guestUserId.isNotEmpty && guestUserId == userId) {
+      _isGuestUser = true;
+    }
+    else {
+      _isLoginedUser = true;
+    }
     fromMap(userData);
   }
 }

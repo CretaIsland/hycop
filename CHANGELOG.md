@@ -1,3 +1,5 @@
+## 0.4.12
+- add guest-user & func.
 ## 0.4.11
 - saveMangaer have saveForcce function.
 ## 0.3.39

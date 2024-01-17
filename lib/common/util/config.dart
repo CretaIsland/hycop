@@ -134,9 +134,14 @@ class AssetConfig extends AbsServerConfig {
   String _sessionServerUrl = '';
   String _googleOAuthCliendId = '';
 
+  String _guestUserId = '';
+  String _guestUserPassword = '';
+
   int get savePeriod => _savePeriod;
   String get sessionServerUrl => _sessionServerUrl;
   String get googleOAuthCliendId => _googleOAuthCliendId;
+  String get guestUserId => _guestUserId;
+  String get guestUserPassword => _guestUserPassword;
 
   @override
   Future<void> loadAsset(/*BuildContext context*/) async {
@@ -148,6 +153,8 @@ class AssetConfig extends AbsServerConfig {
       _sessionServerUrl = _sessionServerUrl.substring(0, _sessionServerUrl.length - 1);
     }
     _googleOAuthCliendId = configMap['googleOAuthCliendId'] ?? '';
+    _guestUserId = configMap['guestUserId'] ?? '';
+    _guestUserPassword = configMap['guestUserPassword'] ?? '';
   }
 }
 

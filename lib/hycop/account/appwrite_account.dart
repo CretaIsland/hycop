@@ -258,7 +258,7 @@ class AppwriteAccount extends AbsAccount {
     logger.finest('logout');
     Account account = Account(AbsDatabase.awDBConn!);
     //Future result =
-    account.deleteSession(sessionId: 'current').catchError((error, stackTrace) =>
+    await account.deleteSession(sessionId: 'current').catchError((error, stackTrace) =>
         throw HycopUtils.getHycopException(
             error: error, defaultMessage: 'deleteSession failed !!!'));
   }
@@ -268,7 +268,7 @@ class AppwriteAccount extends AbsAccount {
     logger.finest('resetPassword($email)');
     Account account = Account(AbsDatabase.awDBConn!);
     //Future result =
-    account.createRecovery(email: email, url: 'http://localhost/#/resetPasswordConfirm').catchError(
+    await account.createRecovery(email: email, url: 'http://localhost/#/resetPasswordConfirm').catchError(
         (error, stackTrace) => throw HycopUtils.getHycopException(
             error: error, defaultMessage: 'createRecovery failed !!!'));
   }
