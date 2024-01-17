@@ -90,7 +90,7 @@ class SaveManager extends ChangeNotifier {
   Timer? _saveTimer;
 
   void stopTimer() {
-    logger.severe('SaveManager.stopTimer');
+    //logger.severe('SaveManager.stopTimer');
     _saveTimer?.cancel();
     _saveTimer = null;
   }
@@ -140,7 +140,7 @@ class SaveManager extends ChangeNotifier {
   }
 
   Future<void> runSaveTimer() async {
-    logger.severe('SaveManager.runSaveTimer');
+    //logger.severe('SaveManager.runSaveTimer');
 
     _saveTimer = Timer.periodic(Duration(milliseconds: myConfig!.config.savePeriod), (timer) async {
       await saveForce();
