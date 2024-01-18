@@ -1,4 +1,6 @@
 ## 0.4.13
+- fix bug of copy content, add func move content
+## 0.4.13
 - fix bug of guest-user & func. 
 ## 0.4.12
 - add guest-user & func.

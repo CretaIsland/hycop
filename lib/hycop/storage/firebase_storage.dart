@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'dart:html';
 import 'dart:typed_data';
 
-
-import 'package:http/browser_client.dart';
-import 'package:http/http.dart' as http;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:http/browser_client.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:hycop/common/util/config.dart';
 import 'package:hycop/common/util/logger.dart';
 import 'package:hycop/hycop/account/account_manager.dart';
@@ -16,244 +16,256 @@ import 'package:hycop/hycop/model/file_model.dart';
 import 'package:hycop/hycop/storage/abs_storage.dart';
 import 'package:hycop/hycop/utils/hycop_utils.dart';
 
-
 class FirebaseAppStorage extends AbsStorage {
 
-
   FirebaseStorage? _storage;
-
+  
 
   @override
   Future<void> initialize() async {
     if(AbsStorage.fbStorageConn == null) {
-      logger.info("storage initialize");
       AbsStorage.setFirebaseApp(await Firebase.initializeApp(
-        name: 'storage',
+        name: "storage",
         options: FirebaseOptions(
-          apiKey: myConfig!.serverConfig!.storageConnInfo.apiKey,
-          appId: myConfig!.serverConfig!.storageConnInfo.appId,
-          messagingSenderId: myConfig!.serverConfig!.storageConnInfo.messagingSenderId,
+          apiKey: myConfig!.serverConfig!.storageConnInfo.apiKey, 
+          appId: myConfig!.serverConfig!.storageConnInfo.appId, 
+          messagingSenderId: myConfig!.serverConfig!.storageConnInfo.messagingSenderId, 
           projectId: myConfig!.serverConfig!.storageConnInfo.projectId,
           storageBucket: myConfig!.serverConfig!.storageConnInfo.storageURL
         )
       ));
     }
-    if(_storage == null) {
-      logger.info("_storage init");
-      _storage = FirebaseStorage.instanceFor(app: AbsStorage.fbStorageConn);
-    }
+    _storage ??= FirebaseStorage.instanceFor(app: AbsStorage.fbStorageConn);
   }
- 
- 
+
   @override
-  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes, {bool makeThumbnail = false, String fileUsage = "content"}) async {
-    await initialize();
+  Future<void> setBucket() async {
+    myConfig!.serverConfig!.storageConnInfo.bucketId = HycopUtils.genBucketId(AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId);
+  }
 
-    fileName = fileName.replaceAll(RegExp(r'[^a-zA-Z0-9가-힣.]'), "_");
-    String folderName = "";
-    if(fileUsage == "content") {
-      if(fileType.contains("image")) {
-        folderName = "$fileUsage/image/";
-      } else if(fileType.contains("video")) {
-        folderName = "$fileUsage/video/";
-      } else {
-        folderName = "$fileUsage/etc/";
-      }
-    }
 
+  @override
+  Future<FileModel?> uploadFile(String fileName, String fileType, Uint8List fileBytes, {bool makeThumbnail = false, String usageType = "content", String bucketId = ""}) async {
     try {
-      var targetFile = _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$folderName$fileName");
-      var uploadFile = await getFile(targetFile.fullPath);
+      await initialize();
 
+      bucketId = bucketId.isEmpty ? myConfig!.serverConfig!.storageConnInfo.bucketId : bucketId;
+      fileName = fileName.replaceAll(RegExp(r'[^a-zA-Z0-9가-힣.]'), "_");
+      String folderName = "";
+      if(usageType == "content") {
+        if(fileType.contains("image")) {
+          folderName = "$usageType/image/";
+        } else if(fileType.contains("video")) {
+          makeThumbnail = true;
+          folderName = "$usageType/video/";
+        } else {
+          if(fileType.contains("pdf")) makeThumbnail = true;
+          folderName = "$usageType/etc/";
+        } 
+      } else if (usageType == "profile") {
+        folderName = "profile";
+      } else {
+        folderName = "banner";
+      }
+
+      var target = _storage!.ref().child("$bucketId/$folderName$fileName");
+      var uploadFile = await getFileData(target.fullPath);
 
       if(uploadFile != null) {
-        if(uploadFile.thumbnailUrl == "" && (makeThumbnail || fileType.contains("video") || fileType.contains("pdf"))) {
-          await createThumbnail(folderName, fileName, fileType);
+        if(uploadFile.thumbnailUrl == "" && makeThumbnail) {
+          await createThumbnail(folderName, fileName, fileType, bucketId);
+          return await getFileData(uploadFile.id);
         }
-        return await getFile(targetFile.fullPath);
+        return uploadFile;
       } else {
-        await targetFile.putData(fileBytes);
-        await targetFile.updateMetadata(SettableMetadata(contentType: fileType));
-        if(makeThumbnail || fileType.contains("video") || fileType.contains("pdf")) {
-          await createThumbnail(folderName, fileName, fileType);
+        await target.putData(fileBytes);
+        await target.updateMetadata(SettableMetadata(contentType: fileType));
+        if(makeThumbnail) {
+          await createThumbnail(folderName, fileName, fileType, bucketId);
         }
-        return await getFile(targetFile.fullPath);
+        return await getFileData(target.fullPath);
       }
     } catch (error) {
-      logger.severe(error);
+      logger.severe("error during Storage.uplaodFile >> $error");
     }
     return null;
   }
 
 
   @override
-  Future<void> deleteFile(String fileId) async {
-    await initialize();
-    await _storage!.ref().child(fileId).delete().onError((error, stackTrace) => logger.severe(error));
+  Future<FileModel?> getFileData(String fileId, {String bucketId = ""}) async {
+    try {
+      await initialize();
+
+      bucketId = bucketId.isEmpty ? myConfig!.serverConfig!.storageConnInfo.bucketId : bucketId;
+      var target = _storage!.ref().child(fileId);
+      var targetMetaData = await target.getMetadata();
+      var targetUrl = await target.getDownloadURL();
+
+      var targetThumbnailUrl = await _storage!.ref()
+        .child("$bucketId/content/thumbnail/${fileId.substring(fileId.lastIndexOf("/") + 1, fileId.lastIndexOf("."))}.jpg")
+        .getDownloadURL().onError((error, stackTrace) async {
+          return targetUrl;
+        });
+      
+      return FileModel(
+        id: targetMetaData.fullPath, 
+        name: targetMetaData.name, 
+        url: targetUrl, 
+        thumbnailUrl: targetThumbnailUrl, 
+        size: targetMetaData.size ?? 0, 
+        contentType: targetMetaData.contentType == null ? ContentsType.none : ContentsType.getContentTypes(targetMetaData.contentType!)
+      );
+    } catch (error) {
+      logger.severe("error during Storage.getFileData >> $error");
+    }
+    return null;
   }
 
+  @override
+  Future<List<FileModel>?> getMultiFileData({String search = "", int limit = 99, int? offset, String? cursor, String cursorDirection = "after", String orderType = "DESC", String bucketId = ""}) async {
+    List<FileModel> multiFileData = [];
+  
+    try {
+      await initialize();
+
+      bucketId = bucketId.isEmpty ? myConfig!.serverConfig!.storageConnInfo.bucketId : bucketId;
+      final multiTarget = await _storage!.ref().child("$bucketId/$search").listAll();
+      for(var target in multiTarget.items) {
+        var targetMetaData = await target.getMetadata();
+        var targetUrl = await target.getDownloadURL();
+        var targetThumbnail = await _storage!.ref()
+          .child("$bucketId/content/thumbnail/${target.fullPath.substring(target.fullPath.lastIndexOf("/") + 1, targetMetaData.fullPath.lastIndexOf("."))}.jpg")
+          .getDownloadURL().onError((error, stackTrace) {
+            return targetUrl;
+          });
+        multiFileData.add(FileModel(
+          id: targetMetaData.fullPath,
+          name: targetMetaData.name, 
+          url: targetUrl, 
+          thumbnailUrl: targetThumbnail, 
+          size: targetMetaData.size ?? 0,
+          contentType: ContentsType.getContentTypes(targetMetaData.contentType!)
+        ));
+      }
+      return multiFileData;
+    } catch (error) {
+      logger.severe("error during Storage.getMultiFileData >> $error");
+    }
+    return null;
+  }
 
   @override
-  Future<Uint8List?> getFileBytes(String fileId) async {
+  Future<Uint8List?> getFileBytes(String fileId, {String bucketId = ""}) async {
     try {
       await initialize();
       return await _storage!.ref().child(fileId).getData();
     } catch (error) {
-      logger.severe(error);
-      return null;
+      logger.severe("error during Storage.getFileBytes >> $error");
     }
+    return null;
   }
 
-
   @override
-  Future<FileModel?> getFile(String fileId) async {
+  Future<bool> deleteFile(String fileId, {String bucketId = ""}) async {
     try {
       await initialize();
-
-      var targetFile = _storage!.ref().child(fileId);
-      var targetFileMetaData = await targetFile.getMetadata();
-      var targetFileUrl = await targetFile.getDownloadURL();
-
-      var fileThumbnailUrl = await _storage!.ref()
-        .child("${myConfig!.serverConfig!.storageConnInfo.bucketId}content/thumbnail/${fileId.substring(fileId.lastIndexOf("/")+1, fileId.lastIndexOf("."))}.jpg")
-        .getDownloadURL().onError((error, stackTrace) async {
-          logger.info(error);
-          return targetFileUrl;
-        });
-
-      return FileModel(
-        id: targetFileMetaData.fullPath,
-        name: targetFileMetaData.name,
-        url: targetFileUrl,
-        thumbnailUrl: fileThumbnailUrl,
-        size: targetFileMetaData.size!,
-        contentType: ContentsType.getContentTypes(targetFileMetaData.contentType!)
-      );
-    } catch(error) {
-      logger.info(error);
-      return null;
-    }
-  }
-
-
-
-
-  @override
-  Future<List<FileModel>?> getFileList({String search = "", int limit = 99, int? offset, String? cursor, String cursorDirection = "after", String orderType = "DESC"}) async {
-    List<FileModel> fileList = [];
-
-    try {
-      await initialize();
-
-      // search 파라미터에는 조회하고 싶은 폴더명 입력 (ex. content/image/)
-      final targetFileList = await _storage!.ref().child("${myConfig!.serverConfig!.storageConnInfo.bucketId}$search").listAll();
-      for(var targetFile in targetFileList.items) {
-        var targetFileMetaData = await targetFile.getMetadata();
-        var targetFileUrl = await targetFile.getDownloadURL();
-        var targetFileThumbnail = await _storage!.ref()
-          .child("${myConfig!.serverConfig!.storageConnInfo.bucketId}content/thumbnail/${targetFile.fullPath.substring(targetFile.fullPath.lastIndexOf("/")+1, targetFile.fullPath.lastIndexOf("."))}.jpg")
-          .getDownloadURL().onError((error, stackTrace) {
-            logger.info(error);
-            return targetFileUrl;
-          });
-
-        fileList.add(FileModel(
-          id: targetFile.fullPath,
-          name: targetFileMetaData.name,
-          url: targetFileUrl,
-          thumbnailUrl: targetFileThumbnail,
-          size: targetFileMetaData.size!,
-          contentType: ContentsType.getContentTypes(targetFileMetaData.contentType!)
-          )
-        );
-      }
-      return fileList;
-    } catch (error) {
-      logger.info(error);
-      return null;
-    }
-  }
-
-
-  @override
-  Future<bool> downloadFile(String fileId, String fileName) async {
-    try {
-      Uint8List? targetFileBytes = await _storage!.ref().child(fileId).getData();
-      final targetFileUrl = Url.createObjectUrlFromBlob(Blob([targetFileBytes!]));
-      AnchorElement(href: targetFileUrl)
-        ..setAttribute("download", fileName)
-        ..click();
-      Url.revokeObjectUrl(targetFileUrl);
+      await _storage!.ref().child(fileId).delete();
       return true;
     } catch (error) {
-      logger.severe(error);
-      return false;
+      logger.severe("error during Storage.deleteFile >> $error");
+    }
+    return false;
+  }
+
+  @override
+  Future<void> downloadFile(String fileId, String fileName, {String bucketId = ""}) async {
+    try {
+      await initialize();
+      Uint8List? targetBytes = await getFileBytes(fileId, bucketId: bucketId);
+      String targetUrl = Url.createObjectUrlFromBlob(Blob([targetBytes]));
+      AnchorElement(href: targetUrl)
+        ..setAttribute("download", fileName)
+        ..click();
+      Url.revokeObjectUrl(targetUrl);
+    } catch (error) {
+      logger.severe("error during Storage.downloadFile >> $error");
     }
   }
- 
- 
+
   @override
-  Future<void> setBucket() async {
-    myConfig!.serverConfig!.storageConnInfo.bucketId = "${HycopUtils.genBucketId(AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId)}/";
+  Future<FileModel?> copyFile(String sourceBucketId, String sourceFileId, {String bucketId = ""}) async {
+    try {
+      await initialize();
+
+      var target = await getFileData("$sourceBucketId/$sourceFileId");
+      if(target != null) {
+        var targetBytes = await getFileBytes("$sourceBucketId/$sourceFileId");
+        if(targetBytes == null) throw Exception("file not exist");
+        return await uploadFile(target.name, target.contentType.name, targetBytes);
+      }
+    } catch (error) {
+      logger.severe("error during Storage.copyFile >> $error");
+    }
+    return null;
   }
- 
- 
+
   @override
-  Future<void> createThumbnail(String sourceFileId, String sourceFileName, String sourceFileType) async {
+  Future<FileModel?> moveFile(String sourceBucketId, String sourceFileId, {String bucketId = ""}) async {
+    try {
+      await initialize();
+
+      var target = await getFileData("$sourceBucketId/$sourceFileId");
+      if(target != null) {
+        var targetBytes = await getFileBytes("$sourceBucketId/$sourceFileId");
+        if(targetBytes == null) throw Exception("file not exist");
+        var moveFile = await uploadFile(target.name, target.contentType.name, targetBytes);
+        await deleteFile("$sourceBucketId/$sourceFileId");
+        return moveFile;
+      }
+    } catch (error) {
+      logger.severe("error during Storage.copyFile >> $error");
+    }
+    return null;
+  }
+
+  @override
+  Future<bool> createThumbnail(String sourceFileId, String sourceFileName, String sourceFileType, String sourceBucketId) async {
     try {
       http.Client client = http.Client();
       if (client is BrowserClient) {
         client.withCredentials = true;
       }
 
-      await client.post(
+      var response = await client.post(
         Uri.parse("https://devcreta.com:553/createThumbnail"),
         headers: {
           "Content-type": "application/json"
         },
         body: jsonEncode({
-          "bucketId" : myConfig!.serverConfig!.storageConnInfo.bucketId.substring(0, myConfig!.serverConfig!.storageConnInfo.bucketId.length -1),
+          "bucketId" : sourceBucketId,
           "folderName" : sourceFileId.replaceAll("/", "%2F"),
           "fileName" : sourceFileName,
           "fileType": sourceFileType,
           "cloudType" : "firebase"
         })
       );
+
+      if(response.statusCode == 200) return true;
     } catch (error) {
       logger.info(error);
     }
+    return false;
   }
-  
+
   @override
-  Future<FileModel?> copyFile(String targetFileurl, {String targetThumbnailUrl = ""}) async {
-    try {
-      http.Client client = http.Client();
-      if (client is BrowserClient) {
-        client.withCredentials = true;
-      }
+  Map<String, String> parseFileUrl(String fileUrl) {
+    Map<String, String> parseResult = {};
 
-      http.Response res = await client.post(
-        Uri.parse("https://devcreta.com:444/copyContent"),
-        headers: {
-          "Content-type": "application/json"
-        },
-        body: jsonEncode({
-          "sourceFileUrl" : targetFileurl,
-          "sourceThumbnailUrl" : targetThumbnailUrl,
-          "targetBucketId" : myConfig!.serverConfig!.storageConnInfo.bucketId,
-          "cloudType" : "firebase"
-        })
-      );
+    parseResult.addEntries(<String, String>{"bucketId" : fileUrl.substring(fileUrl.indexOf("o/") + 2, fileUrl.indexOf("%2F"))}.entries);
+    parseResult.addEntries(<String, String>{"fileId" : Uri.decodeComponent(fileUrl.substring(fileUrl.indexOf("%2F") + 3, fileUrl.indexOf("?alt")).replaceAll(RegExp(r"%2F", caseSensitive: false), "/"))}.entries);
 
-      var resData = jsonDecode(utf8.decode(res.bodyBytes));
-      if(resData["status"] == "success") {
-        return await getFile(resData["fileId"]);
-      } 
-    } catch (error) {
-      logger.severe(error);
-    }
-    return null;
+    return parseResult;
   }
 
- 
 }
