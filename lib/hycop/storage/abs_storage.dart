@@ -25,7 +25,7 @@ abstract class AbsStorage {
   Future<List<FileModel>?> getMultiFileData({String search="", int limit = 99, int? offset, String? cursor, String cursorDirection = "after", String orderType = "DESC", String bucketId = ""}); // get multiple file info
   Future<Uint8List?> getFileBytes(String fileId, {String bucketId = ""}); // get file bytes
   Future<bool> deleteFile(String fileId, {String bucketId = ""}); // delete file
-  Future<void> downloadFile(String fileId, String fileName, {String bucketId = ""}); // local download file
+  Future<bool> downloadFile(String fileId, String fileName, {String bucketId = ""}); // local download file
   Future<FileModel?> copyFile(String sourceBucketId, String sourceFileId, {String bucketId = ""});  // copy file
   Future<FileModel?> moveFile(String sourceBucketId, String sourceFileId, {String bucketId = ""});  // change file bucket
 

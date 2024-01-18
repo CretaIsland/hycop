@@ -221,7 +221,7 @@ class AppwriteStorage extends AbsStorage {
   }
 
   @override
-  Future<void> downloadFile(String fileId, String fileName, {String bucketId = ""}) async {
+  Future<bool> downloadFile(String fileId, String fileName, {String bucketId = ""}) async {
     try {
       await initialize();
       Uint8List? targetBytes = await getFileBytes(fileId, bucketId: bucketId);
@@ -230,9 +230,11 @@ class AppwriteStorage extends AbsStorage {
         ..setAttribute("download", fileName)
         ..click();
       Url.revokeObjectUrl(targetUrl);
+      return true;
     } catch (error) {
       logger.severe("error during Storage.downloadFile >> $error");
     }
+    return false;
   }
 
   @override

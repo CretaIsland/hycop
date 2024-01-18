@@ -1,3 +1,5 @@
+## 0.4.15
+- fix download file func
 ## 0.4.14
 - fix bug of copy content, add func move content
 ## 0.4.13
