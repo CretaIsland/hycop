@@ -63,9 +63,11 @@ class FirebaseAppStorage extends AbsStorage {
           folderName = "$usageType/etc/";
         } 
       } else if (usageType == "profile") {
-        folderName = "profile";
-      } else {
-        folderName = "banner";
+        folderName = "profile/";
+      } else if (usageType == "banner") {
+        folderName = "banner/";
+      } else if (usageType == "bookThumbnail"){
+        folderName = "book/thumbnail/";
       }
 
       var target = _storage!.ref().child("$bucketId/$folderName$fileName");
@@ -105,7 +107,7 @@ class FirebaseAppStorage extends AbsStorage {
       var targetThumbnailUrl = await _storage!.ref()
         .child("$bucketId/content/thumbnail/${fileId.substring(fileId.lastIndexOf("/") + 1, fileId.lastIndexOf("."))}.jpg")
         .getDownloadURL().onError((error, stackTrace) async {
-          return targetUrl;
+          return targetMetaData.contentType!.contains("image") ? targetUrl : "";
         });
       
       return FileModel(
@@ -117,7 +119,7 @@ class FirebaseAppStorage extends AbsStorage {
         contentType: targetMetaData.contentType == null ? ContentsType.none : ContentsType.getContentTypes(targetMetaData.contentType!)
       );
     } catch (error) {
-      logger.severe("error during Storage.getFileData >> $error");
+      logger.info("error during Storage.getFileData >> $error");
     }
     return null;
   }
@@ -137,7 +139,7 @@ class FirebaseAppStorage extends AbsStorage {
         var targetThumbnail = await _storage!.ref()
           .child("$bucketId/content/thumbnail/${target.fullPath.substring(target.fullPath.lastIndexOf("/") + 1, targetMetaData.fullPath.lastIndexOf("."))}.jpg")
           .getDownloadURL().onError((error, stackTrace) {
-            return targetUrl;
+            return targetMetaData.contentType!.contains("image") ? targetUrl : "";
           });
         multiFileData.add(FileModel(
           id: targetMetaData.fullPath,
@@ -150,7 +152,7 @@ class FirebaseAppStorage extends AbsStorage {
       }
       return multiFileData;
     } catch (error) {
-      logger.severe("error during Storage.getMultiFileData >> $error");
+      logger.info("error during Storage.getMultiFileData >> $error");
     }
     return null;
   }
@@ -159,9 +161,12 @@ class FirebaseAppStorage extends AbsStorage {
   Future<Uint8List?> getFileBytes(String fileId, {String bucketId = ""}) async {
     try {
       await initialize();
-      return await _storage!.ref().child(fileId).getData();
+      String downloadUrl = await _storage!.ref().child(fileId).getDownloadURL();
+      http.Response response = await http.get(Uri.parse(downloadUrl));
+      Uint8List imageData = response.bodyBytes;
+      return imageData;
     } catch (error) {
-      logger.severe("error during Storage.getFileBytes >> $error");
+      logger.info("error during Storage.getFileBytes >> $error");
     }
     return null;
   }
@@ -200,11 +205,11 @@ class FirebaseAppStorage extends AbsStorage {
     try {
       await initialize();
 
-      var target = await getFileData("$sourceBucketId/$sourceFileId");
+      var target = await getFileData("$sourceBucketId/$sourceFileId",bucketId: sourceBucketId);
       if(target != null) {
-        var targetBytes = await getFileBytes("$sourceBucketId/$sourceFileId");
+        var targetBytes = await getFileBytes("$sourceBucketId/$sourceFileId", bucketId: sourceBucketId);
         if(targetBytes == null) throw Exception("file not exist");
-        return await uploadFile(target.name, target.contentType.name, targetBytes);
+        return await uploadFile(target.name, target.contentType.name, targetBytes, bucketId: bucketId, usageType: getUsageType(target.id));
       }
     } catch (error) {
       logger.severe("error during Storage.copyFile >> $error");
@@ -217,11 +222,15 @@ class FirebaseAppStorage extends AbsStorage {
     try {
       await initialize();
 
-      var target = await getFileData("$sourceBucketId/$sourceFileId");
+      var target = await getFileData("$sourceBucketId/$sourceFileId", bucketId: sourceBucketId);
       if(target != null) {
         var targetBytes = await getFileBytes("$sourceBucketId/$sourceFileId");
         if(targetBytes == null) throw Exception("file not exist");
-        var moveFile = await uploadFile(target.name, target.contentType.name, targetBytes);
+        var moveFile = await uploadFile(target.name, target.contentType.name, targetBytes, bucketId: bucketId, usageType: getUsageType(target.id));
+        if(target.thumbnailUrl.isNotEmpty && target.thumbnailUrl != target.url) {
+          var targetThumbnailData = parseFileUrl(target.thumbnailUrl);
+          await deleteFile("${targetThumbnailData["bucketId"]!}/${targetThumbnailData["fileId"]!}");
+        }
         await deleteFile("$sourceBucketId/$sourceFileId");
         return moveFile;
       }
@@ -268,6 +277,18 @@ class FirebaseAppStorage extends AbsStorage {
     parseResult.addEntries(<String, String>{"fileId" : Uri.decodeComponent(fileUrl.substring(fileUrl.indexOf("%2F") + 3, fileUrl.indexOf("?alt")).replaceAll(RegExp(r"%2F", caseSensitive: false), "/"))}.entries);
 
     return parseResult;
+  }
+
+  String getUsageType(String fileId) {
+    if(fileId.contains("content")) {
+      return "content";
+    } else if(fileId.contains("profile")) {
+      return "profile";
+    } else if(fileId.contains("banner")) {
+       return "banner";
+    } else {
+      return "bookThumbnail";
+    }
   }
 
 }

@@ -99,7 +99,8 @@ class AppwriteStorage extends AbsStorage {
           break;
         default: break;
       }
-      fileId += StorageUtils.getMD5(fileBytes);
+      if(usageType != "bookThumbnail") fileId += StorageUtils.getMD5(fileBytes);
+
       var target = await getFileData(fileId);
       if(target != null) {
         if(target.thumbnailUrl.isEmpty && makeThumbnail) {
@@ -146,7 +147,7 @@ class AppwriteStorage extends AbsStorage {
         );
       }
     } catch (error) { // file not exist or something error
-      logger.severe("error during Storage.getFileData >> $error");
+      logger.info("error during Storage.getFileData >> $error");
     }
     return null;
   }
@@ -190,7 +191,7 @@ class AppwriteStorage extends AbsStorage {
       }
       return multiFileData;
     } catch (error) {
-      logger.severe("error during Storage.getMultiFileData >> $error");
+      logger.info("error during Storage.getMultiFileData >> $error");
     }
     return null;
   }
@@ -202,7 +203,7 @@ class AppwriteStorage extends AbsStorage {
       bucketId = bucketId.isEmpty ? myConfig!.serverConfig!.storageConnInfo.bucketId : bucketId;
       return await _storage!.getFileDownload(bucketId: bucketId, fileId: fileId);
     } catch (error) {
-      logger.severe("error during Storage.getFileBytes >> $error");
+      logger.info("error during Storage.getFileBytes >> $error");
     }
     return null;
   }
@@ -245,7 +246,7 @@ class AppwriteStorage extends AbsStorage {
       if(target != null) {
         var targetBytes = await getFileBytes(sourceFileId, bucketId: sourceBucketId);
         if(targetBytes == null) throw Exception("file bytes is null");
-        return await uploadFile(target.name, target.contentType.name, targetBytes, bucketId: bucketId);
+        return await uploadFile(target.name, target.contentType.name, targetBytes, bucketId: bucketId, usageType: getUsageType(target.id));
       }
     } catch (error) {
       logger.severe("error during Storage.copyFile >> $error");
@@ -261,7 +262,12 @@ class AppwriteStorage extends AbsStorage {
       if(target != null) {
         var targetBytes = await getFileBytes(sourceFileId, bucketId: sourceBucketId);
         if(targetBytes == null) throw Exception("file bytes is null");
-        var moveFile = await uploadFile(target.name, target.contentType.name, targetBytes, bucketId: bucketId);
+        var moveFile = await uploadFile(target.name, target.contentType.name, targetBytes, bucketId: bucketId, usageType: getUsageType(target.id));
+        
+        if(target.thumbnailUrl.isNotEmpty && target.thumbnailUrl != target.url) {
+          var targetThumbnailData = parseFileUrl(target.thumbnailUrl);
+          await deleteFile(targetThumbnailData["fileId"]!, bucketId: targetThumbnailData["bucketId"]!);
+        }
         await deleteFile(sourceFileId, bucketId: sourceBucketId);
         return moveFile;
       }
@@ -309,6 +315,18 @@ class AppwriteStorage extends AbsStorage {
     parseResult.addEntries(<String, String>{"fileId" : fileUrl.substring(fileUrl.indexOf("files/") + 6, fileUrl.indexOf("/view"))}.entries);
 
     return parseResult;
+  }
+
+  String getUsageType(String fileId) {
+    if(fileId.contains("img-") || fileId.contains("vid-") || fileId.contains("etc-")) {
+      return "content";
+    } else if(fileId.contains("pic-")) {
+      return "profile";
+    } else if(fileId.contains("ad-")) {
+       return "banner";
+    } else {
+      return "bookThumbnail";
+    }
   }
 
 
