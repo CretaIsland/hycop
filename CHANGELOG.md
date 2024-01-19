@@ -1,3 +1,6 @@
+## 0.4.17
+- modify resetPassword
+- fix bug of simpleQueryData on firebase
 ## 0.4.16
 - fix fileId bug
 ## 0.4.15

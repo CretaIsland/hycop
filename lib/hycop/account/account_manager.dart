@@ -409,11 +409,12 @@ class AccountManager {
     await deleteSession();
   }
 
-  static Future<void> resetPassword(String email) async {
+  static Future<(String, String)> resetPassword(String email) async {
     await initialize();
-    await HycopFactory.account!.resetPassword(email).catchError((error, stackTrace) =>
+    var ret = await HycopFactory.account!.resetPassword(email).catchError((error, stackTrace) =>
         throw HycopUtils.getHycopException(
             error: error, defaultMessage: 'AccountManager.resetPassword Failed !!!'));
+    return ret;
   }
 
   static Future<void> resetPasswordConfirm(String userId, String secret, String newPassword) async {

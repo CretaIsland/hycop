@@ -1,5 +1,6 @@
 // import 'package:cloud_firestore/cloud_firestore.dart';
 // import '../../hycop/absModel/abs_ex_model.dart';
+import 'package:uuid/uuid.dart';
 import '../absModel/abs_model.dart';
 // import 'package:firebase_core/firebase_core.dart';
 //import '../../hycop/utils/hycop_exceptions.dart';
@@ -213,14 +214,36 @@ class FirebaseAccount extends AbsAccount {
     // do nothing
   }
 
+
+
   @override
-  Future<void> resetPassword(String email) async {
+  Future<(String, String)> resetPassword(String email) async {
     logger.finest('resetPassword');
     //
     // 서버의 api-url로 email정보 전송
     // => users 테이블에서 email 계정을 찾아서 (임의의)secret키 set, userId를 get
     // => smtp로 email 계정으로 secret키 및 userId를 전송 (ex: https://www.examples.com/resetPasswordConfirm?userId=xxx&secret=yyy )
     //
+    logger.finest('resetPassword(email:$email)');
+    // var getUserData = await HycopFactory.dataBase!.getData('hycop_users', 'email=$email').catchError(
+    //         (error, stackTrace) =>
+    //     throw HycopUtils.getHycopException(error: error, defaultMessage: 'not exist account(email:$email) !!!'));
+    final getUserDataList = await HycopFactory.dataBase!
+        .simpleQueryData('hycop_users', name: 'email', value: email, orderBy: 'name')
+        .catchError((error, stackTrace) =>
+    throw HycopUtils.getHycopException(error: error, defaultMessage: 'not exist account(email:$email) !!!'));
+    if (getUserDataList.isEmpty) {
+      logger.severe('getData error !!!');
+      throw const HycopException(message: 'getData failed !!!');
+    }
+    var getUserData = getUserDataList[0]; // exist only-one
+    String userId = getUserData['userId'];
+    String uuid = const Uuid().v4();
+    String secretKey = uuid.replaceAll(RegExp(r'-'), '');
+    getUserData['secret'] = secretKey;
+    await HycopFactory.dataBase!.setData('hycop_users', 'user=${getUserData['userId']}', getUserData).catchError(
+            (error, stackTrace) => throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
+    return (userId, secretKey);
   }
 
   @override

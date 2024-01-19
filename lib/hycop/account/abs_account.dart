@@ -20,6 +20,6 @@ abstract class AbsAccount {
 
   Future<void> login(String email, String password, {Map<String, dynamic>? returnUserData, AccountSignUpType accountSignUpType=AccountSignUpType.hycop});
   Future<void> logout();
-  Future<void> resetPassword(String email);
+  Future<(String, String)> resetPassword(String email);
   Future<void> resetPasswordConfirm(String userId, String secret, String newPassword);
 }

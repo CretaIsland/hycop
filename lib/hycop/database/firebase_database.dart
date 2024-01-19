@@ -131,16 +131,17 @@ class FirebaseDatabase extends AbsDatabase {
       int? offset}) async {
     await initialize();
 
-    final List resultList = [];
+    List resultList = [];
     CollectionReference collectionRef = _db!.collection(collectionId);
     await collectionRef
         .orderBy(orderBy, descending: true)
         .where(name, isEqualTo: value)
         .get()
         .then((snapshot) {
-      for (var result in snapshot.docs) {
-        resultList.add(result);
-      }
+      resultList = snapshot.docs.map((doc) {
+        //logger.finest(doc.data()!.toString());
+        return doc.data()! as Map<String, dynamic>;
+      }).toList();
     });
     return resultList;
   }

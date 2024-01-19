@@ -264,13 +264,13 @@ class AppwriteAccount extends AbsAccount {
   }
 
   @override
-  Future<void> resetPassword(String email) async {
+  Future<(String, String)> resetPassword(String email) async {
     logger.finest('resetPassword($email)');
     Account account = Account(AbsDatabase.awDBConn!);
-    //Future result =
     await account.createRecovery(email: email, url: 'http://localhost/#/resetPasswordConfirm').catchError(
         (error, stackTrace) => throw HycopUtils.getHycopException(
             error: error, defaultMessage: 'createRecovery failed !!!'));
+    return ('', '');
   }
 
   @override
