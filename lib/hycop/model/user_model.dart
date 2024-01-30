@@ -23,6 +23,7 @@ class UserModel extends AbsModel {
   String get phone => getValue('phone') ?? '';
   String get imagefile => getValue('imagefile') ?? '';
   String get userType => getValue('userType') ?? '';
+  String get secret => getValue('secret') ?? '';
 
   UserModel(
       {ObjectType type = ObjectType.user, Map<String, dynamic>? userData, bool logout = false})

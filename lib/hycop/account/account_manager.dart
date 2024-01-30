@@ -207,7 +207,7 @@ class AccountManager {
           throw HycopUtils.getHycopException(defaultMessage: 'login cancel!!!');
         }
       }
-      bool alreadyExistAccount = await AccountManager.isExistAccount(_googleAccount!.email)
+      final value = await AccountManager.isExistAccount(_googleAccount!.email)
           .catchError((error, stackTrace) {
         throw HycopUtils.getHycopException(
             error: error, defaultMessage: 'isExistAccount error !!!');
@@ -217,8 +217,7 @@ class AccountManager {
           //throw HycopUtils.getHycopException(defaultMessage: 'already exist account !!!');
         }
       });*/
-
-      if (alreadyExistAccount == false) {
+      if (value == AccountSignUpType.none) {
         Map<String, dynamic> userData = {};
         userData['name'] = _googleAccount!.displayName ?? '';
         userData['email'] = _googleAccount!.email;
@@ -245,16 +244,16 @@ class AccountManager {
     }
   }
 
-  static Future<bool> isExistAccount(String email) async {
+  static Future<AccountSignUpType?> isExistAccount(String email) async {
     await initialize();
     logger.finest('isExistAccount');
-    bool isExistAccount =
+    final value =
         await HycopFactory.account!.isExistAccount(email).catchError((error, stackTrace) {
       logger.severe('isExistAccount failed (${error.toString()})');
       throw HycopUtils.getHycopException(
           error: error, defaultMessage: 'AccountManager.isExistAccount Failed !!!');
     });
-    return isExistAccount;
+    return value;
   }
 
   static Future<void> getCurrentUserInfo() async {

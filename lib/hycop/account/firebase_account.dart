@@ -1,6 +1,6 @@
 // import 'package:cloud_firestore/cloud_firestore.dart';
 // import '../../hycop/absModel/abs_ex_model.dart';
-import 'package:uuid/uuid.dart';
+//import 'package:uuid/uuid.dart';
 import '../absModel/abs_model.dart';
 // import 'package:firebase_core/firebase_core.dart';
 //import '../../hycop/utils/hycop_exceptions.dart';
@@ -14,6 +14,7 @@ import '../utils/hycop_exceptions.dart';
 import '../utils/hycop_utils.dart';
 import 'account_manager.dart';
 import '../enum/model_enums.dart'; // AccountSignUpType 사용
+import '../model/user_model.dart';
 
 class FirebaseAccount extends AbsAccount {
   // @override
@@ -22,20 +23,14 @@ class FirebaseAccount extends AbsAccount {
   // }
   //
 
+
   @override
   Future<void> createAccount(Map<String, dynamic> createUserData) async {
     logger.finest('createAccount($createUserData)');
     // accountSignUpType
-    // var accountSignUpType = AccountSignUpType.hycop;
-    // if (createUserData['accountSignUpType'] == null) {
-    //   createUserData['accountSignUpType'] = accountSignUpType.index;
-    // } else {
-    //   accountSignUpType = AccountSignUpType.fromInt(int.parse(createUserData['accountSignUpType'].toString()));
-    //   if (accountSignUpType == AccountSignUpType.none) {
-    //     logger.severe('invalid sign-up type !!!');
-    //     throw HycopUtils.getHycopException(defaultMessage: 'invalid sign-up type !!!');
-    //   }
-    // }
+    // var accountSignUpType = AccountSignUpType.fromInt(
+    //   int.parse(createUserData['accountSignUpType'].toString()),
+    // );
     // userId
     String userId = createUserData['userId'] ?? '';
     if (userId.isEmpty) {
@@ -51,52 +46,36 @@ class FirebaseAccount extends AbsAccount {
     }
     // password
     // String password = createUserData['password'] ?? '';
-    // if (password.isEmpty && accountSignUpType == AccountSignUpType.hycop) {
-    //   // hycop-service need password !!!
-    //   logger.severe('password is empty !!!');
-    //   throw HycopUtils.getHycopException(defaultMessage: 'password is empty !!!');
-    // }
-    // String passwordSha1 = '';
-    // if (accountSignUpType == AccountSignUpType.hycop) {
-    //   // hycop-service's password = sha1-hash of password
-    //   passwordSha1 = HycopUtils.stringToSha1(password);
-    // } else {
-    //   // hycop-service's password = sha1-hash of email
-    //   passwordSha1 = HycopUtils.stringToSha1(email); //sha1.convert(bytes).toString();
-    //   password = passwordSha1;
-    // }
-    // createUserData['password'] = passwordSha1;
-    // logger.finest('password resetting to [$password] (${accountSignUpType.name}');
+    // secret
+    String secret = createUserData['secret'] ?? '';
+    if (secret.isEmpty) {
+      secret = HycopUtils.genUuid(includeDash: false);//const Uuid().v4().replaceAll('-', '');
+      createUserData['secret'] = secret;
+    }
+    // create account
     logger.finest('createAccount($createUserData)');
     await HycopFactory.dataBase!.createData('hycop_users', 'user=$userId', createUserData).catchError((error, stackTrace) =>
         throw HycopUtils.getHycopException(error: error, defaultMessage: 'loginByEmail Error !!!'));
     logger.finest('createAccount($createUserData) success');
   }
 
+
   @override
-  Future<bool> isExistAccount(String email) async {
-    final getUserData =
-    await HycopFactory.dataBase!
-        .simpleQueryData('hycop_users', name: 'email', value: email, orderBy: 'name')
-        .catchError((error, stackTrace) =>
-    throw HycopUtils.getHycopException(error: error, defaultMessage: 'not exist account(email:$email) !!!'));
-    //     .then((value) {
-    //   if (value.isEmpty) {
-    //     logger.finest('not exist account(email:$email) !!!');
-    //     //throw HycopException(message: 'not exist account(email:$email) !!!');
-    //     return Future.value(false); //false;
-    //   } else {
-    //     logger.finest('exist account(email:$email)');
-    //     return Future.value(true); //true;
-    //   }
-    // });
-    // logger.finest('not exist account(email:$email)');
-    // return Future.value(false); //false;
-    if (getUserData.isEmpty) {
-      return false;
+  Future<AccountSignUpType?> isExistAccount(String email) async {
+    List getUserDataList = await HycopFactory.dataBase!
+        .simpleQueryData('hycop_users', name: 'email', value: email, orderBy: 'email')
+        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
+        error: error, defaultMessage: 'not exist account(email:$email) !!!'));
+    if (getUserDataList.isEmpty) {
+      logger.finest('not exist account(email:$email) !!!');
+      return AccountSignUpType.none;
     }
-    return true;
+    logger.finest('exist account(email:$email)');
+    final getUserData = getUserDataList[0]; // exist only-one
+    final userModel = UserModel(userData: getUserData);
+    return userModel.accountSignUpType;
   }
+
 
   @override
   Future<void> getAccountInfo(String userId, Map<String, dynamic> userData) async {
@@ -118,6 +97,7 @@ class FirebaseAccount extends AbsAccount {
     logger.finest('getAccountInfo success ($userData)');
   }
 
+
   @override
   Future<void> updateAccountInfo(Map<String, dynamic> updateUserData) async {
     logger.finest('updateAccount($updateUserData)');
@@ -128,6 +108,7 @@ class FirebaseAccount extends AbsAccount {
     await HycopFactory.dataBase!.setData('hycop_users', 'user=$userId', updateUserData).catchError(
         (error, stackTrace) => throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
   }
+
 
   @override
   Future<void> updateAccountPassword(String newPassword, String oldPassword) async {
@@ -167,6 +148,7 @@ class FirebaseAccount extends AbsAccount {
         (error, stackTrace) => throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
   }
 
+
   @override
   Future<void> deleteAccount() async {
     logger.finest('deleteAccount(${AccountManager.currentLoginUser.email})');
@@ -178,6 +160,7 @@ class FirebaseAccount extends AbsAccount {
     await HycopFactory.dataBase!.setData('hycop_users', 'user=$userId', newUserData).catchError(
         (error, stackTrace) => throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
   }
+
 
   @override
   Future<void> login(String email, String password,
@@ -208,12 +191,12 @@ class FirebaseAccount extends AbsAccount {
     logger.finest('loginByEmail success ($returnUserData)');
   }
 
+
   @override
   Future<void> logout() async {
     logger.finest('logout');
     // do nothing
   }
-
 
 
   @override
@@ -225,9 +208,6 @@ class FirebaseAccount extends AbsAccount {
     // => smtp로 email 계정으로 secret키 및 userId를 전송 (ex: https://www.examples.com/resetPasswordConfirm?userId=xxx&secret=yyy )
     //
     logger.finest('resetPassword(email:$email)');
-    // var getUserData = await HycopFactory.dataBase!.getData('hycop_users', 'email=$email').catchError(
-    //         (error, stackTrace) =>
-    //     throw HycopUtils.getHycopException(error: error, defaultMessage: 'not exist account(email:$email) !!!'));
     final getUserDataList = await HycopFactory.dataBase!
         .simpleQueryData('hycop_users', name: 'email', value: email, orderBy: 'name')
         .catchError((error, stackTrace) =>
@@ -237,14 +217,17 @@ class FirebaseAccount extends AbsAccount {
       throw const HycopException(message: 'getData failed !!!');
     }
     var getUserData = getUserDataList[0]; // exist only-one
-    String userId = getUserData['userId'];
-    String uuid = const Uuid().v4();
-    String secretKey = uuid.replaceAll(RegExp(r'-'), '');
-    getUserData['secret'] = secretKey;
+    final userModel = UserModel(userData: getUserData);
+    if (userModel.accountSignUpType != AccountSignUpType.hycop) {
+      return ('', '');
+    }
+    String secret = HycopUtils.genUuid(includeDash: false);//const Uuid().v4().replaceAll(RegExp(r'-'), '');
+    getUserData['secret'] = secret;
     await HycopFactory.dataBase!.setData('hycop_users', 'user=${getUserData['userId']}', getUserData).catchError(
             (error, stackTrace) => throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
-    return (userId, secretKey);
+    return (userModel.userId, secret);
   }
+
 
   @override
   Future<void> resetPasswordConfirm(String userId, String secret, String newPassword) async {

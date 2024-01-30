@@ -3,7 +3,9 @@
 //import 'package:appwrite/appwrite.dart';
 //import 'package:firebase_core/firebase_core.dart';
 //import 'package:flutter/material.dart';
-// import 'account_manager.dart'; // AccountSignUpType 사용
+//import 'account_manager.dart'; // AccountSignUpType 사용
+//import 'package:appwrite/appwrite.dart';
+
 import '../enum/model_enums.dart'; // AccountSignUpType 사용
 
 
@@ -12,7 +14,7 @@ abstract class AbsAccount {
   //Future<void> initialize();
 
   Future<void> createAccount(Map<String, dynamic> createUserData);
-  Future<bool> isExistAccount(String email);
+  Future<AccountSignUpType?> isExistAccount(String email);
   Future<void> getAccountInfo(String userId, Map<String, dynamic> userData);
   Future<void> updateAccountInfo(Map<String, dynamic> updateUserData);
   Future<void> updateAccountPassword(String newPassword, String oldPassword);

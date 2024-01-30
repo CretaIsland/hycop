@@ -1,3 +1,5 @@
+## 0.4.18
+- modify account & func.
 ## 0.4.17
 - modify resetPassword
 - fix bug of simpleQueryData on firebase

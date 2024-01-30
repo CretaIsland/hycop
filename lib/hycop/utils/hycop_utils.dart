@@ -126,4 +126,11 @@ class HycopUtils {
     return bucketId;
   }
 
+  static String genUuid({bool includeBracket=false, bool includeDash=true}) {
+    String uuid = (includeBracket) ? '{${const Uuid().v4()}}' : const Uuid().v4();
+    if (includeDash) {
+      return uuid;
+    }
+    return uuid.replaceAll(RegExp(r'-'), '');
+  }
 }
