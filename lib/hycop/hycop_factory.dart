@@ -1,4 +1,4 @@
-import 'package:hycop/hycop/account/account_manager.dart';
+import '../../hycop/account/account_manager.dart';
 
 import '../../hycop/storage/abs_storage.dart';
 import '../../hycop/storage/appwrite_storage.dart';
@@ -67,7 +67,9 @@ class HycopFactory {
   }
 
   static void setBucketId() {
-    if ((AccountManager.currentLoginUser.isLoginedUser || AccountManager.currentLoginUser.isGuestUser) && HycopFactory.storage != null) {
+    if ((AccountManager.currentLoginUser.isLoginedUser ||
+            AccountManager.currentLoginUser.isGuestUser) &&
+        HycopFactory.storage != null) {
       storage!.setBucket();
     }
   }

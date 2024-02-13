@@ -1,9 +1,6 @@
-import 'package:hycop/hycop/enum/model_enums.dart';
-
+import '../../hycop/enum/model_enums.dart';
 
 class FileModel {
-
-
   late String id;
   late String name;
   late String url;
@@ -11,28 +8,24 @@ class FileModel {
   late int size;
   late ContentsType contentType;
 
-
-  FileModel({
-    required this.id,
-    required this.name,
-    required this.url,
-    required this.thumbnailUrl,
-    required this.size,
-    required this.contentType
-  });
-
+  FileModel(
+      {required this.id,
+      required this.name,
+      required this.url,
+      required this.thumbnailUrl,
+      required this.size,
+      required this.contentType});
 
   Map<String, dynamic> toMap() {
     return {
-      'id' : id,
-      'name' : name,
-      'url' : url,
-      'thumbnailUrl' : thumbnailUrl,
-      'size' : size,
-      'contentType' : contentType
+      'id': id,
+      'name': name,
+      'url': url,
+      'thumbnailUrl': thumbnailUrl,
+      'size': size,
+      'contentType': contentType
     };
   }
-
 
   void fromMap(Map<String, dynamic> map) {
     id = map['id'];
@@ -42,6 +35,4 @@ class FileModel {
     size = map['size'];
     contentType = map['contentType'];
   }
-
-
 }

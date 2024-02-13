@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:hycop/common/util/logger.dart';
-import 'package:hycop/hycop/account/account_manager.dart';
-import 'package:hycop/hycop/socket/mouse_tracer.dart';
+import '../../common/util/logger.dart';
+import '../../hycop/account/account_manager.dart';
+import '../../hycop/socket/mouse_tracer.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
 class SocketClient {

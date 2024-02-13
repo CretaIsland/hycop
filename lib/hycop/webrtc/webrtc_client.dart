@@ -1,20 +1,17 @@
-
-
-import 'package:hycop/hycop/webrtc/media_devices/media_devices_data.dart';
-import 'package:hycop/hycop/webrtc/peers/peers_data.dart';
-import 'package:hycop/hycop/webrtc/producers/producers_data.dart';
-import 'package:hycop/hycop/webrtc/websocket.dart';
+import '../../hycop/webrtc/media_devices/media_devices_data.dart';
+import '../../hycop/webrtc/peers/peers_data.dart';
+import '../../hycop/webrtc/producers/producers_data.dart';
+import '../../hycop/webrtc/websocket.dart';
 import 'package:mediasoup_client_flutter/mediasoup_client_flutter.dart';
 
 WebRTCClient? webRTCClient;
 
 class WebRTCClient {
-
   final String roomId;
   final String peerId;
   final String peerName;
   final String serverUrl;
-  
+
   WebSocket? _webSocket;
   Device? _mediaDevice;
   Transport? _sendTransport;
@@ -27,23 +24,19 @@ class WebRTCClient {
   String audioInputDeviceId = "";
   String videoInputDeviceId = "";
 
-
-  WebRTCClient({required this.roomId, required this.peerId, required this.peerName, required this.serverUrl});
-
+  WebRTCClient(
+      {required this.roomId,
+      required this.peerId,
+      required this.peerName,
+      required this.serverUrl});
 
   // connect socket server
   void connectSocket() {
-
-    _webSocket = WebSocket(
-      peerId: peerId, 
-      roomId: roomId, 
-      url: serverUrl
-    );
+    _webSocket = WebSocket(peerId: peerId, roomId: roomId, url: serverUrl);
 
     // socket event
     _webSocket!.onOpen = joinRoom;
-    _webSocket!.onFail = () {
-    };
+    _webSocket!.onFail = () {};
     _webSocket!.onDisconnected = () {
       if (_sendTransport != null) {
         _sendTransport!.close();
@@ -85,7 +78,7 @@ class WebRTCClient {
           break;
       }
     };
-    _webSocket!.onNotification =(notification) {
+    _webSocket!.onNotification = (notification) {
       switch (notification['method']) {
         case 'consumerClosed':
           {
@@ -129,18 +122,20 @@ class WebRTCClient {
 
   // join socket room
   Future<void> joinRoom() async {
-
     try {
       _mediaDevice = Device();
 
-      dynamic routerRtpCapabilities = await _webSocket!.socket.request("getRouterRtpCapabilities", {});
+      dynamic routerRtpCapabilities =
+          await _webSocket!.socket.request("getRouterRtpCapabilities", {});
       final rtpCapabilities = RtpCapabilities.fromMap(routerRtpCapabilities);
-      rtpCapabilities.headerExtensions.removeWhere((element) => element.uri == "urn:3gpp:video-orientation");
+      rtpCapabilities.headerExtensions
+          .removeWhere((element) => element.uri == "urn:3gpp:video-orientation");
       await _mediaDevice!.load(routerRtpCapabilities: rtpCapabilities);
 
-      if(_mediaDevice!.canProduce(RTCRtpMediaType.RTCRtpMediaTypeVideo) || _mediaDevice!.canProduce(RTCRtpMediaType.RTCRtpMediaTypeAudio)) _canProduce = true;
-      
-      if(_canProduce) {
+      if (_mediaDevice!.canProduce(RTCRtpMediaType.RTCRtpMediaTypeVideo) ||
+          _mediaDevice!.canProduce(RTCRtpMediaType.RTCRtpMediaTypeAudio)) _canProduce = true;
+
+      if (_canProduce) {
         Map transportInfo = await _webSocket!.socket.request("createWebRtcTransport", {
           "forceTcp": false,
           "producing": true,
@@ -148,18 +143,18 @@ class WebRTCClient {
           "sctpCapabilities": _mediaDevice!.sctpCapabilities.toMap(),
         });
 
-        _sendTransport = _mediaDevice!.createSendTransportFromMap(
-          transportInfo,
-          producerCallback: _producerCallback
-        );
+        _sendTransport = _mediaDevice!
+            .createSendTransportFromMap(transportInfo, producerCallback: _producerCallback);
 
         // sendTransport event
         _sendTransport!.on("connect", (Map data) {
-          _webSocket!.socket.request("connectWebRtcTransport", {
-            "transportId": _sendTransport!.id,
-            "dtlsParameters": data["dtlsParameters"].toMap(),
-          }).then(data["callback"])
-          .catchError(data["errback"]);
+          _webSocket!.socket
+              .request("connectWebRtcTransport", {
+                "transportId": _sendTransport!.id,
+                "dtlsParameters": data["dtlsParameters"].toMap(),
+              })
+              .then(data["callback"])
+              .catchError(data["errback"]);
         });
 
         _sendTransport!.on("produce", (Map data) async {
@@ -192,8 +187,7 @@ class WebRTCClient {
         });
       }
 
-
-      if(_canConsume) {
+      if (_canConsume) {
         Map transportInfo = await _webSocket!.socket.request(
           "createWebRtcTransport",
           {
@@ -204,28 +198,23 @@ class WebRTCClient {
           },
         );
 
-        _recvTransport = _mediaDevice!.createRecvTransportFromMap(
-          transportInfo,
-          consumerCallback: _consumerCallback
-        );
+        _recvTransport = _mediaDevice!
+            .createRecvTransportFromMap(transportInfo, consumerCallback: _consumerCallback);
 
         _recvTransport!.on("connect", (Map data) {
-          _webSocket!.socket.request("connectWebRtcTransport", {
-            "transportId" : _recvTransport!.id,
-            "dtlsParameters" : data["dtlsParameters"].toMap()
-          }).then(data["callback"])
-          .catchError(data["errback"]);
+          _webSocket!.socket
+              .request("connectWebRtcTransport", {
+                "transportId": _recvTransport!.id,
+                "dtlsParameters": data["dtlsParameters"].toMap()
+              })
+              .then(data["callback"])
+              .catchError(data["errback"]);
         });
       }
 
-
       Map response = await _webSocket!.socket.request("join", {
-        "displayName" : peerName,
-        "device": {
-          "name": "Flutter",
-          "flag": "flutter",
-          "version": "0.8.0"
-        },
+        "displayName": peerName,
+        "device": {"name": "Flutter", "flag": "flutter", "version": "0.8.0"},
         "rtpCapabilities": _mediaDevice!.rtpCapabilities.toMap(),
         "sctpCapabilities": _mediaDevice!.sctpCapabilities.toMap(),
       });
@@ -238,8 +227,6 @@ class WebRTCClient {
       //   enableWebCam();
       //   enableMic();
       // }
-
-
     } catch (error) {
       rethrow;
     }
@@ -261,10 +248,10 @@ class WebRTCClient {
     audioInputDeviceId = mediaDeviceDataHolder!.selectedAudioInput!.deviceId;
     try {
       Map<String, dynamic> mediaConstraints = {
-        "audio" : {
-          "optional" : [{
-            "sourceId" : audioInputDeviceId
-          }]
+        "audio": {
+          "optional": [
+            {"sourceId": audioInputDeviceId}
+          ]
         }
       };
       MediaStream audioStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
@@ -278,11 +265,11 @@ class WebRTCClient {
     try {
       videoInputDeviceId = mediaDeviceDataHolder!.selectedVideoInput!.deviceId;
       Map<String, dynamic> mediaConstraints = <String, dynamic>{
-        "audio" : false,
-        "video" : {
-          "optional" : [{
-            "sourceId" : videoInputDeviceId
-          }]
+        "audio": false,
+        "video": {
+          "optional": [
+            {"sourceId": videoInputDeviceId}
+          ]
         }
       };
       MediaStream videoStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
@@ -293,37 +280,36 @@ class WebRTCClient {
   }
 
   Future<void> enableWebCam() async {
-    if(_mediaDevice!.canProduce(RTCRtpMediaType.RTCRtpMediaTypeVideo) == false) return;
+    if (_mediaDevice!.canProduce(RTCRtpMediaType.RTCRtpMediaTypeVideo) == false) return;
 
     MediaStream? videoStream;
     MediaStreamTrack? track;
 
     try {
       //const videoVPVersion = 8;
-      // RtpCodecCapability? codec = _mediaDevice!.rtpCapabilities.codecs.firstWhere((RtpCodecCapability c) => 
+      // RtpCodecCapability? codec = _mediaDevice!.rtpCapabilities.codecs.firstWhere((RtpCodecCapability c) =>
       //   c.mimeType.toLowerCase() == 'video/vp$videoVPVersion', orElse: () => throw "desired vp$videoVPVersion codec+configuration is not supported"
       // );
       videoStream = await createVideoStream();
       track = videoStream!.getVideoTracks().first;
 
       _sendTransport!.produce(
-        track: track, 
-        stream: videoStream, 
-        // codec: codec,
-        // codecOptions: ProducerCodecOptions(
-        //   videoGoogleStartBitrate: 1000
-        // ),
-        // encodings: [ RtpEncodingParameters(scalabilityMode: "L1T3", scaleResolutionDownBy: 1.0) ],
-        appData: {"source" : "webcam"},
-        source: "webcam"
-      );
+          track: track,
+          stream: videoStream,
+          // codec: codec,
+          // codecOptions: ProducerCodecOptions(
+          //   videoGoogleStartBitrate: 1000
+          // ),
+          // encodings: [ RtpEncodingParameters(scalabilityMode: "L1T3", scaleResolutionDownBy: 1.0) ],
+          appData: {"source": "webcam"},
+          source: "webcam");
     } catch (error) {
-      if(videoStream != null) await videoStream.dispose();
+      if (videoStream != null) await videoStream.dispose();
     }
   }
 
   Future<void> enableMic() async {
-    if(_mediaDevice!.canProduce(RTCRtpMediaType.RTCRtpMediaTypeAudio) == false) return;
+    if (_mediaDevice!.canProduce(RTCRtpMediaType.RTCRtpMediaTypeAudio) == false) return;
 
     MediaStream? audioStream;
     MediaStreamTrack? track;
@@ -333,17 +319,16 @@ class WebRTCClient {
       track = audioStream!.getAudioTracks().first;
 
       _sendTransport!.produce(
-        track: track, 
-        stream: audioStream, 
-        // codecOptions: ProducerCodecOptions(
-        //   opusStereo: 1,
-        //   opusDtx: 1
-        // ),
-        appData: {"source" : "mic"},
-        source: "mic"
-      );
+          track: track,
+          stream: audioStream,
+          // codecOptions: ProducerCodecOptions(
+          //   opusStereo: 1,
+          //   opusDtx: 1
+          // ),
+          appData: {"source": "mic"},
+          source: "mic");
     } catch (error) {
-      if(audioStream != null) await audioStream.dispose();
+      if (audioStream != null) await audioStream.dispose();
     }
   }
 
@@ -351,9 +336,7 @@ class WebRTCClient {
     String webcamId = producerDataHolder!.webcam!.id;
     producerDataHolder!.producerRemove("webcam");
     try {
-      await _webSocket!.socket.request("closeProducer", {
-        "producerId" : webcamId
-      });
+      await _webSocket!.socket.request("closeProducer", {"producerId": webcamId});
     } catch (error) {
       rethrow;
     }
@@ -363,9 +346,7 @@ class WebRTCClient {
     String micId = producerDataHolder!.mic!.id;
     producerDataHolder!.producerRemove("mic");
     try {
-      await _webSocket!.socket.request("closeProducer", {
-        "producerId" : micId
-      });
+      await _webSocket!.socket.request("closeProducer", {"producerId": micId});
     } catch (error) {
       rethrow;
     }
@@ -374,9 +355,8 @@ class WebRTCClient {
   Future<void> muteMic() async {
     producerDataHolder!.producerPause('mic');
     try {
-      await _webSocket!.socket.request('pauseProducer', {
-        'producerId': producerDataHolder!.mic!.id
-      });
+      await _webSocket!.socket
+          .request('pauseProducer', {'producerId': producerDataHolder!.mic!.id});
     } catch (error) {
       // error process
     }
@@ -400,8 +380,4 @@ class WebRTCClient {
     _recvTransport?.close();
     _closed = true;
   }
-
-
-
-
 }

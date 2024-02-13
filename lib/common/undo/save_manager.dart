@@ -3,7 +3,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
-import 'package:hycop/hycop/utils/hycop_utils.dart';
+import '../../hycop/utils/hycop_utils.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../hycop/absModel/abs_ex_model.dart';

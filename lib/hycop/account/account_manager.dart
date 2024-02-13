@@ -1,6 +1,6 @@
 //import 'package:appwrite/appwrite.dart';
 import 'package:http/browser_client.dart';
-import 'package:hycop/hycop.dart';
+import '../../hycop.dart';
 
 // import '../../../hycop/hycop_factory.dart';
 // import '../../common/util/config.dart';
@@ -247,8 +247,7 @@ class AccountManager {
   static Future<AccountSignUpType?> isExistAccount(String email) async {
     await initialize();
     logger.finest('isExistAccount');
-    final value =
-        await HycopFactory.account!.isExistAccount(email).catchError((error, stackTrace) {
+    final value = await HycopFactory.account!.isExistAccount(email).catchError((error, stackTrace) {
       logger.severe('isExistAccount failed (${error.toString()})');
       throw HycopUtils.getHycopException(
           error: error, defaultMessage: 'AccountManager.isExistAccount Failed !!!');

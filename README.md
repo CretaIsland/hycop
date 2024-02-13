@@ -117,3 +117,45 @@ flutter run -d chrome --web-renderer html
 # or
 flutter run -d chrome --web-renderer canvaskit
 
+
+
+
+########## hycop 의 경우  윈도우와 리눅스를 지원하지 않는 패키지
+
+  WL cupertino_icons: ^1.0.2
+  -------------------------XX cloud_functions: ^4.0.7
+  #device_info_plus: ^3.2.2
+
+  WL logging: ^1.0.2
+  WL flutter_riverpod: ^1.0.4
+  WL synchronized: ^3.0.0
+  WL uuid: ^4.1.0
+  WL equatable: ^2.0.3
+  -------------------------XX firebase_database: ^10.3.3
+  #firebase: ^9.0.2
+  -------------------------WX firebase_core: ^2.21.0
+  ------------------------WX cloud_firestore: ^4.3.1
+  ------------------------XX cloud_firestore_web: ^3.2.1
+  WL appwrite: 11.0.0
+  WL routemaster: ^1.0.1
+  WL provider: ^6.0.1
+  WL font_awesome_flutter: ^10.1.0
+  WL shimmer: ^2.0.0
+  WL random_string: ^2.3.1
+  WL encrypt: ^5.0.1
+  ------------------------WX firebase_storage: ^11.4.1
+  WL dart_appwrite: 10.0.0
+   -------------------------XX md5_file_checksum: ^1.0.3   // Web 도 안됨.
+  WL convert: ^3.0.2
+  WL crypto: ^3.0.2
+  -------------------------XX flutter_dropzone: ^3.0.5
+  WL socket_io_client: ^2.0.0
+  WL http: ^1.1.0
+  -------------------------XX extension_google_sign_in_as_googleapis_auth: ^2.0.7  // --> googleapis_auth 를 써야함.
+  -------------------------XX google_sign_in: ^5.4.2
+  WL flutter_webrtc: ^0.9.35
+  WL firebase_core_platform_interface: ^5.0.0
+  WL mediasoup_client_flutter: ^0.8.5
+  WL protoo_client: ^0.3.3   // web 이 안됨.
+  WL flutter_bloc: ^7.0.1
+  WL collection: ^1.17.0
