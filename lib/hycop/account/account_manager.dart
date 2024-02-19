@@ -39,8 +39,8 @@ class AccountManager {
   static Future<bool> getSession() async {
     if (myConfig == null ||
         myConfig!.serverConfig == null ||
-        myConfig!.config.sessionServerUrl.isEmpty) return false;
-    final url = Uri.parse('${myConfig!.config.sessionServerUrl}/getSession/');
+        myConfig!.config.apiServerUrl.isEmpty) return false;
+    final url = Uri.parse('${myConfig!.config.apiServerUrl}/getSession/');
     // <!-- http.Response response = await htt!p.get(url);
     http.Client client = http.Client();
     if (client is BrowserClient) {
@@ -76,7 +76,7 @@ class AccountManager {
 
   static Future<void> createSession() async {
     if (_currentLoginUser.isLoginedUser || _currentLoginUser.isGuestUser) {
-      final url = Uri.parse('${myConfig!.config.sessionServerUrl}/createSession/');
+      final url = Uri.parse('${myConfig!.config.apiServerUrl}/createSession/');
       http.Client client = http.Client();
       if (client is BrowserClient) {
         logger.finest('client.withCredentials');
@@ -106,7 +106,7 @@ class AccountManager {
   }
 
   static Future<void> deleteSession() async {
-    final url = Uri.parse('${myConfig!.config.sessionServerUrl}/deleteSession/');
+    final url = Uri.parse('${myConfig!.config.apiServerUrl}/deleteSession/');
 
     // <!-- http.Response response = await http.get(url);
     http.Client client = http.Client();

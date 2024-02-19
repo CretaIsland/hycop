@@ -263,7 +263,7 @@ class FirebaseAppStorage extends AbsStorage {
         client.withCredentials = true;
       }
 
-      var response = await client.post(Uri.parse("https://devcreta.com:553/createThumbnail"),
+      var response = await client.post(Uri.parse("${myConfig!.config.apiServerUrl}/createThumbnail"),
           headers: {"Content-type": "application/json"},
           body: jsonEncode({
             "bucketId": sourceBucketId,

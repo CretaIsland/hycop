@@ -131,26 +131,26 @@ class AssetConfig extends AbsServerConfig {
   AssetConfig({String enterprise = 'Demo'}) : super(enterprise);
 
   int _savePeriod = 1000;
-  String _sessionServerUrl = '';
+  String _apiServerUrl = '';
   String _googleOAuthCliendId = '';
 
   String _guestUserId = '';
   String _guestUserPassword = '';
 
   int get savePeriod => _savePeriod;
-  String get sessionServerUrl => _sessionServerUrl;
+  String get apiServerUrl => _apiServerUrl;
   String get googleOAuthCliendId => _googleOAuthCliendId;
   String get guestUserId => _guestUserId;
   String get guestUserPassword => _guestUserPassword;
-
+  
   @override
   Future<void> loadAsset(/*BuildContext context*/) async {
     await super.loadAsset(/*context*/);
     final dynamic configMap = jsonMap['AssetConfig'];
     _savePeriod = configMap['savePeriod'] ?? 1000;
-    _sessionServerUrl = configMap['sessionServerUrl'] ?? 'http://localhost:3000';
-    if (_sessionServerUrl[_sessionServerUrl.length - 1] == '/') {
-      _sessionServerUrl = _sessionServerUrl.substring(0, _sessionServerUrl.length - 1);
+    _apiServerUrl = configMap['apiServerUrl'] ?? 'http://localhost:3000';
+    if (_apiServerUrl[_apiServerUrl.length - 1] == '/') {
+      _apiServerUrl = _apiServerUrl.substring(0, _apiServerUrl.length - 1);
     }
     _googleOAuthCliendId = configMap['googleOAuthCliendId'] ?? '';
     _guestUserId = configMap['guestUserId'] ?? '';

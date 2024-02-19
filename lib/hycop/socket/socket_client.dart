@@ -8,14 +8,17 @@ import '../../hycop/socket/mouse_tracer.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
 class SocketClient {
+
   late Socket socket;
   late String roomId;
+  late String serverUrl;
   Timer? healthCheckTimer;
 
   void initialize(String socketServerUrl) {
+    serverUrl = socketServerUrl;
     try {
       socket = io(
-          socketServerUrl,
+          serverUrl,
           //'ws://localhost:4432',
           <String, dynamic>{
             "transports": ["websocket"],
@@ -99,7 +102,7 @@ class SocketClient {
     healthCheckTimer = Timer.periodic(const Duration(minutes: 3), (timer) {
       if (!socket.connected) {
         disconnect();
-        initialize("");
+        initialize(serverUrl);
         connectServer(roomId);
       }
     });

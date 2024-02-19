@@ -1,3 +1,5 @@
+## 0.4.20
+- fix config
 ## 0.4.19
 - modify import style  ex : package:hycop --> ../../hycop
 ## 0.4.18
