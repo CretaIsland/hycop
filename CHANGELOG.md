@@ -1,3 +1,7 @@
+## 0.4.22
+- add site, notice, schedule
+## 0.4.21
+- add host
 ## 0.4.20
 - fix config
 ## 0.4.19
