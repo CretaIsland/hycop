@@ -180,12 +180,13 @@ class FirebaseDatabase extends AbsDatabase {
   Future<bool> isNameExist(
     String collectionId, {
     required String value,
+     String name = 'name',
   }) async {
     await initialize();
     logger.finest('after');
     assert(_db != null);
     CollectionReference collectionRef = _db!.collection(collectionId);
-    Query<Object?> query = collectionRef.where('name', isEqualTo: value);
+    Query<Object?> query = collectionRef.where(name, isEqualTo: value);
 
     QuerySnapshot<Object?> snapshot = await query.get();
 

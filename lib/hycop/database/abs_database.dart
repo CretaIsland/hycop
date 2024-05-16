@@ -82,6 +82,7 @@ abstract class AbsDatabase {
   Future<bool> isNameExist(
     String collectionId, {
     required String value,
+    String name = 'name',
   });
 
   Future<void> setData(String collectionId, String mid, Map<dynamic, dynamic> data);

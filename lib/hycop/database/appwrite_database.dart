@@ -249,6 +249,7 @@ class AppwriteDatabase extends AbsDatabase {
   Future<bool> isNameExist(
     String collectionId, {
     required String value,
+     String name = 'name',
   }) async {
     await initialize();
 
@@ -256,7 +257,7 @@ class AppwriteDatabase extends AbsDatabase {
       //String orderType = descending ? 'DESC' : 'ASC';
 
       List<String> queryList = [];
-      queryList.add(Query.equal('name', value));
+      queryList.add(Query.equal(name, value));
 
       final result = await database!.listDocuments(
         databaseId: myConfig!.serverConfig!.dbConnInfo.appId,

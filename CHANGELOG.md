@@ -1,3 +1,7 @@
+## 0.4.24
+- flutter 3.22 upgrade
+## 0.4.23
+- add template
 ## 0.4.22
 - add site, notice, schedule
 ## 0.4.21
