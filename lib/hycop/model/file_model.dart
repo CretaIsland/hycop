@@ -5,7 +5,6 @@ class FileModel {
   late String name;
   late String url;
   late String thumbnailUrl;
-  late String thumbnailId;
   late int size;
   late ContentsType contentType;
 
@@ -14,7 +13,6 @@ class FileModel {
       required this.name,
       required this.url,
       required this.thumbnailUrl,
-      required this.thumbnailId,
       required this.size,
       required this.contentType});
 
@@ -24,7 +22,6 @@ class FileModel {
       'name': name,
       'url': url,
       'thumbnailUrl': thumbnailUrl,
-      'thumbnailId': thumbnailId,
       'size': size,
       'contentType': contentType
     };
@@ -35,7 +32,6 @@ class FileModel {
     name = map['name'];
     url = map['url'];
     thumbnailUrl = map['thumbnailUrl'];
-    thumbnailId = map['thumbnailId'];
     size = map['size'];
     contentType = map['contentType'];
   }
