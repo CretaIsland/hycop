@@ -107,25 +107,6 @@ class HycopUtils {
   // -->
 
 
-  // 사용자의 email과 userId를 토대로 bucketId 생성
-  static String genBucketId(String email, String userId) {
-    String replaceEmail = email.replaceAll(RegExp(r'[!@#$%^&*(),.?":{}|<>]'), "-");
-    String bucketId = '$replaceEmail.$userId';
-    if (HycopFactory.serverType == ServerType.appwrite) {
-      // appwrite (bucketId is max 36 char)
-      if (bucketId.length > 36) {
-        return bucketId.substring(0, 36);
-      }
-    }
-    else {
-      // firebase
-      if(replaceEmail.length > 30) {
-        return "$replaceEmail.${userId.substring(0, 63-replaceEmail.length)}";
-      }
-    }
-    return bucketId;
-  }
-
   static String genUuid({bool includeBracket=false, bool includeDash=true}) {
     String uuid = (includeBracket) ? '{${const Uuid().v4()}}' : const Uuid().v4();
     if (includeDash) {
