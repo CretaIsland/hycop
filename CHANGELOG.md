@@ -1,3 +1,5 @@
+## 0.4.25
+- screenshot name change
 ## 0.4.24
 - flutter 3.22 upgrade
 ## 0.4.23
