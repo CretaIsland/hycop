@@ -63,7 +63,7 @@ class FirebaseAppStorage extends AbsStorage {
 
       return FileModel(
         id: file.fullPath, 
-        name: file.name, 
+        name: file.name.length > 36 ? file.name.substring(32) : file.name, 
         url: fileUrl, 
         thumbnailUrl: thumbnailUrl, 
         size: fileMetadata.size ?? 0, 
