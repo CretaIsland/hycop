@@ -98,7 +98,7 @@ abstract class AbsDatabase {
           (collectionId.contains('_published') == false &&
               collectionId.contains('hycop_') == false)) {
         //print('setModel($collectionId, ${model.mid}, $dontRealTime)');
-        HycopFactory.realtime!.setDelta(directive: 'set', mid: model.mid, delta: model.toMap());
+        HycopFactory.realtime?.setDelta(directive: 'set', mid: model.mid, delta: model.toMap());
       }
     } catch (e) {
       logger.severe("setModel(set) error", e);
@@ -114,7 +114,7 @@ abstract class AbsDatabase {
       if (collectionId.contains('_published') == false &&
           collectionId.contains('hycop_') == false) {
         //print('createModel()');
-        HycopFactory.realtime!.setDelta(directive: 'create', mid: model.mid, delta: model.toMap());
+        HycopFactory.realtime?.setDelta(directive: 'create', mid: model.mid, delta: model.toMap());
       }
     } catch (e) {
       logger.severe("setModel(create) error", e);
@@ -129,7 +129,7 @@ abstract class AbsDatabase {
       Map<String, dynamic> delta = {};
       delta['mid'] = mid;
       //print('removeModel()');
-      HycopFactory.realtime!.setDelta(directive: 'remove', mid: mid, delta: delta);
+      HycopFactory.realtime?.setDelta(directive: 'remove', mid: mid, delta: delta);
     } catch (e) {
       logger.severe("setModel(remove) error", e);
       throw HycopException(message: "setModel(remove) error", exception: e as Exception);

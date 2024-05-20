@@ -1,3 +1,5 @@
+## 0.4.26
+- option 
 ## 0.4.25
 - screenshot name change
 ## 0.4.24
