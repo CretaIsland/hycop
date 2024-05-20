@@ -6,12 +6,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
-import '../../common/util/config.dart';
+//import '../../common/util/config.dart';
 // import '../../common/util/logger.dart';
 import '../enum/model_enums.dart';
 //import 'abs_database.dart';
 import 'hycop_exceptions.dart';
-import '../hycop_factory.dart';
+//import '../hycop_factory.dart';
 
 class HycopUtils {
   static String midToKey(String mid) {
