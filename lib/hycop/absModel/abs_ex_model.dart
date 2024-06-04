@@ -73,10 +73,13 @@ class AbsExModel extends Equatable {
   }
 
   void fromMap(Map<String, dynamic> map) {
-    _mid = map["mid"];
-    _updateTime = HycopUtils.dateTimeFromDB(map["updateTime"]);
+    _mid = map["mid"] ?? HycopUtils.genMid(type);
+    _updateTime =
+        map["updateTime"] == null ? DateTime.now() : HycopUtils.dateTimeFromDB(map["updateTime"]);
     _createTime =
         map["createTime"] == null ? _updateTime : HycopUtils.dateTimeFromDB(map["createTime"]);
+
+    //print("createTime = $createTime, $mid");
     parentMid.setDD(map["parentMid"] ?? '', save: false, noUndo: true);
     order.setDD(map["order"] ?? 1, save: false, noUndo: true);
     hashTag.setDD(map["hashTag"] ?? '', save: false, noUndo: true);

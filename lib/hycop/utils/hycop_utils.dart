@@ -40,14 +40,14 @@ class HycopUtils {
 
   static DateTime dateTimeFromDB(String src) {
     //if (myConfig!.serverType == ServerType.appwrite) {
-    return DateTime.parse(src); // yyyy-mm-dd hh:mm:ss.sss
+    return DateTime.parse(src).toLocal(); // yyyy-mm-ddThh:mm:ss.sss
     //}
     //return src.toDate();
   }
 
   static String dateTimeToDB(DateTime src) {
     //if (myConfig!.serverType == ServerType.appwrite) {
-    return src.toIso8601String(); // yyyy-mm-dd hh:mm:ss.sss
+    return src.toUtc().toIso8601String(); // yyyy-mm-ddThh:mm:ss.sssZ
     //}
     //return src;
   }
@@ -98,7 +98,11 @@ class HycopUtils {
     } else {
       defMsg = defaultMessage;
     }
-    return HycopException(message: defMsg, exception: error, code: code,);
+    return HycopException(
+      message: defMsg,
+      exception: error,
+      code: code,
+    );
   }
 
   //static HycopException throwHycopException({dynamic error, required String defaultMessage}) => throw getHycopException(defaultMessage: defaultMessage);
@@ -106,8 +110,7 @@ class HycopUtils {
   static String stringToSha1(String str) => sha1.convert(utf8.encode(str)).toString();
   // -->
 
-
-  static String genUuid({bool includeBracket=false, bool includeDash=true}) {
+  static String genUuid({bool includeBracket = false, bool includeDash = true}) {
     String uuid = (includeBracket) ? '{${const Uuid().v4()}}' : const Uuid().v4();
     if (includeDash) {
       return uuid;
