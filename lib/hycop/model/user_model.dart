@@ -1,4 +1,3 @@
-
 import '../enum/model_enums.dart';
 import '../absModel/abs_model.dart';
 import '../../common/util/config.dart';
@@ -25,6 +24,10 @@ class UserModel extends AbsModel {
   String get userType => getValue('userType') ?? '';
   String get secret => getValue('secret') ?? '';
 
+  bool isSuperUser() {
+    return userType == 'tomato';
+  }
+
   UserModel(
       {ObjectType type = ObjectType.user, Map<String, dynamic>? userData, bool logout = false})
       : super(type: type) {
@@ -41,8 +44,7 @@ class UserModel extends AbsModel {
     String guestUserId = myConfig?.config.guestUserId ?? '';
     if (guestUserId.isNotEmpty && guestUserId == userData['email']) {
       _isGuestUser = true;
-    }
-    else {
+    } else {
       _isLoginedUser = true;
     }
     fromMap(userData);

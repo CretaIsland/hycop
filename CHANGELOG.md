@@ -1,3 +1,5 @@
+## 0.4.28
+- isSuperUser 
 ## 0.4.27
 - utc time  
 ## 0.4.26
