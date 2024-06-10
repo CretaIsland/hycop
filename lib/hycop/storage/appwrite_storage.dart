@@ -317,4 +317,16 @@ class AppwriteStorage extends AbsStorage {
     return null;
   }
 
+@override
+Future<String> getImageUrl(String path) async {
+  // Firebase Storage 인스턴스 생성
+  await initialize();
+
+  // 파일의 URL을 얻기 위한 참조 생성
+  Uint8List blob = await _storage!.getFileView(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: path); 
+  String url = Url.createObjectUrlFromBlob(Blob([blob])); 
+
+  return url;
+}
+
 }

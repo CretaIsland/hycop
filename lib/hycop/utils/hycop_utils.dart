@@ -39,8 +39,14 @@ class HycopUtils {
   }
 
   static DateTime dateTimeFromDB(String src) {
+    if (src.isEmpty) return DateTime(1970, 1, 1).toLocal();
     //if (myConfig!.serverType == ServerType.appwrite) {
-    return DateTime.parse(src).toLocal(); // yyyy-mm-ddThh:mm:ss.sss
+    try {
+      return DateTime.parse(src).toLocal(); // yyyy-mm-ddThh:mm:ss.sss
+    } catch (e) {
+      return DateTime(1970, 1, 1).toLocal();
+// yyyy-mm-ddThh:mm:ss.sssZ
+    }
     //}
     //return src.toDate();
   }
@@ -50,6 +56,11 @@ class HycopUtils {
     return src.toUtc().toIso8601String(); // yyyy-mm-ddThh:mm:ss.sssZ
     //}
     //return src;
+  }
+
+  static String dateTimeToDisplay(DateTime src) {
+    DateTime d = src.toUtc();
+    return "${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')} ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}:${d.second.toString().padLeft(2, '0')}";
   }
 
   static String hideString(String org, {int max = 0}) {
