@@ -1,3 +1,5 @@
+## 0.4.31
+- createNewAccount
 ## 0.4.30
 - gdateTimeToDisplay 
 ## 0.4.29

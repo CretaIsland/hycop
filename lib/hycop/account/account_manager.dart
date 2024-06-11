@@ -39,7 +39,9 @@ class AccountManager {
   static Future<bool> getSession() async {
     if (myConfig == null ||
         myConfig!.serverConfig == null ||
-        myConfig!.config.apiServerUrl.isEmpty) return false;
+        myConfig!.config.apiServerUrl.isEmpty) {
+      return false;
+    }
     final url = Uri.parse('${myConfig!.config.apiServerUrl}/getSession/');
     // <!-- http.Response response = await htt!p.get(url);
     http.Client client = http.Client();
@@ -127,7 +129,7 @@ class AccountManager {
     logger.finest('jsonData=$jsonData');
   }
 
-  static Future<void> createAccount(Map<String, dynamic> userData) async {
+  static Future<void> createAccount(Map<String, dynamic> userData, {bool autoLogin = true}) async {
     await initialize();
     logger.finest('createAccount start');
     // accountSignUpType
@@ -171,8 +173,11 @@ class AccountManager {
         throw HycopUtils.getHycopException(
             error: error, defaultMessage: 'AccountManager.createAccount Failed !!!'));
     logger.finest('createAccount end');
-    _currentLoginUser = UserModel(userData: userData);
-    await createSession();
+
+    if (autoLogin) {
+      _currentLoginUser = UserModel(userData: userData);
+      await createSession();
+    }
     logger.finest('createAccount set');
   }
 
@@ -242,6 +247,19 @@ class AccountManager {
       throw HycopUtils.getHycopException(
           error: error, defaultMessage: 'unknown google-account error !!!');
     }
+  }
+
+  static Future<UserModel> createDefaultAccount(String enterprise) async {
+    Map<String, dynamic> userData = {};
+    userData['name'] = '${enterprise}Admin';
+    userData['email'] = '${enterprise}Admin@nomail.com';
+    userData['password'] = '${enterprise}Admin!!';
+    userData['accountSignUpType'] = AccountSignUpType.hycop.index;
+    //userData['imagefile'] = _googleAccount!.photoUrl;
+    await createAccount(userData).then((value) {}).onError((error, stackTrace) {
+      throw HycopUtils.getHycopException(error: error, defaultMessage: 'createAccount error !!!');
+    });
+    return UserModel(userData: userData);
   }
 
   static Future<AccountSignUpType?> isExistAccount(String email) async {
