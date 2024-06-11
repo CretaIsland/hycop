@@ -1,3 +1,5 @@
+## 0.4.32
+- createNewAccount
 ## 0.4.31
 - createNewAccount
 ## 0.4.30

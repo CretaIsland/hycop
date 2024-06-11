@@ -256,7 +256,7 @@ class AccountManager {
     userData['password'] = '${enterprise}Admin!!';
     userData['accountSignUpType'] = AccountSignUpType.hycop.index;
     //userData['imagefile'] = _googleAccount!.photoUrl;
-    await createAccount(userData).then((value) {}).onError((error, stackTrace) {
+    await createAccount(userData, autoLogin : false).then((value) {}).onError((error, stackTrace) {
       throw HycopUtils.getHycopException(error: error, defaultMessage: 'createAccount error !!!');
     });
     return UserModel(userData: userData);
