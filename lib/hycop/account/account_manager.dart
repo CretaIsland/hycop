@@ -176,7 +176,7 @@ class AccountManager {
 
     if (autoLogin) {
       _currentLoginUser = UserModel(userData: userData);
-      await createSession();
+     await createSession();
     }
     logger.finest('createAccount set');
   }
