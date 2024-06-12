@@ -95,19 +95,29 @@ class FirebaseRealtime extends AbsRealtime {
     if (event.snapshot.value == null) {
       return;
     }
-    final rows = event.snapshot.value as Map<String, dynamic>;
 
-    logger.finest('[$hint Listen]------------------------------');
-    rows.forEach((mapKey, mapValue) {
-      processEvent(mapValue);
-    });
-    if (realTimeKey != null) {
-      lastUpdateTime = maxDataTime;
-      lastUpdateTimeStr = HycopUtils.dateTimeToDB(maxDataTime);
-      logger.finest('[$hint end $lastUpdateTimeStr]-------------------------------------');
+    try {
+      //print('event.snapshot.value: ${event.snapshot.value}');
+      //print('hint: $hint, $realTimeKey');
+      if (event.snapshot.value is Map<String, dynamic>) {
+        logger.finest('event.snapshot.value is Map<String, dynamic> type');
+        final rows = event.snapshot.value as Map<String, dynamic>;
+        rows.forEach((mapKey, mapValue) {
+          processEvent(mapValue);
+        });
+        if (realTimeKey != null) {
+          lastUpdateTime = maxDataTime;
+          lastUpdateTimeStr = HycopUtils.dateTimeToDB(maxDataTime);
+          logger.finest('[$hint end $lastUpdateTimeStr]-------------------------------------');
+        }
+        _isListenComplete = true;
+        return;
+      }
+      logger.severe(
+          'event.snapshot.value is ${event.snapshot.value.runtimeType}, it is not expected type....');
+    } catch (e) {
+      logger.severe('Error: $e');
     }
-
-    _isListenComplete = true;
   }
 
   @override

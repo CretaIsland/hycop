@@ -1,3 +1,17 @@
+## 0.4.39
+- remove firebase_messaging: ^14.8.1
+## 0.4.38
+- firebase_messaging: ^14.8.1
+## 0.4.37
+- return to 0.4.32 & LinkedMap problem, Can't use realTime service !!!
+## 0.4.36
+- return to 0.4.32 & LinkedMap problem, Can't use realTime service !!!
+## 0.4.35
+- return to 0.4.32 & LinkedMap problem, Can't use realTime service !!!
+## 0.4.34
+- firebase_core version fix to 2.29.0
+## 0.4.33
+- firebase_core version fix to 2.21.0
 ## 0.4.32
 - createNewAccount
 ## 0.4.31
