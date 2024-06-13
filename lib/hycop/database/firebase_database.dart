@@ -1,6 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
 import '../../common/util/logger.dart';
 import '../../common/util/config.dart';
 import '../hycop_factory.dart';
@@ -8,6 +9,7 @@ import 'abs_database.dart';
 
 class FirebaseDatabase extends AbsDatabase {
   FirebaseFirestore? _db;
+  DocumentSnapshot? startAfter;
 
   @override
   Future<void> initialize() async {
@@ -180,7 +182,7 @@ class FirebaseDatabase extends AbsDatabase {
   Future<bool> isNameExist(
     String collectionId, {
     required String value,
-     String name = 'name',
+    String name = 'name',
   }) async {
     await initialize();
     logger.finest('after');
@@ -291,5 +293,62 @@ class FirebaseDatabase extends AbsDatabase {
     logger.finest('$mid deleted');
 
     //FirebaseFirestore.instanceFor(app: app)
+  }
+
+  @override
+  Widget streamData({
+    required String collectionId,
+    required Widget Function(List<Map<String, dynamic>> resultList) consumerFunc,
+    required Map<String, dynamic> where,
+    required String orderBy,
+    bool descending = true,
+    int? limit, // 페이지 크기
+  }) {
+    if (_db == null) {
+      return const Text('database is not initialized');
+    }
+    CollectionReference? collectionRef = _db!.collection(collectionId);
+
+    Query<Object?> query = collectionRef.orderBy(orderBy, descending: descending);
+    where.forEach((mid, value) {
+      query = query.where(mid, isEqualTo: value.value);
+    });
+
+    // 마지막 문서가 있으면, 해당 문서 이후부터 데이터 로드
+    if (limit != null) {
+      query = query.limit(limit);
+    }
+    if (startAfter != null) {
+      query = query.startAfterDocument(startAfter!);
+    }
+
+    // Query<Object?> queryRef = collectionRef; // Query 타입으로 초기화
+
+    // 여러 조건이 주어진 경우 where 조건을 추가
+    // where.forEach((fieldName, fieldValue) {
+    //   queryRef = queryRef.where(fieldName, isEqualTo: fieldValue.value);
+    // });
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: query.snapshots(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        }
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return const Text('Loading...');
+          default:
+            logger.finest('streamData :  ${snapshot.data!.docs.length} data founded');
+
+            // 마지막 문서 업데이트 (페이징을 위해)
+            startAfter = snapshot.data!.docs.isNotEmpty ? snapshot.data!.docs.last : null;
+
+            return consumerFunc(snapshot.data!.docs.map((doc) {
+              return doc.data() as Map<String, dynamic>;
+            }).toList());
+        }
+      },
+    );
   }
 }

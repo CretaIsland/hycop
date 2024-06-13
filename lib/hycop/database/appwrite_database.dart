@@ -2,6 +2,7 @@
 //import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:appwrite/appwrite.dart';
+import 'package:flutter/material.dart';
 import '../../hycop/utils/hycop_exceptions.dart';
 import '../../hycop/utils/hycop_utils.dart';
 import '../../hycop/hycop_factory.dart';
@@ -249,7 +250,7 @@ class AppwriteDatabase extends AbsDatabase {
   Future<bool> isNameExist(
     String collectionId, {
     required String value,
-     String name = 'name',
+    String name = 'name',
   }) async {
     await initialize();
 
@@ -445,5 +446,18 @@ class AppwriteDatabase extends AbsDatabase {
       }
       throw HycopException(message: 'Appwrite error', code: e.code);
     }
+  }
+
+  @override
+  Widget streamData({
+    required String collectionId,
+    required Widget Function(List<Map<String, dynamic>> resultList) consumerFunc,
+    required Map<String, dynamic> where,
+    required String orderBy,
+    bool descending = true,
+    int? limit, // 페이지 크기
+  }) {
+    // appwrite 에서는 일단은 ...사용되지 않는다.
+    return const Center(child: Text('Appwrite does not support streamData() yet!'));
   }
 }

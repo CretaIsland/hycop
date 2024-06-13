@@ -195,4 +195,30 @@ abstract class AbsExModelManager extends ChangeNotifier {
     }
     return null;
   }
+
+  Widget streamData({
+    required Widget Function(List<Map<String, dynamic>> resultList) consumerFunc,
+    required Map<String, dynamic> where,
+    required String orderBy,
+    bool descending = true,
+    int? limit, // 페이지 크기
+  }) {
+    return HycopFactory.dataBase!.streamData(
+      collectionId: collectionId,
+      consumerFunc: (List<Map<String, dynamic>> resultList) {
+        modelList.clear();
+        for (Map<String, dynamic> ele in resultList) {
+          AbsExModel model = newModel(ele['mid'] ?? '');
+          model.fromMap(ele);
+          modelList.add(model);
+        }
+        notifyListeners();
+        return consumerFunc(resultList);
+      },
+      where: where,
+      orderBy: orderBy,
+      descending: descending,
+      limit: limit,
+    );
+  }
 }

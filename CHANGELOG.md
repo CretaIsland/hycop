@@ -1,3 +1,9 @@
+## 0.4.42
+- streamData
+## 0.4.41
+- streamData
+## 0.4.40
+- dateTimeToDisplay
 ## 0.4.39
 - remove firebase_messaging: ^14.8.1
 ## 0.4.38

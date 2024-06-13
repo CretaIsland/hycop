@@ -90,6 +90,15 @@ abstract class AbsDatabase {
   Future<void> createData(String collectionId, String mid, Map<dynamic, dynamic> data);
   Future<void> removeData(String collectionId, String mid);
 
+  Widget streamData({
+    required String collectionId,
+    required Widget Function(List<Map<String, dynamic>> resultList) consumerFunc,
+    required Map<String, dynamic> where,
+    required String orderBy,
+    bool descending = true,
+    int? limit, // 페이지 크기
+  });
+
   Future<void> setModel(String collectionId, AbsExModel model, {bool dontRealTime = false}) async {
     try {
       await setData(collectionId, model.mid, model.toMap());

@@ -20,7 +20,7 @@ class AbsExModel extends Equatable {
   DateTime get createTime => _createTime;
 
   void setUpdateTime() {
-    _updateTime = DateTime.now();
+    _updateTime = DateTime.now().toUtc();
   }
 
   late UndoAble<String> parentMid;
