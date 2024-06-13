@@ -97,6 +97,7 @@ abstract class AbsDatabase {
     required String orderBy,
     bool descending = true,
     int? limit, // 페이지 크기
+    bool hasPage = false,
   });
 
   Future<void> setModel(String collectionId, AbsExModel model, {bool dontRealTime = false}) async {

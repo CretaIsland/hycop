@@ -1,3 +1,5 @@
+## 0.4.43
+- streamData
 ## 0.4.42
 - streamData
 ## 0.4.41

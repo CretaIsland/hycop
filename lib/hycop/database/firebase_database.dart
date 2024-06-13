@@ -303,6 +303,7 @@ class FirebaseDatabase extends AbsDatabase {
     required String orderBy,
     bool descending = true,
     int? limit, // 페이지 크기
+    bool hasPage = false,
   }) {
     if (_db == null) {
       return const Text('database is not initialized');
@@ -318,7 +319,7 @@ class FirebaseDatabase extends AbsDatabase {
     if (limit != null) {
       query = query.limit(limit);
     }
-    if (startAfter != null) {
+    if (startAfter != null && hasPage) {
       query = query.startAfterDocument(startAfter!);
     }
 
@@ -342,7 +343,9 @@ class FirebaseDatabase extends AbsDatabase {
             logger.finest('streamData :  ${snapshot.data!.docs.length} data founded');
 
             // 마지막 문서 업데이트 (페이징을 위해)
-            startAfter = snapshot.data!.docs.isNotEmpty ? snapshot.data!.docs.last : null;
+            if (hasPage) {
+              startAfter = snapshot.data!.docs.isNotEmpty ? snapshot.data!.docs.last : null;
+            }
 
             return consumerFunc(snapshot.data!.docs.map((doc) {
               return doc.data() as Map<String, dynamic>;

@@ -456,6 +456,7 @@ class AppwriteDatabase extends AbsDatabase {
     required String orderBy,
     bool descending = true,
     int? limit, // 페이지 크기
+    bool hasPage = false,
   }) {
     // appwrite 에서는 일단은 ...사용되지 않는다.
     return const Center(child: Text('Appwrite does not support streamData() yet!'));

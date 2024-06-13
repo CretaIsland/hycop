@@ -212,7 +212,7 @@ abstract class AbsExModelManager extends ChangeNotifier {
           model.fromMap(ele);
           modelList.add(model);
         }
-        notifyListeners();
+        //notifyListeners();
         return consumerFunc(resultList);
       },
       where: where,
