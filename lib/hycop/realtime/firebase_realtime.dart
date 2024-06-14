@@ -62,6 +62,9 @@ class FirebaseRealtime extends AbsRealtime {
 
   @override
   Future<void> startTemp(String? rtKey) async {
+    // skpark 2024.06.14 현재 firebase bug 로 인해 임시로 막아둠.
+    return;
+/*
     realTimeKey = rtKey;
     if (realTimeKey == null || realTimeKey!.isEmpty) {
       return;
@@ -88,6 +91,7 @@ class FirebaseRealtime extends AbsRealtime {
           .listen((event) => _listenCallback(event, ''));
     }
     //});
+    */
   }
 
   void _listenCallback(DatabaseEvent event, String hint) {
@@ -115,6 +119,7 @@ class FirebaseRealtime extends AbsRealtime {
       }
       logger.severe(
           'event.snapshot.value is ${event.snapshot.value.runtimeType}, it is not expected type....');
+      _isListenComplete = true;
     } catch (e) {
       logger.severe('Error: $e');
     }
