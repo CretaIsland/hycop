@@ -30,6 +30,7 @@ enum ExModelType {
   template,
   tenant,
   license,
+  scrshot,
   end;
 
   static int validCheck(int val) => (val > end.index || val < none.index) ? none.index : val;

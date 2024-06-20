@@ -90,6 +90,21 @@ abstract class AbsDatabase {
   Future<void> createData(String collectionId, String mid, Map<dynamic, dynamic> data);
   Future<void> removeData(String collectionId, String mid);
 
+  dynamic initStream({
+    required String collectionId,
+    required Map<String, dynamic> where,
+    required String orderBy,
+    bool descending = true,
+    int? limit, // 페이지 크기
+    bool hasPage = false,
+  });
+
+  Widget streamData2({
+    required dynamic snapshot,
+    required Widget Function(List<Map<String, dynamic>> resultList) consumerFunc,
+    bool hasPage = false,
+  });
+
   Widget streamData({
     required String collectionId,
     required Widget Function(List<Map<String, dynamic>> resultList) consumerFunc,

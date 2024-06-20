@@ -1,3 +1,7 @@
+## 0.4.46
+- StreamBuilder 
+## 0.4.45
+- ExModelType.scrshot type 
 ## 0.4.44
 - Can't use realTime service !!!
 ## 0.4.43

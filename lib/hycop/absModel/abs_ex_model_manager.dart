@@ -196,6 +196,40 @@ abstract class AbsExModelManager extends ChangeNotifier {
     return null;
   }
 
+  dynamic initStream({
+    required Map<String, dynamic> where,
+    required String orderBy,
+    bool descending = true,
+    int? limit, // 페이지 크기
+  }) {
+    return HycopFactory.dataBase!.initStream(
+      collectionId: collectionId,
+      where: where,
+      orderBy: orderBy,
+      descending: descending,
+      limit: limit,
+    );
+  }
+
+  Widget streamData2({
+    required dynamic snapshot,
+    required Widget Function(List<Map<String, dynamic>> resultList) consumerFunc,
+  }) {
+    return HycopFactory.dataBase!.streamData2(
+      snapshot: snapshot,
+      consumerFunc: (List<Map<String, dynamic>> resultList) {
+        modelList.clear();
+        for (Map<String, dynamic> ele in resultList) {
+          AbsExModel model = newModel(ele['mid'] ?? '');
+          model.fromMap(ele);
+          modelList.add(model);
+        }
+        //notifyListeners();
+        return consumerFunc(resultList);
+      },
+    );
+  }
+
   Widget streamData({
     required Widget Function(List<Map<String, dynamic>> resultList) consumerFunc,
     required Map<String, dynamic> where,

@@ -296,6 +296,67 @@ class FirebaseDatabase extends AbsDatabase {
   }
 
   @override
+  dynamic initStream({
+    required String collectionId,
+    required Map<String, dynamic> where,
+    required String orderBy,
+    bool descending = true,
+    int? limit, // 페이지 크기
+    bool hasPage = false,
+  }) {
+    if (_db == null) {
+      return const Text('database is not initialized');
+    }
+    CollectionReference? collectionRef = _db!.collection(collectionId);
+
+    Query<Object?> query = collectionRef.orderBy(orderBy, descending: descending);
+    where.forEach((mid, value) {
+      query = query.where(mid, isEqualTo: value.value);
+    });
+
+    // 마지막 문서가 있으면, 해당 문서 이후부터 데이터 로드
+    if (limit != null) {
+      query = query.limit(limit);
+    }
+    if (startAfter != null && hasPage) {
+      query = query.startAfterDocument(startAfter!);
+    }
+    return query.snapshots();
+  }
+
+  @override
+  Widget streamData2({
+    required dynamic snapshot,
+    required Widget Function(List<Map<String, dynamic>> resultList) consumerFunc,
+    bool hasPage = false,
+  }) {
+    // appwrite 에서는 일단은 ...사용되지 않는다.
+    return StreamBuilder<QuerySnapshot>(
+      stream: snapshot,
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        }
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return const Text('Loading...');
+          default:
+            logger.finest('streamData :  ${snapshot.data!.docs.length} data founded');
+
+            // 마지막 문서 업데이트 (페이징을 위해)
+            if (hasPage) {
+              startAfter = snapshot.data!.docs.isNotEmpty ? snapshot.data!.docs.last : null;
+            }
+
+            return consumerFunc(snapshot.data!.docs.map((doc) {
+              return doc.data() as Map<String, dynamic>;
+            }).toList());
+        }
+      },
+    );
+  }
+
+  @override
   Widget streamData({
     required String collectionId,
     required Widget Function(List<Map<String, dynamic>> resultList) consumerFunc,

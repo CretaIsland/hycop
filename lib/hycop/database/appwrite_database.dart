@@ -449,6 +449,28 @@ class AppwriteDatabase extends AbsDatabase {
   }
 
   @override
+  dynamic initStream({
+    required String collectionId,
+    required Map<String, dynamic> where,
+    required String orderBy,
+    bool descending = true,
+    int? limit, // 페이지 크기
+    bool hasPage = false,
+  }) {
+    return null;
+  }
+
+  @override
+  Widget streamData2({
+    required dynamic snapshot,
+    required Widget Function(List<Map<String, dynamic>> resultList) consumerFunc,
+    bool hasPage = false,
+  }) {
+    // appwrite 에서는 일단은 ...사용되지 않는다.
+    return const Center(child: Text('Appwrite does not support streamData() yet!'));
+  }
+
+  @override
   Widget streamData({
     required String collectionId,
     required Widget Function(List<Map<String, dynamic>> resultList) consumerFunc,
