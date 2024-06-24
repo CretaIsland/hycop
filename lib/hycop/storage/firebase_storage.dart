@@ -66,7 +66,7 @@ class FirebaseAppStorage extends AbsStorage {
           size: fileMetadata.size ?? 0,
           contentType: ContentsType.getContentTypes(fileMetadata.contentType ?? ""));
     } catch (error) {
-      logger.severe("error at Storage.getFileData >>> $error");
+      logger.info("error at Storage.getFileData >>> $error");
     }
     return null;
   }
@@ -77,7 +77,7 @@ class FirebaseAppStorage extends AbsStorage {
       var file = _storage!.refFromURL(fileUrl);
       return await getFileData(file.fullPath, bucketId: file.bucket);
     } catch (error) {
-      logger.severe("error at Storage.getFileDataFromUrl >>> $error");
+      logger.info("error at Storage.getFileDataFromUrl >>> $error");
     }
     return null;
   }
@@ -92,7 +92,7 @@ class FirebaseAppStorage extends AbsStorage {
       }
       return fileDatas;
     } catch (error) {
-      logger.severe("error at Storage.getMultiFileData >>> $error");
+      logger.info("error at Storage.getMultiFileData >>> $error");
     }
     return List.empty();
   }
@@ -128,10 +128,15 @@ class FirebaseAppStorage extends AbsStorage {
       }
 
       var file = _storage!.ref().child("$bucketId/$folderPath$fileName");
-      await file.putData(fileBytes);
-      await file.updateMetadata(SettableMetadata(contentType: fileType));
-      if (makeThumbnail) await createThumbnail(folderPath, fileName, fileType, bucketId);
-      return await getFileData(file.fullPath);
+      var alreadyFile = await getFileData(file.fullPath);
+
+      if(alreadyFile == null) {
+        await file.putData(fileBytes);
+        await file.updateMetadata(SettableMetadata(contentType: fileType));
+        if (makeThumbnail) await createThumbnail(folderPath, fileName, fileType, bucketId);
+        return await getFileData(file.fullPath);
+      }
+      return alreadyFile;
     } catch (error) {
       logger.severe("error at Storage.uploadFile >>> $error");
     }
@@ -174,7 +179,7 @@ class FirebaseAppStorage extends AbsStorage {
       Uint8List fileBytes = response.bodyBytes;
       return fileBytes;
     } catch (error) {
-      logger.severe("error at Storage.getFileBytes >>> $error");
+      logger.info("error at Storage.getFileBytes >>> $error");
     }
     return null;
   }
@@ -194,7 +199,7 @@ class FirebaseAppStorage extends AbsStorage {
         return true;
       }
     } catch (error) {
-      logger.severe("error at Storage.downloadFile >>> $error");
+      logger.info("error at Storage.downloadFile >>> $error");
     }
     return false;
   }
@@ -207,7 +212,7 @@ class FirebaseAppStorage extends AbsStorage {
       var file = _storage!.refFromURL(fileUrl);
       return await downloadFile(file.fullPath, saveName);
     } catch (error) {
-      logger.severe("error at Storage.downloadFileFromUrl >>> $error");
+      logger.info("error at Storage.downloadFileFromUrl >>> $error");
     }
     return true;
   }
@@ -219,7 +224,7 @@ class FirebaseAppStorage extends AbsStorage {
       await _storage!.ref().child(fileId).delete();
       return true;
     } catch (error) {
-      logger.severe("error at Storage.deleteFile >>> $error");
+      logger.info("error at Storage.deleteFile >>> $error");
     }
     return false;
   }
@@ -231,7 +236,7 @@ class FirebaseAppStorage extends AbsStorage {
       await _storage!.refFromURL(fileUrl).delete();
       return true;
     } catch (error) {
-      logger.severe("error at Storage.deleteFileFromUrl >>> $error");
+      logger.info("error at Storage.deleteFileFromUrl >>> $error");
     }
     return false;
   }
@@ -257,7 +262,7 @@ class FirebaseAppStorage extends AbsStorage {
           sourceFile.name, sourceFileMetaData.contentType ?? "", sourceFileBytes!,
           bucketId: bucketId);
     } catch (error) {
-      logger.severe("error at Storage.copyFile >>> $error");
+      logger.info("error at Storage.copyFile >>> $error");
     }
     return null;
   }
@@ -271,7 +276,7 @@ class FirebaseAppStorage extends AbsStorage {
       return await copyFile(file.fullPath.substring(0, file.fullPath.indexOf("/")), file.fullPath,
           bucketId: bucketId);
     } catch (error) {
-      logger.severe("error at Storage.copyFileFromUrl >>> $error");
+      logger.info("error at Storage.copyFileFromUrl >>> $error");
     }
     return null;
   }
@@ -284,7 +289,7 @@ class FirebaseAppStorage extends AbsStorage {
       await deleteFile(sourceFileId);
       return moveFile;
     } catch (error) {
-      logger.severe("error at Storage.moveFile >>> $error");
+      logger.info("error at Storage.moveFile >>> $error");
     }
     return null;
   }
@@ -298,7 +303,7 @@ class FirebaseAppStorage extends AbsStorage {
       return await moveFile(file.fullPath.substring(0, file.fullPath.indexOf("/")), file.fullPath,
           bucketId: bucketId);
     } catch (error) {
-      logger.severe("error at Storage.moveFileFromUrl >>> $error");
+      logger.info("error at Storage.moveFileFromUrl >>> $error");
     }
     return null;
   }
@@ -313,4 +318,5 @@ class FirebaseAppStorage extends AbsStorage {
 
     return url;
   }
+  
 }

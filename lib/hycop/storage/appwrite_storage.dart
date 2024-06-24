@@ -92,7 +92,7 @@ class AppwriteStorage extends AbsStorage {
         );
       }
     } catch (error) {
-      logger.severe("error at Storage.getFileData >>> $error");
+      logger.info("error at Storage.getFileData >>> $error");
     }
     return null;
   }
@@ -104,7 +104,7 @@ class AppwriteStorage extends AbsStorage {
       String fileId = fileUrl.substring(fileUrl.indexOf("files/") + 6, fileUrl.indexOf("/view"));
       return await getFileData(fileId, bucketId: bucketId);
     } catch (error) {
-      logger.severe("error at Storage.getFileDataFromUrl >>> $error");
+      logger.info("error at Storage.getFileDataFromUrl >>> $error");
     }
     return null;
   }
@@ -119,7 +119,7 @@ class AppwriteStorage extends AbsStorage {
       }
       return fileDatas;
     } catch (error) {
-      logger.severe("error at Storage.getMultiFileData >>> $error");
+      logger.info("error at Storage.getMultiFileData >>> $error");
     }
     return List.empty();
   }
@@ -196,7 +196,7 @@ class AppwriteStorage extends AbsStorage {
       bucketId ??= myConfig!.serverConfig!.storageConnInfo.bucketId;
       return await _storage!.getFileDownload(bucketId: bucketId, fileId: fileId);
     } catch (error) {
-      logger.severe("error at Storage.getFileBytes >>> $error");
+      logger.info("error at Storage.getFileBytes >>> $error");
     }
     return null;
   }
@@ -215,7 +215,7 @@ class AppwriteStorage extends AbsStorage {
         return true;
       }
     } catch (error) {
-      logger.severe("error during Storage.downloadFile >>> $error");
+      logger.info("error during Storage.downloadFile >>> $error");
     }
     return false;
   }
@@ -227,7 +227,7 @@ class AppwriteStorage extends AbsStorage {
       String fileId = fileUrl.substring(fileUrl.indexOf("files/") + 6, fileUrl.indexOf("/view"));
       return await downloadFile(fileId, saveName, bucketId: bucketId);
     } catch (error) {
-      logger.severe("error at Storage.downloadFileFromUrl >>> $error");
+      logger.info("error at Storage.downloadFileFromUrl >>> $error");
     }
     return true;
   }
@@ -245,7 +245,7 @@ class AppwriteStorage extends AbsStorage {
       }
       return true;
     } catch (error) {
-      logger.severe("error at Storage.deleteFile >>> $error");
+      logger.info("error at Storage.deleteFile >>> $error");
     }
     return false;
   }
@@ -257,7 +257,7 @@ class AppwriteStorage extends AbsStorage {
       String fileId = fileUrl.substring(fileUrl.indexOf("files/") + 6, fileUrl.indexOf("/view"));
       return await deleteFile(fileId, bucketId: bucketId);
     } catch (error) {
-      logger.severe("error at Storage.deleteFileFromUrl >>> $error");
+      logger.info("error at Storage.deleteFileFromUrl >>> $error");
     }
     return false;
   }
@@ -276,7 +276,7 @@ class AppwriteStorage extends AbsStorage {
       }
       return await uploadFile(sourceFile.name, sourceFile.mimeType, sourceFileBytes!, bucketId: bucketId);
     } catch (error) {
-      logger.severe("error at Storage.copyFile >>> $error");
+      logger.info("error at Storage.copyFile >>> $error");
     }
     return null;
   }
@@ -288,7 +288,7 @@ class AppwriteStorage extends AbsStorage {
       String sourceFileId = fileUrl.substring(fileUrl.indexOf("files/") + 6, fileUrl.indexOf("/view"));
       return await copyFile(sourceBucketId, sourceFileId, bucketId: bucketId);
     } catch (error) {
-      logger.severe("error at Storage.copyFileFromUrl >>> $error");
+      logger.info("error at Storage.copyFileFromUrl >>> $error");
     }
     return null;
   }
@@ -300,7 +300,7 @@ class AppwriteStorage extends AbsStorage {
       await deleteFile(sourceFileId, bucketId: sourceBucketId);
       return moveFile;
     } catch (error) {
-      logger.severe("error at Storage.moveFile >>> $error");
+      logger.info("error at Storage.moveFile >>> $error");
     }
     return null;
   }
@@ -312,14 +312,14 @@ class AppwriteStorage extends AbsStorage {
       String sourceFileId = fileUrl.substring(fileUrl.indexOf("files/") + 6, fileUrl.indexOf("/view"));
       return await moveFile(sourceBucketId, sourceFileId, bucketId: bucketId);
     } catch (error) {
-      logger.severe("error at Storage.moveFileFromUrl >>> $error");
+      logger.info("error at Storage.moveFileFromUrl >>> $error");
     }
     return null;
   }
 
-@override
+  @override
 Future<String> getImageUrl(String path) async {
-  // Firebase Storage 인스턴스 생성
+  // Appwrite Storage 인스턴스 생성
   await initialize();
 
   // 파일의 URL을 얻기 위한 참조 생성
