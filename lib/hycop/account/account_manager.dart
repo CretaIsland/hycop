@@ -1,4 +1,6 @@
 //import 'package:appwrite/appwrite.dart';
+import 'dart:math';
+
 import 'package:http/browser_client.dart';
 import '../../hycop.dart';
 
@@ -176,7 +178,7 @@ class AccountManager {
 
     if (autoLogin) {
       _currentLoginUser = UserModel(userData: userData);
-     await createSession();
+      await createSession();
     }
     logger.finest('createAccount set');
   }
@@ -256,10 +258,56 @@ class AccountManager {
     userData['password'] = '${enterprise}Admin!!';
     userData['accountSignUpType'] = AccountSignUpType.hycop.index;
     //userData['imagefile'] = _googleAccount!.photoUrl;
-    await createAccount(userData, autoLogin : false).then((value) {}).onError((error, stackTrace) {
+    await createAccount(userData, autoLogin: false).then((value) {}).onError((error, stackTrace) {
       throw HycopUtils.getHycopException(error: error, defaultMessage: 'createAccount error !!!');
     });
     return UserModel(userData: userData);
+  }
+
+  static Future<UserModel> createAccountByAdmin(String name, String email) async {
+    Map<String, dynamic> userData = {};
+    userData['name'] = name;
+    userData['email'] = email;
+    userData['password'] = generateTemporaryPassword(8);
+    userData['userType'] = "gen_password";
+    userData['accountSignUpType'] = AccountSignUpType.hycop.index;
+    //userData['imagefile'] = _googleAccount!.photoUrl;
+    await createAccount(userData, autoLogin: false).then((value) {}).onError((error, stackTrace) {
+      throw HycopUtils.getHycopException(error: error, defaultMessage: 'createAccount error !!!');
+    });
+    return UserModel(userData: userData);
+  }
+
+  static String generateTemporaryPassword(int length) {
+    const String lowercaseLetters = 'abcdefghijklmnopqrstuvwxyz';
+    const String uppercaseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const String numbers = '0123456789';
+    const String specialChars = '@#\$%^&*()-_=+';
+
+    // Ensure the password length is at least 8 characters
+    final int minLength = length < 8 ? 8 : length;
+
+    // Create a list to hold the password characters
+    final List<String> passwordChars = [];
+
+    // Randomly select at least one character from each character set
+    final Random random = Random();
+    passwordChars.add(lowercaseLetters[random.nextInt(lowercaseLetters.length)]);
+    passwordChars.add(uppercaseLetters[random.nextInt(uppercaseLetters.length)]);
+    passwordChars.add(numbers[random.nextInt(numbers.length)]);
+    passwordChars.add(specialChars[random.nextInt(specialChars.length)]);
+
+    // Fill the rest of the password length with random characters from all sets
+    const String allChars = lowercaseLetters + uppercaseLetters + numbers + specialChars;
+    while (passwordChars.length < minLength) {
+      passwordChars.add(allChars[random.nextInt(allChars.length)]);
+    }
+
+    // Shuffle the characters to ensure randomness
+    passwordChars.shuffle();
+
+    // Join the characters to form the password string and return
+    return passwordChars.join();
   }
 
   static Future<AccountSignUpType?> isExistAccount(String email) async {
