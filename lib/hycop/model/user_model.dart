@@ -24,9 +24,8 @@ class UserModel extends AbsModel {
   String get userType => getValue('userType') ?? '';
   String get secret => getValue('secret') ?? '';
 
-  bool isSuperUser() {
-    return userType == 'tomato';
-  }
+  bool get isSuperUser => userType == 'tomato';
+  bool get hasGenPassword => userType == 'gen_password';
 
   UserModel(
       {ObjectType type = ObjectType.user, Map<String, dynamic>? userData, bool logout = false})

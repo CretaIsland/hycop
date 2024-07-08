@@ -1,3 +1,5 @@
+## 0.4.49
+- hasGenPassword
 ## 0.4.48
 - createAccountByAdmin
 ## 0.4.47
