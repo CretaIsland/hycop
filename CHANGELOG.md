@@ -1,3 +1,5 @@
+## 0.4.50
+- hasGenPassword
 ## 0.4.49
 - hasGenPassword
 ## 0.4.48

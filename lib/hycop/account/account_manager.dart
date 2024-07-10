@@ -268,7 +268,9 @@ class AccountManager {
     Map<String, dynamic> userData = {};
     userData['name'] = name;
     userData['email'] = email;
-    userData['password'] = generateTemporaryPassword(8);
+    String pwd = generateTemporaryPassword(8);
+    logger.severe(pwd);
+    userData['password'] = pwd;
     userData['userType'] = "gen_password";
     userData['accountSignUpType'] = AccountSignUpType.hycop.index;
     //userData['imagefile'] = _googleAccount!.photoUrl;
