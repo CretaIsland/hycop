@@ -73,9 +73,9 @@ abstract class AbsExModelManager extends ChangeNotifier {
     }
   }
 
-  Future<bool> isNameExist(String value) async {
+  Future<bool> isNameExist(String value, {String name = 'name'}) async {
     try {
-      return await HycopFactory.dataBase!.isNameExist(collectionId, value: value);
+      return await HycopFactory.dataBase!.isNameExist(collectionId, value: value, name: name);
     } catch (e) {
       logger.severe('databaseError $e');
       //throw HycopException(message: 'databaseError', exception: e as Exception);
