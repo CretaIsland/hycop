@@ -1,3 +1,11 @@
+## 0.4.55
+- supabase 1
+## 0.4.54
+- deleteAccountByUser
+## 0.4.53
+- deleteAccountByUser
+## 0.4.52
+- deleteAccountByUser
 ## 0.4.51
 - isNameExist
 ## 0.4.50

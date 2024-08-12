@@ -1,6 +1,6 @@
 name: hycop
 description: Hycop Framework
-version: 0.4.51
+version: 0.4.55
 homepage: http://www.sqisoft.com
 
 environment:
@@ -14,7 +14,8 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   #device_info_plus: ^3.2.2
-
+  supabase_flutter: ^2.5.11
+  
   logging: ^1.0.2
   flutter_riverpod: ^1.0.4
   synchronized: ^3.0.0
@@ -55,7 +56,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
-
+  
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

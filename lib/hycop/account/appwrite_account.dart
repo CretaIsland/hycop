@@ -177,6 +177,22 @@ class AppwriteAccount extends AbsAccount {
         (error, stackTrace) => throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
   }
 
+  @override
+  Future<void> deleteAccountByUser(Map<String, dynamic> newUserData) async {
+    logger.finest('deleteAccountByUser()');
+    //
+     String userForeignKey = newUserData['userForeignKey'] ?? '';
+    if (userForeignKey.isEmpty) {
+      throw HycopUtils.getHycopException(defaultMessage: 'userForeignKey is null !!!');
+    }
+    newUserData['isRemoved'] = true;
+    await HycopFactory.dataBase!
+        .setData('hycop_users', 'user=$userForeignKey', newUserData)
+        .catchError((error, stackTrace) =>
+            throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
+  }
+
+
 
   @override
   Future<void> login(String email, String password,

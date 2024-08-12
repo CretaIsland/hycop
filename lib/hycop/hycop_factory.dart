@@ -8,6 +8,7 @@ import '../../hycop/storage/firebase_storage.dart';
 import 'database/firebase_database.dart';
 import 'database/appwrite_database.dart';
 import 'database/abs_database.dart';
+import 'database/supabase_database.dart';
 import 'realtime/abs_realtime.dart';
 import 'realtime/firebase_realtime.dart';
 import 'realtime/appwrite_realtime.dart';
@@ -18,6 +19,7 @@ import '../common/util/config.dart';
 import 'account/abs_account.dart';
 import 'account/appwrite_account.dart';
 import 'account/firebase_account.dart';
+import 'realtime/supabase_realtime.dart';
 
 class HycopFactory {
   static String enterprise = 'Demo';
@@ -26,6 +28,8 @@ class HycopFactory {
   static Future<void> selectDatabase() async {
     if (HycopFactory.serverType == ServerType.appwrite) {
       dataBase = AppwriteDatabase();
+    } else if (HycopFactory.serverType == ServerType.supabase) {
+      dataBase = SupabaseDatabase();
     } else {
       dataBase = FirebaseDatabase();
     }
@@ -37,6 +41,8 @@ class HycopFactory {
   static Future<void> selectRealTime() async {
     if (HycopFactory.serverType == ServerType.appwrite) {
       realtime = AppwriteRealtime();
+    } else if (HycopFactory.serverType == ServerType.supabase) {
+      realtime = SupabaseRealtime();
     } else {
       realtime = FirebaseRealtime();
     }

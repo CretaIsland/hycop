@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../common/util/logger.dart';
 import '../utils/hycop_utils.dart';
@@ -17,6 +18,11 @@ abstract class AbsRealtime {
   static FirebaseApp? get fbRTApp => _fbRTApp;
   @protected
   static void setFirebaseApp(FirebaseApp fb) => _fbRTApp = fb;
+
+  static SupabaseClient? _sbRTConn; // supabase only Database connection
+  static SupabaseClient? get sbRTConn => _sbRTConn; // supabase only Database connection
+  @protected
+  static set setSupabaseApp(SupabaseClient sb) => _sbRTConn = sb;
 
   DateTime lastUpdateTime = DateTime.now(); // used only firebase
   String lastUpdateTimeStr = HycopUtils.dateTimeToDB(DateTime.now()); // used only firebase

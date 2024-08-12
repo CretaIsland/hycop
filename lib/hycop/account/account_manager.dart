@@ -453,6 +453,16 @@ class AccountManager {
     await logout();
   }
 
+  static Future<void> deleteAccountByUser(String userId) async {
+    await initialize();
+    Map<String, dynamic> userData = {};
+    await HycopFactory.account!.getAccountInfo(userId, userData);
+
+    await HycopFactory.account!.deleteAccountByUser(userData).catchError((error, stackTrace) =>
+        throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'AccountManager.deleteAccountByUser Failed !!!'));
+  }
+
   static Future<void> logout() async {
     if (_currentLoginUser.isLoginedUser == false && _currentLoginUser.isGuestUser == false) {
       // already logout !!!

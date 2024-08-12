@@ -164,6 +164,17 @@ class FirebaseAccount extends AbsAccount {
   }
 
   @override
+  Future<void> deleteAccountByUser(Map<String, dynamic> newUserData) async {
+    logger.finest('deleteAccountByUser()');
+
+    newUserData['isRemoved'] = true;
+    String userId = newUserData['userId'];
+    await HycopFactory.dataBase!.setData('hycop_users', 'user=$userId', newUserData).catchError(
+        (error, stackTrace) =>
+            throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
+  }
+
+  @override
   Future<void> login(String email, String password,
       {Map<String, dynamic>? returnUserData,
       AccountSignUpType accountSignUpType = AccountSignUpType.hycop}) async {

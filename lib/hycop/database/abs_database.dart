@@ -2,6 +2,8 @@
 
 import 'package:appwrite/appwrite.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../hycop/utils/hycop_exceptions.dart';
@@ -42,15 +44,19 @@ class QueryValue {
 abstract class AbsDatabase {
   //connection info
   static Client? _awDBConn; //appwrite only
-  static FirebaseApp? _fbDBApp; // firebase only Database connection
-
   static Client? get awDBConn => _awDBConn;
+
+  static FirebaseApp? _fbDBApp; // firebase only Database connection
   static FirebaseApp? get fbDBApp => _fbDBApp;
+
+  static SupabaseClient? _sbDBConn; // supabase only Database connection
+  static SupabaseClient? get sbDBConn => _sbDBConn; // supabase only Database connection
 
   @protected
   static void setAppWriteApp(Client client) => _awDBConn = client;
   @protected
   static void setFirebaseApp(FirebaseApp fb) => _fbDBApp = fb;
+  static void setSupabaseApp(SupabaseClient sb) => _sbDBConn = sb;
 
   Future<void> initialize();
 

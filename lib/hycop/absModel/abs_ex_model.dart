@@ -1,5 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages, prefer_final_fields, must_be_immutable
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 //import '../common/util/logger.dart';
@@ -121,5 +122,47 @@ class AbsExModel extends Equatable {
 
   void create() {
     saveManagerHolder!.pushCreated(this, 'create model');
+  }
+
+  String generateCreateTableScript() {
+    // 모델 타입의 인스턴스를 생성하여 속성을 가져옵니다.
+    var className = type.toString().replaceAll('ExModelType.', "creta_");
+    String fields = '';
+    toMap().forEach(
+      (key, value) {
+        if (value is String) {
+          fields += '$key TEXT,';
+        } else if (value is double) {
+          fields += '$key NUMERIC,';
+        } else if (value is int) {
+          fields += '$key INTEGER,';
+        } else if (value is DateTime) {
+          fields += '$key TIMESTAMP,';
+        } else if (value is Timestamp) {
+          fields += '$key TIMESTAMP,';
+        } else if (value is bool) {
+          fields += '$key BOOLEAN,';
+        } else if (value is List) {
+          if (value.isNotEmpty) {
+            if (value.first is String) {
+              fields += '$key TEXT[],';
+            } else if (value.first is double) {
+              fields += '$key NUMERIC[],';
+            } else if (value.first is int) {
+              fields += '$key INTEGER[],';
+            } else if (value.first is bool) {
+              fields += '$key BOOLEAN[],';
+            } else {
+              fields += '$key TEXT[],';
+            } // Add more types as needed
+          } else {
+            fields += '$key TEXT[],';
+          }
+        } else {
+          fields += '$key TEXT,';
+        }
+      },
+    );
+    return 'CREATE TABLE $className ($fields);';
   }
 }
