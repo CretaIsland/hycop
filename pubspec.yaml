@@ -1,6 +1,6 @@
 name: hycop
 description: Hycop Framework
-version: 0.4.55
+version: 0.4.56
 homepage: http://www.sqisoft.com
 
 environment:
@@ -30,14 +30,14 @@ dependencies:
   firebase_database: ^10.5.7
   firebase_storage: ^11.7.7
   
-  appwrite: 11.0.0
+  appwrite: ^12.0.4
   routemaster: ^1.0.1
   provider: ^6.0.1
   font_awesome_flutter: ^10.1.0
   shimmer: ^2.0.0
   random_string: ^2.3.1
   encrypt: ^5.0.1
-  dart_appwrite: 10.0.0
+  dart_appwrite: ^11.0.3
   md5_file_checksum: ^1.0.3
   convert: ^3.0.2
   crypto: ^3.0.2

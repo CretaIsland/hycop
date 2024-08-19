@@ -1,8 +1,10 @@
+## 0.4.56
+- http : ^1.1.0
 ## 0.4.55
 - supabase 1
 ## 0.4.54
 - deleteAccountByUser
-## 0.4.53
+## 0.4.53A
 - deleteAccountByUser
 ## 0.4.52
 - deleteAccountByUser

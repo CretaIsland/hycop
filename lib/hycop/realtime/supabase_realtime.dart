@@ -47,7 +47,7 @@ class SupabaseRealtime extends AbsRealtime {
               table: 'hycop_delta',
               //filter: ,
               callback: (PostgresChangePayload payload) {
-                print('Change received: ${payload.toString()}');
+                //print('Change received: ${payload.toString()}');
                 processEvent(payload.newRecord);
               })
           .subscribe();
@@ -79,7 +79,7 @@ class SupabaseRealtime extends AbsRealtime {
               filter: PostgresChangeFilter(
                   type: PostgresChangeFilterType.eq, column: "realTimeKey", value: realTimeKey),
               callback: (PostgresChangePayload payload) {
-                print('Change received: ${payload.toString()}');
+                //print('Change received: ${payload.toString()}');
                 processEvent(payload.newRecord);
               })
           .subscribe();
