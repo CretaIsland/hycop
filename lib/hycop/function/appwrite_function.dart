@@ -43,9 +43,15 @@ class AppwriteFunction extends AbsFunction {
     //final result =
     //    await functions!.createExecution(functionId: functionId, data: realParams, xasync: false);
     final result =
-         await functions!.createExecution(functionId: functionId, body: realParams, xasync: false);
+        await functions!.createExecution(functionId: functionId, body: realParams, xasync: false);
     logger.info('$functionId finished, ${result.responseBody}, ${result.responseStatusCode}');
 
     return result.responseBody;
+  }
+
+  @override
+  Future<String> execute2(
+      {required String functionId, Map<String, dynamic>? params, bool isAsync = true}) async{
+    return Future.value('');
   }
 }

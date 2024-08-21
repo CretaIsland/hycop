@@ -49,4 +49,10 @@ class FirebaseFunction extends AbsFunction {
       throw HycopException(message: error.message!, code: int.parse(error.code));
     }
   }
+
+  @override
+  Future<String> execute2(
+      {required String functionId, Map<String, dynamic>? params, bool isAsync = true}) async {
+    return Future.value('');
+  }
 }

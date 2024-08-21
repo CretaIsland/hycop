@@ -1,7 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../hycop/utils/hycop_exceptions.dart';
+//import '../../hycop/utils/hycop_exceptions.dart';
 import '../hycop_factory.dart';
 
 import '../../common/util/config.dart';
@@ -10,8 +10,6 @@ import '../database/abs_database.dart';
 import 'abs_function.dart';
 
 class SupabaseFunction extends AbsFunction {
-  SupabaseFunction? function;
-
   @override
   Future<void> initialize() async {
     if (AbsDatabase.sbDBConn == null) {
@@ -25,37 +23,33 @@ class SupabaseFunction extends AbsFunction {
 
       //AbsDatabase.sbDBConn = null;
     }
-
-    if (function == null) {
-      function = SupabaseFunction();
-      function!.initialize();
-    }
-
     assert(AbsDatabase.sbDBConn != null);
   }
 
   @override
   Future<String> execute({required String functionId, String? params, bool isAsync = false}) async {
-    await initialize();
-    String connectionStr = '"projectId":"${myConfig!.serverConfig!.dbConnInfo.projectId}",';
-    connectionStr += '"databaseId":"${myConfig!.serverConfig!.dbConnInfo.appId}",';
-    connectionStr += '"endPoint":"${myConfig!.serverConfig!.dbConnInfo.databaseURL}",';
-    connectionStr += '"apiKey":"${myConfig!.serverConfig!.dbConnInfo.apiKey}"';
-    String realParams = '';
-    if (params == null) {
-      realParams = '{$connectionStr}';
-    } else {
-      if (0 == params.indexOf("{")) {
-        realParams = '{$connectionStr,${params.substring(1)}';
-      } else {
-        throw const HycopException(message: "params should start with '{'");
-      }
-    }
-    logger.info('$functionId executed with $realParams');
+    return Future.value('');
+  }
 
-    final result = await function!.execute(functionId: functionId, params: realParams);
+  @override
+  Future<String> execute2(
+      {required String functionId, Map<String, dynamic>? params, bool isAsync = true}) async {
+    await initialize();
+
+    Map<String, dynamic> realParams = {};
+
+    realParams["projectId"] = myConfig!.serverConfig!.dbConnInfo.projectId;
+    realParams["databaseId"] = myConfig!.serverConfig!.dbConnInfo.appId;
+    realParams["endPoint"] = myConfig!.serverConfig!.dbConnInfo.databaseURL;
+    realParams["apiKey"] = myConfig!.serverConfig!.dbConnInfo.apiKey;
+
+    if (params != null) {
+      realParams.addAll(params);
+    }
+    final result =
+        await Supabase.instance.client.functions.invoke(functionId, queryParameters: realParams);
     logger.info('$functionId finished, $result');
 
-    return result;
+    return result.toString();
   }
 }
