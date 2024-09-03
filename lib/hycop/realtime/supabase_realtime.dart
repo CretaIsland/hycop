@@ -1,13 +1,8 @@
-// ignore_for_file: depend_on_referenced_packages
 import 'dart:async';
-//import 'dart:convert';
-import '../../common/util/config.dart';
-import '../../common/util/logger.dart';
-//import '../hycop_factory.dart';
-import '../database/abs_database.dart';
-import '../hycop_factory.dart';
-import 'abs_realtime.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../common/util/logger.dart';
+import 'abs_realtime.dart';
 
 class SupabaseRealtime extends AbsRealtime {
   bool _isListenComplete = true;
@@ -16,14 +11,14 @@ class SupabaseRealtime extends AbsRealtime {
 
   @override
   Future<void> initialize() async {
-    if (AbsDatabase.sbDBConn == null) {
-      await HycopFactory.initAll();
+    if (AbsRealtime.sbRTConn == null) {
+      // await HycopFactory.initAll();
       logger.finest('initialize');
-      await Supabase.initialize(
-        url: myConfig!.serverConfig!.dbConnInfo.databaseURL,
-        anonKey: myConfig!.serverConfig!.dbConnInfo.apiKey,
-      );
-      AbsDatabase.setSupabaseApp(Supabase.instance.client);
+      // await Supabase.initialize(
+      //   url: myConfig!.serverConfig.dbConnInfo.databaseURL,
+      //   anonKey: myConfig!.serverConfig.dbConnInfo.apiKey,
+      // );
+      AbsRealtime.setSupabaseApp(Supabase.instance.client);
       //AbsRealtime.sbRTConn = null;
     }
 
@@ -173,7 +168,7 @@ class SupabaseRealtime extends AbsRealtime {
     logger.finest('setDelta = ${input.toString()}');
 
     try {
-      SupabaseQueryBuilder fromRef = AbsDatabase.sbDBConn!.from('hycop_delta');
+      SupabaseQueryBuilder fromRef = AbsRealtime.sbRTConn!.from('hycop_delta');
       fromRef.upsert(input, onConflict: 'mid', ignoreDuplicates: true);
       logger.finest("hycop_delta sample data created");
       return true;

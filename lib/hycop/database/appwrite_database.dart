@@ -17,12 +17,12 @@ class AppwriteDatabase extends AbsDatabase {
   Future<void> initialize() async {
     if (AbsDatabase.awDBConn == null) {
       //logger.finest(
-      //    "AppwriteDatabase initialize ${myConfig!.serverConfig!.dbConnInfo.databaseURL}, ${myConfig!.serverConfig!.dbConnInfo.projectId}");
+      //    "AppwriteDatabase initialize ${myConfig!.serverConfig.dbConnInfo.databaseURL}, ${myConfig!.serverConfig.dbConnInfo.projectId}");
       await HycopFactory.initAll();
       AbsDatabase.setAppWriteApp(Client()
-        ..setProject(myConfig!.serverConfig!.dbConnInfo.projectId)
+        ..setProject(myConfig!.serverConfig.dbConnInfo.projectId)
         ..setSelfSigned(status: true)
-        ..setEndpoint(myConfig!.serverConfig!.dbConnInfo.databaseURL));
+        ..setEndpoint(myConfig!.serverConfig.dbConnInfo.databaseURL));
     }
     // ignore: prefer_conditional_assignment
     if (database == null) {
@@ -39,7 +39,7 @@ class AppwriteDatabase extends AbsDatabase {
     String key = HycopUtils.midToKey(mid);
     try {
       final doc = await database!.getDocument(
-        databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
+        databaseId: myConfig!.serverConfig.dbConnInfo.appId,
         collectionId: collectionId,
         documentId: key,
       );
@@ -62,7 +62,7 @@ class AppwriteDatabase extends AbsDatabase {
 
     try {
       final result = await database!.listDocuments(
-          databaseId: myConfig!.serverConfig!.dbConnInfo.appId, collectionId: collectionId);
+          databaseId: myConfig!.serverConfig.dbConnInfo.appId, collectionId: collectionId);
       return result.documents.map((element) {
         return element.data;
       }).toList();
@@ -86,7 +86,7 @@ class AppwriteDatabase extends AbsDatabase {
       String key = HycopUtils.midToKey(mid);
       logger.finest('setData($key)');
       await database!.updateDocument(
-        databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
+        databaseId: myConfig!.serverConfig.dbConnInfo.appId,
         collectionId: collectionId,
         documentId: key,
         data: data as Map<String, dynamic>,
@@ -111,7 +111,7 @@ class AppwriteDatabase extends AbsDatabase {
       String key = HycopUtils.midToKey(mid);
       logger.finest('setData($key)');
       await database!.updateDocument(
-        databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
+        databaseId: myConfig!.serverConfig.dbConnInfo.appId,
         collectionId: collectionId,
         documentId: key,
         data: data as Map<String, dynamic>,
@@ -137,7 +137,7 @@ class AppwriteDatabase extends AbsDatabase {
       String key = HycopUtils.midToKey(mid);
       logger.finest('createData($key)');
       await database!.createDocument(
-        databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
+        databaseId: myConfig!.serverConfig.dbConnInfo.appId,
         collectionId: collectionId,
         documentId: key,
         data: data,
@@ -163,7 +163,7 @@ class AppwriteDatabase extends AbsDatabase {
     try {
       //String orderType = descending ? 'DESC' : 'ASC';
       final result = await database!.listDocuments(
-        databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
+        databaseId: myConfig!.serverConfig.dbConnInfo.appId,
         collectionId: collectionId,
         queries: [
           Query.equal(name, value),
@@ -219,7 +219,7 @@ class AppwriteDatabase extends AbsDatabase {
       }
 
       final result = await database!.listDocuments(
-          databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
+          databaseId: myConfig!.serverConfig.dbConnInfo.appId,
           collectionId: collectionId,
           queries: [
             ...queryList,
@@ -261,7 +261,7 @@ class AppwriteDatabase extends AbsDatabase {
       queryList.add(Query.equal(name, value));
 
       final result = await database!.listDocuments(
-        databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
+        databaseId: myConfig!.serverConfig.dbConnInfo.appId,
         collectionId: collectionId,
         queries: queryList,
         // index 를 만들어줘야 함.
@@ -399,7 +399,7 @@ class AppwriteDatabase extends AbsDatabase {
       }
 
       final result = await database!.listDocuments(
-          databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
+          databaseId: myConfig!.serverConfig.dbConnInfo.appId,
           collectionId: collectionId,
           queries: [
             ...queryList,
@@ -432,7 +432,7 @@ class AppwriteDatabase extends AbsDatabase {
     try {
       String key = HycopUtils.midToKey(mid);
       await database!.deleteDocument(
-        databaseId: myConfig!.serverConfig!.dbConnInfo.appId,
+        databaseId: myConfig!.serverConfig.dbConnInfo.appId,
         collectionId: collectionId,
         documentId: key,
       );

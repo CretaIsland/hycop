@@ -26,18 +26,18 @@ class FirebaseAppStorage extends AbsStorage {
       AbsStorage.setFirebaseApp(await Firebase.initializeApp(
           name: "storage",
           options: FirebaseOptions(
-              apiKey: myConfig!.serverConfig!.storageConnInfo.apiKey,
-              appId: myConfig!.serverConfig!.storageConnInfo.appId,
-              messagingSenderId: myConfig!.serverConfig!.storageConnInfo.messagingSenderId,
-              projectId: myConfig!.serverConfig!.storageConnInfo.projectId,
-              storageBucket: myConfig!.serverConfig!.storageConnInfo.storageURL)));
+              apiKey: myConfig!.serverConfig.storageConnInfo.apiKey,
+              appId: myConfig!.serverConfig.storageConnInfo.appId,
+              messagingSenderId: myConfig!.serverConfig.storageConnInfo.messagingSenderId,
+              projectId: myConfig!.serverConfig.storageConnInfo.projectId,
+              storageBucket: myConfig!.serverConfig.storageConnInfo.storageURL)));
     }
     _storage ??= FirebaseStorage.instanceFor(app: AbsStorage.fbStorageConn);
   }
 
   @override
   Future<void> setBucket() async {
-    myConfig!.serverConfig!.storageConnInfo.bucketId = StorageUtils.createBucketId(
+    myConfig!.serverConfig.storageConnInfo.bucketId = StorageUtils.createBucketId(
         AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId);
   }
 
@@ -103,7 +103,7 @@ class FirebaseAppStorage extends AbsStorage {
     try {
       await initialize();
 
-      bucketId ??= myConfig!.serverConfig!.storageConnInfo.bucketId;
+      bucketId ??= myConfig!.serverConfig.storageConnInfo.bucketId;
       fileName = StorageUtils.sanitizeString(StorageUtils.getMD5(fileBytes) + fileName);
       late String folderPath;
 
@@ -153,7 +153,7 @@ class FirebaseAppStorage extends AbsStorage {
       }
 
       var response =
-          await client.post(Uri.parse("${myConfig!.config.apiServerUrl}/createThumbnail"),
+          await client.post(Uri.parse("${myConfig!.serverConfig.apiServerUrl}/createThumbnail"),
               headers: {"Content-type": "application/json"},
               body: jsonEncode({
                 "bucketId": bucketId,
@@ -247,7 +247,7 @@ class FirebaseAppStorage extends AbsStorage {
     try {
       await initialize();
 
-      bucketId ??= myConfig!.serverConfig!.storageConnInfo.bucketId;
+      bucketId ??= myConfig!.serverConfig.storageConnInfo.bucketId;
       var sourceFile = _storage!.ref().child(sourceFileId);
       var sourceFileData = await getFileData(sourceFileId);
       var sourceFileMetaData = await sourceFile.getMetadata();

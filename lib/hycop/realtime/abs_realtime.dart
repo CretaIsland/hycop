@@ -22,7 +22,7 @@ abstract class AbsRealtime {
   static SupabaseClient? _sbRTConn; // supabase only Database connection
   static SupabaseClient? get sbRTConn => _sbRTConn; // supabase only Database connection
   @protected
-  static set setSupabaseApp(SupabaseClient sb) => _sbRTConn = sb;
+  static void setSupabaseApp(SupabaseClient sb) => _sbRTConn = sb;
 
   DateTime lastUpdateTime = DateTime.now(); // used only firebase
   String lastUpdateTimeStr = HycopUtils.dateTimeToDB(DateTime.now()); // used only firebase

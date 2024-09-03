@@ -40,7 +40,7 @@ class UserModel extends AbsModel {
     if (userId.isEmpty) {
       return;
     }
-    String guestUserId = myConfig?.config.guestUserId ?? '';
+    String guestUserId = myConfig?.serverConfig.guestUserId ?? '';
     if (guestUserId.isNotEmpty && guestUserId == userData['email']) {
       _isGuestUser = true;
     } else {

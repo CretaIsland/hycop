@@ -24,12 +24,12 @@ class FirebaseRealtime extends AbsRealtime {
       AbsRealtime.setFirebaseApp(await Firebase.initializeApp(
           name: "realTime",
           options: FirebaseOptions(
-              databaseURL: myConfig!.serverConfig!.dbConnInfo.databaseURL,
-              apiKey: myConfig!.serverConfig!.dbConnInfo.apiKey,
-              appId: myConfig!.serverConfig!.dbConnInfo.appId,
-              storageBucket: myConfig!.serverConfig!.dbConnInfo.storageBucket,
-              messagingSenderId: myConfig!.serverConfig!.dbConnInfo.messagingSenderId,
-              projectId: myConfig!.serverConfig!.dbConnInfo.projectId)));
+              databaseURL: myConfig!.serverConfig.dbConnInfo.databaseURL,
+              apiKey: myConfig!.serverConfig.dbConnInfo.apiKey,
+              appId: myConfig!.serverConfig.dbConnInfo.appId,
+              storageBucket: myConfig!.serverConfig.dbConnInfo.storageBucket,
+              messagingSenderId: myConfig!.serverConfig.dbConnInfo.messagingSenderId,
+              projectId: myConfig!.serverConfig.dbConnInfo.projectId)));
       logger.finest('realTime initialized');
     }
     // ignore: prefer_conditional_assignment

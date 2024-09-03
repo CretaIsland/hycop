@@ -1,29 +1,31 @@
-import '../../hycop/account/account_manager.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../hycop/storage/abs_storage.dart';
-import '../../hycop/storage/appwrite_storage.dart';
-import '../../hycop/storage/firebase_storage.dart';
-
+import '../common/util/config.dart';
 //import '../common/util/logger.dart';
-import 'database/firebase_database.dart';
-import 'database/appwrite_database.dart';
+import 'account/abs_account.dart';
+import 'account/account_manager.dart';
+import 'account/appwrite_account.dart';
+import 'account/firebase_account.dart';
+import 'account/supabase_account.dart';
 import 'database/abs_database.dart';
+import 'database/appwrite_database.dart';
+import 'database/firebase_database.dart';
 import 'database/supabase_database.dart';
-import 'realtime/abs_realtime.dart';
-import 'realtime/firebase_realtime.dart';
-import 'realtime/appwrite_realtime.dart';
 import 'function/abs_function.dart';
 import 'function/appwrite_function.dart';
 import 'function/firebase_function.dart';
-import '../common/util/config.dart';
-import 'account/abs_account.dart';
-import 'account/appwrite_account.dart';
-import 'account/firebase_account.dart';
+import 'realtime/abs_realtime.dart';
+import 'realtime/appwrite_realtime.dart';
+import 'realtime/firebase_realtime.dart';
 import 'realtime/supabase_realtime.dart';
+import 'storage/abs_storage.dart';
+import 'storage/appwrite_storage.dart';
+import 'storage/firebase_storage.dart';
 
 class HycopFactory {
   static String enterprise = 'Demo';
   static ServerType serverType = ServerType.firebase;
+
   static AbsDatabase? dataBase;
   static Future<void> selectDatabase() async {
     if (HycopFactory.serverType == ServerType.appwrite) {
@@ -80,11 +82,12 @@ class HycopFactory {
     }
   }
 
-  static AbsAccount? account; // = null;
+  static AbsAccount? account;
   static Future<void> selectAccount() async {
-    //if (account != null) return;
     if (HycopFactory.serverType == ServerType.appwrite) {
       account = AppwriteAccount();
+    } else if (HycopFactory.serverType == ServerType.supabase) {
+      account = SupabaseAccount();
     } else {
       account = FirebaseAccount();
     }
@@ -92,8 +95,17 @@ class HycopFactory {
 
   static Future<bool> initAll({bool force = false}) async {
     if (myConfig != null && force == false) return true;
-    myConfig = HycopConfig();
-    await myConfig!.serverConfig!.loadAsset();
+    myConfig = HycopConfig(HycopFactory.enterprise, HycopFactory.serverType);
+    await myConfig!.serverConfig.loadAsset();
+    if (HycopFactory.serverType == ServerType.supabase) {
+      final projectURL = myConfig!.serverConfig.dbConnInfo.databaseURL;
+      final projectApiKey = myConfig!.serverConfig.dbConnInfo.apiKey;
+      await Supabase.initialize(
+        url: projectURL,
+        anonKey: projectApiKey,
+      );
+    }
+    await HycopFactory.selectAccount();
     await AccountManager.getSession();
     //await myConfig!.load
     await HycopFactory.selectDatabase();

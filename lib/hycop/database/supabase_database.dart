@@ -2,8 +2,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
 import '../../common/util/logger.dart';
-import '../../common/util/config.dart';
-import '../hycop_factory.dart';
 import 'abs_database.dart';
 
 class SupabaseDatabase extends AbsDatabase {
@@ -12,12 +10,12 @@ class SupabaseDatabase extends AbsDatabase {
   @override
   Future<void> initialize() async {
     if (AbsDatabase.sbDBConn == null) {
-      await HycopFactory.initAll();
+      // await HycopFactory.initAll();
       logger.finest('initialize');
-      await Supabase.initialize(
-        url: myConfig!.serverConfig!.dbConnInfo.databaseURL,
-        anonKey: myConfig!.serverConfig!.dbConnInfo.apiKey,
-      );
+      // await Supabase.initialize(
+      //   url: myConfig!.serverConfig.dbConnInfo.databaseURL,
+      //   anonKey: myConfig!.serverConfig.dbConnInfo.apiKey,
+      // );
       AbsDatabase.setSupabaseApp(Supabase.instance.client);
 
       //AbsDatabase.sbDBConn = null;
@@ -55,8 +53,10 @@ class SupabaseDatabase extends AbsDatabase {
   Future<void> setData(String collectionId, String mid, Map<dynamic, dynamic> data) async {
     await initialize();
 
+    data['mid'] = mid;
+
     SupabaseQueryBuilder fromRef = AbsDatabase.sbDBConn!.from(collectionId);
-    fromRef.upsert(data, onConflict: 'mid');
+    await fromRef.upsert(data, onConflict: 'mid');
     logger.finest('$mid saved');
   }
 
@@ -65,7 +65,7 @@ class SupabaseDatabase extends AbsDatabase {
     await initialize();
 
     SupabaseQueryBuilder fromRef = AbsDatabase.sbDBConn!.from(collectionId);
-    fromRef.update(data).eq('mid', mid);
+    await fromRef.update(data).eq('mid', mid);
     logger.finest('$mid saved');
   }
 
@@ -75,7 +75,7 @@ class SupabaseDatabase extends AbsDatabase {
 
     logger.finest('createData... $mid!');
     SupabaseQueryBuilder fromRef = AbsDatabase.sbDBConn!.from(collectionId);
-    fromRef.upsert(data, onConflict: 'mid', ignoreDuplicates: true);
+    await fromRef.upsert(data, onConflict: 'mid', ignoreDuplicates: true);
     logger.finest('$mid! created');
   }
 

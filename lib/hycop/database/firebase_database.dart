@@ -19,11 +19,11 @@ class FirebaseDatabase extends AbsDatabase {
       AbsDatabase.setFirebaseApp(await Firebase.initializeApp(
           name: 'database',
           options: FirebaseOptions(
-              apiKey: myConfig!.serverConfig!.dbConnInfo.apiKey,
-              appId: myConfig!.serverConfig!.dbConnInfo.appId,
-              storageBucket: myConfig!.serverConfig!.dbConnInfo.storageBucket,
-              messagingSenderId: myConfig!.serverConfig!.dbConnInfo.messagingSenderId,
-              projectId: myConfig!.serverConfig!.dbConnInfo.projectId)));
+              apiKey: myConfig!.serverConfig.dbConnInfo.apiKey,
+              appId: myConfig!.serverConfig.dbConnInfo.appId,
+              storageBucket: myConfig!.serverConfig.dbConnInfo.storageBucket,
+              messagingSenderId: myConfig!.serverConfig.dbConnInfo.messagingSenderId,
+              projectId: myConfig!.serverConfig.dbConnInfo.projectId)));
 
       //_db = null;
     }

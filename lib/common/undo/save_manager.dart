@@ -142,7 +142,7 @@ class SaveManager extends ChangeNotifier {
   Future<void> runSaveTimer() async {
     //logger.severe('SaveManager.runSaveTimer');
 
-    _saveTimer = Timer.periodic(Duration(milliseconds: myConfig!.config.savePeriod), (timer) async {
+    _saveTimer = Timer.periodic(Duration(milliseconds: myConfig!.serverConfig.savePeriod), (timer) async {
       await saveForce();
       // await _datalock.synchronized(() async {
       //   if (_dataChangedQue.isNotEmpty) {

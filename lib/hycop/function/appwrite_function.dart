@@ -24,10 +24,10 @@ class AppwriteFunction extends AbsFunction {
   @override
   Future<String> execute({required String functionId, String? params, bool isAsync = false}) async {
     await initialize();
-    String connectionStr = '"projectId":"${myConfig!.serverConfig!.dbConnInfo.projectId}",';
-    connectionStr += '"databaseId":"${myConfig!.serverConfig!.dbConnInfo.appId}",';
-    connectionStr += '"endPoint":"${myConfig!.serverConfig!.dbConnInfo.databaseURL}",';
-    connectionStr += '"apiKey":"${myConfig!.serverConfig!.dbConnInfo.apiKey}"';
+    String connectionStr = '"projectId":"${myConfig!.serverConfig.dbConnInfo.projectId}",';
+    connectionStr += '"databaseId":"${myConfig!.serverConfig.dbConnInfo.appId}",';
+    connectionStr += '"endPoint":"${myConfig!.serverConfig.dbConnInfo.databaseURL}",';
+    connectionStr += '"apiKey":"${myConfig!.serverConfig.dbConnInfo.apiKey}"';
     String realParams = '';
     if (params == null) {
       realParams = '{$connectionStr}';

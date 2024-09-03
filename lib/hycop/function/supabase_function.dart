@@ -1,9 +1,6 @@
-// ignore_for_file: depend_on_referenced_packages
-
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../hycop/utils/hycop_exceptions.dart';
-import '../hycop_factory.dart';
 
+import '../../hycop/utils/hycop_exceptions.dart';
 import '../../common/util/config.dart';
 import '../../common/util/logger.dart';
 import '../database/abs_database.dart';
@@ -15,12 +12,12 @@ class SupabaseFunction extends AbsFunction {
   @override
   Future<void> initialize() async {
     if (AbsDatabase.sbDBConn == null) {
-      await HycopFactory.initAll();
+      // await HycopFactory.initAll();
       logger.finest('initialize');
-      await Supabase.initialize(
-        url: myConfig!.serverConfig!.dbConnInfo.databaseURL,
-        anonKey: myConfig!.serverConfig!.dbConnInfo.apiKey,
-      );
+      // await Supabase.initialize(
+      //   url: myConfig!.serverConfig.dbConnInfo.databaseURL,
+      //   anonKey: myConfig!.serverConfig.dbConnInfo.apiKey,
+      // );
       AbsDatabase.setSupabaseApp(Supabase.instance.client);
 
       //AbsDatabase.sbDBConn = null;
@@ -37,10 +34,10 @@ class SupabaseFunction extends AbsFunction {
   @override
   Future<String> execute({required String functionId, String? params, bool isAsync = false}) async {
     await initialize();
-    String connectionStr = '"projectId":"${myConfig!.serverConfig!.dbConnInfo.projectId}",';
-    connectionStr += '"databaseId":"${myConfig!.serverConfig!.dbConnInfo.appId}",';
-    connectionStr += '"endPoint":"${myConfig!.serverConfig!.dbConnInfo.databaseURL}",';
-    connectionStr += '"apiKey":"${myConfig!.serverConfig!.dbConnInfo.apiKey}"';
+    String connectionStr = '"projectId":"${myConfig!.serverConfig.dbConnInfo.projectId}",';
+    connectionStr += '"databaseId":"${myConfig!.serverConfig.dbConnInfo.appId}",';
+    connectionStr += '"endPoint":"${myConfig!.serverConfig.dbConnInfo.databaseURL}",';
+    connectionStr += '"apiKey":"${myConfig!.serverConfig.dbConnInfo.apiKey}"';
     String realParams = '';
     if (params == null) {
       realParams = '{$connectionStr}';

@@ -27,7 +27,7 @@ class AppwriteRealtime extends AbsRealtime {
     if (subscription != null) {
       return;
     }
-    String dbId = myConfig!.serverConfig!.dbConnInfo.appId;
+    String dbId = myConfig!.serverConfig.dbConnInfo.appId;
     String ch = 'databases.$dbId.collections.hycop_delta.documents';
     subscription = Realtime(AbsDatabase.awDBConn!).subscribe([ch]);
     realtimeListener = subscription!.stream.listen((event) {
@@ -92,7 +92,7 @@ class AppwriteRealtime extends AbsRealtime {
     if (subscription != null) {
       return;
     }
-    String dbId = myConfig!.serverConfig!.dbConnInfo.appId;
+    String dbId = myConfig!.serverConfig.dbConnInfo.appId;
     String ch = 'databases.$dbId.collections.hycop_delta.documents';
     //logger.info('---- RealTime subscription !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ----');
     subscription = Realtime(AbsDatabase.awDBConn!).subscribe([ch]);

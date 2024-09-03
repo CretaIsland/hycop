@@ -21,20 +21,20 @@ class AppwriteStorage extends AbsStorage {
 
   Storage? _storage;
   late dart_appwrite.Storage _awStorage;
-  String url = "https://devcreta.com:663/v1/storage/buckets/BUCKET_ID/files/FILE_ID/view?project=${myConfig!.serverConfig!.storageConnInfo.projectId}";
+  String url = "https://devcreta.com:663/v1/storage/buckets/BUCKET_ID/files/FILE_ID/view?project=${myConfig!.serverConfig.storageConnInfo.projectId}";
   
   @override
   Future<void> initialize() async {
     if(AbsStorage.awStorageConn == null) {
       AbsStorage.setAppwriteApp(Client()
-        ..setEndpoint(myConfig!.serverConfig!.storageConnInfo.storageURL)
-        ..setProject(myConfig!.serverConfig!.storageConnInfo.projectId)
+        ..setEndpoint(myConfig!.serverConfig.storageConnInfo.storageURL)
+        ..setProject(myConfig!.serverConfig.storageConnInfo.projectId)
         ..setSelfSigned(status: true)
       );
       _awStorage = dart_appwrite.Storage(dart_appwrite.Client()
-        ..setEndpoint(myConfig!.serverConfig!.storageConnInfo.storageURL)
-        ..setProject(myConfig!.serverConfig!.storageConnInfo.projectId)
-        ..setKey(myConfig!.serverConfig!.storageConnInfo.apiKey)
+        ..setEndpoint(myConfig!.serverConfig.storageConnInfo.storageURL)
+        ..setProject(myConfig!.serverConfig.storageConnInfo.projectId)
+        ..setKey(myConfig!.serverConfig.storageConnInfo.apiKey)
       );
     }
     _storage ??= Storage(AbsStorage.awStorageConn!);
@@ -44,7 +44,7 @@ class AppwriteStorage extends AbsStorage {
   Future<void> setBucket() async {
     try {
       final bucket = await _awStorage.getBucket(bucketId: AccountManager.currentLoginUser.userId);
-      myConfig!.serverConfig!.storageConnInfo.bucketId = bucket.$id;
+      myConfig!.serverConfig.storageConnInfo.bucketId = bucket.$id;
     } catch (error) {
       // bucket이 없을 경우
       final newBucket = await _awStorage.createBucket(
@@ -57,7 +57,7 @@ class AppwriteStorage extends AbsStorage {
           Permission.delete(Role.any())
         ]
       );
-      myConfig!.serverConfig!.storageConnInfo.bucketId = newBucket.$id;
+      myConfig!.serverConfig.storageConnInfo.bucketId = newBucket.$id;
     }
   }
 
@@ -66,7 +66,7 @@ class AppwriteStorage extends AbsStorage {
     try {
       await initialize();
 
-      bucketId ??= myConfig!.serverConfig!.storageConnInfo.bucketId;
+      bucketId ??= myConfig!.serverConfig.storageConnInfo.bucketId;
       var file = await _storage!.getFile(bucketId: bucketId, fileId: fileId);
       String fileUrl = url.replaceFirst("BUCKET_ID", bucketId).replaceFirst("FILE_ID", fileId);
 
@@ -129,7 +129,7 @@ class AppwriteStorage extends AbsStorage {
     try {
       await initialize();
 
-      bucketId ??= myConfig!.serverConfig!.storageConnInfo.bucketId;
+      bucketId ??= myConfig!.serverConfig.storageConnInfo.bucketId;
       fileName = StorageUtils.sanitizeString(fileName);
       late String fileId;
 
@@ -170,7 +170,7 @@ class AppwriteStorage extends AbsStorage {
         client.withCredentials = true;
       }
 
-      var response = await client.post(Uri.parse("${myConfig!.config.apiServerUrl}/createThumbnail"),
+      var response = await client.post(Uri.parse("${myConfig!.serverConfig.apiServerUrl}/createThumbnail"),
           headers: {"Content-type": "application/json"},
           body: jsonEncode({
             "bucketId": bucketId,
@@ -193,7 +193,7 @@ class AppwriteStorage extends AbsStorage {
     try {
       await initialize();
 
-      bucketId ??= myConfig!.serverConfig!.storageConnInfo.bucketId;
+      bucketId ??= myConfig!.serverConfig.storageConnInfo.bucketId;
       return await _storage!.getFileDownload(bucketId: bucketId, fileId: fileId);
     } catch (error) {
       logger.info("error at Storage.getFileBytes >>> $error");
@@ -205,7 +205,7 @@ class AppwriteStorage extends AbsStorage {
   Future<bool> downloadFile(String fileId, String saveName, {String? bucketId}) async {
     try {
       if(kIsWeb) {
-        bucketId ??= myConfig!.serverConfig!.storageConnInfo.bucketId;
+        bucketId ??= myConfig!.serverConfig.storageConnInfo.bucketId;
         Uint8List? targetBytes = await getFileBytes(fileId, bucketId: bucketId);
         String targetUrl = Url.createObjectUrlFromBlob(Blob([targetBytes]));
         AnchorElement(href: targetUrl)
@@ -237,7 +237,7 @@ class AppwriteStorage extends AbsStorage {
     try {
       await initialize();
 
-      bucketId ??= myConfig!.serverConfig!.storageConnInfo.bucketId;
+      bucketId ??= myConfig!.serverConfig.storageConnInfo.bucketId;
       var file = await getFileData(fileId, bucketId: bucketId);
       if(file != null) {
         if(file.thumbnailUrl.isNotEmpty && file.thumbnailUrl != file.url) await _storage!.deleteFile(bucketId: bucketId, fileId: "cov-${file.id.substring(4)}");
@@ -267,7 +267,7 @@ class AppwriteStorage extends AbsStorage {
     try {
       await initialize();
 
-      bucketId ??= myConfig!.serverConfig!.storageConnInfo.bucketId;
+      bucketId ??= myConfig!.serverConfig.storageConnInfo.bucketId;
       var sourceFile = await _storage!.getFile(bucketId: sourceBucketId, fileId: sourceFileId);
       var sourceFileData = await getFileData(sourceFileId, bucketId: sourceBucketId);
       Uint8List? sourceFileBytes = await getFileBytes(sourceFileId, bucketId: sourceBucketId);
@@ -323,7 +323,7 @@ Future<String> getImageUrl(String path) async {
   await initialize();
 
   // 파일의 URL을 얻기 위한 참조 생성
-  Uint8List blob = await _storage!.getFileView(bucketId: myConfig!.serverConfig!.storageConnInfo.bucketId, fileId: path); 
+  Uint8List blob = await _storage!.getFileView(bucketId: myConfig!.serverConfig.storageConnInfo.bucketId, fileId: path); 
   String url = Url.createObjectUrlFromBlob(Blob([blob])); 
 
   return url;
