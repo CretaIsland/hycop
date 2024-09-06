@@ -1,5 +1,5 @@
 // ignore_for_file: depend_on_referenced_packages
-
+import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 //import '../../hycop/utils/hycop_exceptions.dart';
 import '../hycop_factory.dart';
@@ -34,20 +34,24 @@ class SupabaseFunction extends AbsFunction {
   @override
   Future<String> execute2(
       {required String functionId, Map<String, dynamic>? params, bool isAsync = true}) async {
+    //print('execute2 $functionId');
+
     await initialize();
 
     Map<String, dynamic> realParams = {};
 
-    realParams["projectId"] = myConfig!.serverConfig!.dbConnInfo.projectId;
-    realParams["databaseId"] = myConfig!.serverConfig!.dbConnInfo.appId;
+    //realParams["projectId"] = myConfig!.serverConfig!.dbConnInfo.projectId;
+    //realParams["databaseId"] = myConfig!.serverConfig!.dbConnInfo.appId;
     realParams["endPoint"] = myConfig!.serverConfig!.dbConnInfo.databaseURL;
     realParams["apiKey"] = myConfig!.serverConfig!.dbConnInfo.apiKey;
+    realParams["roleKey"] = myConfig!.serverConfig!.dbConnInfo.appId;
 
     if (params != null) {
       realParams.addAll(params);
     }
-    final result =
-        await Supabase.instance.client.functions.invoke(functionId, queryParameters: realParams);
+    String body = jsonEncode(realParams);
+    final result = await Supabase.instance.client.functions
+        .invoke(functionId, body: body, queryParameters: realParams);
     logger.info('$functionId finished, $result');
 
     return result.toString();

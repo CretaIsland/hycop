@@ -27,7 +27,7 @@ class SupabaseRealtime extends AbsRealtime {
       //AbsRealtime.sbRTConn = null;
     }
 
-    assert(AbsRealtime.sbRTConn != null);
+    assert(AbsDatabase.sbDBConn != null);
     // for realtime
   }
 
