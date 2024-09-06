@@ -14,7 +14,7 @@ enum ExModelType {
   team,
   enterprise,
   channel,
-  watchHistory,
+  watch_history,
   playlist,
   favorites,
   subscription,

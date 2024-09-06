@@ -1,3 +1,5 @@
+## 0.4.62
+- watchHistory --> watch_hostory 
 ## 0.4.61
 - supabase function 
 ## 0.4.60

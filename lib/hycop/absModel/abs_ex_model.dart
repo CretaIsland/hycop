@@ -127,17 +127,17 @@ class AbsExModel extends Equatable {
     saveManagerHolder!.pushCreated(this, 'create model');
   }
 
-  String generateCreateTableScript() {
+  String generateCreateTableScript(String? className) {
     // 모델 타입의 인스턴스를 생성하여 속성을 가져옵니다.
-    var className = type.toString().replaceAll('ExModelType.', "creta_");
+    className ??= type.toString().replaceAll('ExModelType.', "creta_");
     String fields = '';
     toMap().forEach(
       (key, value) {
         if (value is String) {
-           if (key == 'mid') {
+          if (key == 'mid') {
             fields += '$key TEXT PRIMARY KEY,';
           } else {
-          fields += '$key TEXT,';
+            fields += '$key TEXT,';
           }
         } else if (value is double) {
           fields += '$key NUMERIC,';
