@@ -1,3 +1,15 @@
+## 0.4.62
+- watchHistory --> watch_hostory 
+## 0.4.61
+- supabase function 
+## 0.4.60
+- supabase function 
+## 0.4.59
+- supabase function 
+## 0.4.58
+- supabase bug fix 
+## 0.4.57
+- supabase function 
 ## 0.4.56
 - http : ^1.1.0
 ## 0.4.55

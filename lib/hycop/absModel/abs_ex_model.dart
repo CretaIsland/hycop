@@ -6,8 +6,10 @@ import 'package:equatable/equatable.dart';
 //import '../common/util/logger.dart';
 import '../../common/undo/save_manager.dart';
 import '../../common/undo/undo.dart';
+import '../../common/util/config.dart';
 import '../../hycop/utils/hycop_utils.dart';
 import '../enum/model_enums.dart';
+import '../hycop_factory.dart';
 
 class AbsExModel extends Equatable {
   bool autoSave = true;
@@ -82,7 +84,8 @@ class AbsExModel extends Equatable {
 
     //print("createTime = $createTime, $mid");
     parentMid.setDD(map["parentMid"] ?? '', save: false, noUndo: true);
-    order.setDD(map["order"] ?? 1, save: false, noUndo: true);
+    order.setDD(map[HycopFactory.serverType == ServerType.supabase ? "order_" : "order"] ?? 1,
+        save: false, noUndo: true);
     hashTag.setDD(map["hashTag"] ?? '', save: false, noUndo: true);
     isRemoved.setDD(map["isRemoved"] ?? false, save: false, noUndo: true);
     String? rtKey = map["realTimeKey"];
@@ -96,7 +99,7 @@ class AbsExModel extends Equatable {
       "updateTime": HycopUtils.dateTimeToDB(updateTime),
       "createTime": HycopUtils.dateTimeToDB(createTime),
       "parentMid": parentMid.value,
-      "order": order.value,
+      HycopFactory.serverType == ServerType.supabase ? "order_" : "order": order.value,
       "hashTag": hashTag.value,
       "isRemoved": isRemoved.value,
       "realTimeKey": realTimeKey,
@@ -124,14 +127,18 @@ class AbsExModel extends Equatable {
     saveManagerHolder!.pushCreated(this, 'create model');
   }
 
-  String generateCreateTableScript() {
+  String generateCreateTableScript(String? className) {
     // 모델 타입의 인스턴스를 생성하여 속성을 가져옵니다.
-    var className = type.toString().replaceAll('ExModelType.', "creta_");
+    className ??= type.toString().replaceAll('ExModelType.', "creta_");
     String fields = '';
     toMap().forEach(
       (key, value) {
         if (value is String) {
-          fields += '$key TEXT,';
+          if (key == 'mid') {
+            fields += '$key TEXT PRIMARY KEY,';
+          } else {
+            fields += '$key TEXT,';
+          }
         } else if (value is double) {
           fields += '$key NUMERIC,';
         } else if (value is int) {
@@ -163,6 +170,10 @@ class AbsExModel extends Equatable {
         }
       },
     );
+    if (fields.endsWith(',')) {
+      fields = fields.substring(0, fields.length - 1);
+    }
+
     return 'CREATE TABLE $className ($fields);';
   }
 }

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../../common/util/logger.dart';
 import 'abs_realtime.dart';
 
