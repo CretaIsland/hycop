@@ -112,7 +112,6 @@ class HycopFactory {
     await AccountManager.getSession();
     //await myConfig!.load
     await HycopFactory.selectDatabase();
-    await HycopFactory.selectAccount();
     await AccountManager.getCurrentUserInfo();
     await HycopFactory.selectRealTime();
     await HycopFactory.selectFunction();
