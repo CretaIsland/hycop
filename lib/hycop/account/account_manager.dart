@@ -68,9 +68,10 @@ class AccountManager {
       String userId = jsonData['user_id'] ?? '';
       String serverType = jsonData['server_type'] ?? '';
       logger.finest('getSession($logined, $userId, $serverType)');
-      if (logined) {
+      if (ServerType.fromString(serverType) != HycopFactory.serverType) {
+        _currentLoginUser = UserModel(logout: true);
+      } else if (logined) {
         _currentLoginUser = UserModel(userData: {'userId': userId});
-        HycopFactory.serverType = ServerType.fromString(serverType);
         return true;
       }
     }
