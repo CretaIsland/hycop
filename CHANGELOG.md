@@ -1,3 +1,5 @@
+## 0.4.64
+- supabase database modify 
 ## 0.4.63
 - supabase merge 
 ## 0.4.62

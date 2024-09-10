@@ -17,8 +17,7 @@ class SupabaseAccount extends AbsAccount {
     String userId = createUserData['userId'] ?? '';
     if (userId.isEmpty) {
       // not exist userId ==> create new one
-      userId =
-          HycopUtils.midToKey(genMid2(ObjectType.user).replaceAll('-', ''));
+      userId = HycopUtils.midToKey(genMid2(ObjectType.user).replaceAll('-', ''));
       createUserData['userId'] = userId;
     }
     // email
@@ -39,10 +38,9 @@ class SupabaseAccount extends AbsAccount {
 
     // create account
     logger.finest('createAccount($createUserData)');
-    await HycopFactory.dataBase!
-        .createData('hycop_users', mid, createUserData)
-        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'loginByEmail Error !!!'));
+    await HycopFactory.dataBase!.createData('hycop_users', mid, createUserData).catchError((error,
+            stackTrace) =>
+        throw HycopUtils.getHycopException(error: error, defaultMessage: 'loginByEmail Error !!!'));
     logger.finest('createAccount($createUserData) success');
   }
 
@@ -52,14 +50,12 @@ class SupabaseAccount extends AbsAccount {
   }
 
   @override
-  Future<void> getAccountInfo(
-      String userId, Map<String, dynamic> userData) async {
+  Future<void> getAccountInfo(String userId, Map<String, dynamic> userData) async {
     logger.finest('getAccountInfo($userId)');
     var getUserData = await HycopFactory.dataBase!
         .getData('hycop_users', 'user=$userId')
         .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
-            error: error,
-            defaultMessage: 'not exist account(userId:$userId) !!!'));
+            error: error, defaultMessage: 'not exist account(userId:$userId) !!!'));
     if (getUserData.isEmpty) {
       logger.severe('getData error !!!');
       throw const HycopException(message: 'getData failed !!!');
@@ -79,33 +75,26 @@ class SupabaseAccount extends AbsAccount {
     if (userId.isEmpty) {
       throw const HycopException(message: 'no userId !!!');
     }
-    await HycopFactory.dataBase!
-        .setData('hycop_users', 'user=$userId', updateUserData)
-        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'setData Error !!!'));
+    await HycopFactory.dataBase!.setData('hycop_users', 'user=$userId', updateUserData).catchError(
+        (error, stackTrace) =>
+            throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
   }
 
   @override
-  Future<void> updateAccountPassword(
-      String newPassword, String oldPassword) async {
+  Future<void> updateAccountPassword(String newPassword, String oldPassword) async {
     logger.finest('updateAccountPassword($newPassword)');
     //
-    if (newPassword.isEmpty ||
-        newPassword.isEmpty ||
-        newPassword == oldPassword) {
+    if (newPassword.isEmpty || newPassword.isEmpty || newPassword == oldPassword) {
       // invalid password !!!
       logger.severe('invalid password !!!');
-      throw HycopUtils.getHycopException(
-          defaultMessage: 'invalid password !!!');
+      throw HycopUtils.getHycopException(defaultMessage: 'invalid password !!!');
     }
     //
     String email = AccountManager.currentLoginUser.email;
     final getUserData = await HycopFactory.dataBase!
-        .simpleQueryData('hycop_users',
-            name: 'email', value: email, orderBy: 'name')
+        .simpleQueryData('hycop_users', name: 'email', value: email, orderBy: 'name')
         .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
-            error: error,
-            defaultMessage: 'not exist account(email:$email) !!!'));
+            error: error, defaultMessage: 'not exist account(email:$email) !!!'));
     if (getUserData.isEmpty) {
       logger.finest('not exist account(email:$email) !!!');
       throw HycopException(message: 'not exist account(email:$email) !!!');
@@ -128,10 +117,9 @@ class SupabaseAccount extends AbsAccount {
       newUserData['userType'] = '';
     }
     String userId = AccountManager.currentLoginUser.userId;
-    await HycopFactory.dataBase!
-        .setData('hycop_users', 'user=$userId', newUserData)
-        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'setData Error !!!'));
+    await HycopFactory.dataBase!.setData('hycop_users', 'user=$userId', newUserData).catchError(
+        (error, stackTrace) =>
+            throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
   }
 
   @override
@@ -142,10 +130,9 @@ class SupabaseAccount extends AbsAccount {
     newUserData.addAll(AccountManager.currentLoginUser.getValueMap);
     newUserData['isRemoved'] = true;
     String userId = AccountManager.currentLoginUser.userId;
-    await HycopFactory.dataBase!
-        .setData('hycop_users', 'user=$userId', newUserData)
-        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'setData Error !!!'));
+    await HycopFactory.dataBase!.setData('hycop_users', 'user=$userId', newUserData).catchError(
+        (error, stackTrace) =>
+            throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
   }
 
   @override
@@ -154,10 +141,9 @@ class SupabaseAccount extends AbsAccount {
 
     newUserData['isRemoved'] = true;
     String userId = newUserData['userId'];
-    await HycopFactory.dataBase!
-        .setData('hycop_users', 'user=$userId', newUserData)
-        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'setData Error !!!'));
+    await HycopFactory.dataBase!.setData('hycop_users', 'user=$userId', newUserData).catchError(
+        (error, stackTrace) =>
+            throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
   }
 
   @override
@@ -166,18 +152,16 @@ class SupabaseAccount extends AbsAccount {
       AccountSignUpType accountSignUpType = AccountSignUpType.hycop}) async {
     logger.finest('loginByEmail($email, $password)');
     var getUserData = await HycopFactory.dataBase!
-        .queryData('hycop_users',
-            where: {'email': email, 'password': password}, orderBy: 'name')
+        .queryData('hycop_users', where: {'email': email, 'password': password}, orderBy: 'name')
         .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
             error: error,
-            defaultMessage: 'not exist account(email:$email) !!!'));
+            defaultMessage: 'not exist account(email:$email) (($error.toString))!!!'));
     if (getUserData.isEmpty) {
       logger.severe('getData error !!!');
       throw const HycopException(message: 'getData failed !!!');
     }
     for (var result in getUserData) {
-      final type = AccountSignUpType.fromInt(
-          int.parse(result['accountSignUpType'].toString()));
+      final type = AccountSignUpType.fromInt(int.parse(result['accountSignUpType'].toString()));
       if (type != accountSignUpType) {
         logger.severe('not [${accountSignUpType.name}] sign-up user !!!');
         throw HycopUtils.getHycopException(
@@ -209,11 +193,9 @@ class SupabaseAccount extends AbsAccount {
     //
     logger.finest('resetPassword(email:$email)');
     final getUserDataList = await HycopFactory.dataBase!
-        .simpleQueryData('hycop_users',
-            name: 'email', value: email, orderBy: 'name')
+        .simpleQueryData('hycop_users', name: 'email', value: email, orderBy: 'name')
         .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
-            error: error,
-            defaultMessage: 'not exist account(email:$email) !!!'));
+            error: error, defaultMessage: 'not exist account(email:$email) !!!'));
     if (getUserDataList.isEmpty) {
       logger.severe('getData error !!!');
       throw const HycopException(message: 'getData failed !!!');
@@ -223,26 +205,23 @@ class SupabaseAccount extends AbsAccount {
     if (userModel.accountSignUpType != AccountSignUpType.hycop) {
       return ('', '');
     }
-    String secret = HycopUtils.genUuid(
-        includeDash: false); //const Uuid().v4().replaceAll(RegExp(r'-'), '');
+    String secret =
+        HycopUtils.genUuid(includeDash: false); //const Uuid().v4().replaceAll(RegExp(r'-'), '');
     getUserData['secret'] = secret;
     await HycopFactory.dataBase!
         .setData('hycop_users', 'user=${getUserData['userId']}', getUserData)
-        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'setData Error !!!'));
+        .catchError((error, stackTrace) =>
+            throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
     return (userModel.userId, secret);
   }
 
   @override
-  Future<void> resetPasswordConfirm(
-      String userId, String secret, String newPassword) async {
-    logger.finest(
-        'resetPassword(userId:$userId, secret:$secret, newPassword:$newPassword)');
+  Future<void> resetPasswordConfirm(String userId, String secret, String newPassword) async {
+    logger.finest('resetPassword(userId:$userId, secret:$secret, newPassword:$newPassword)');
     var getUserData = await HycopFactory.dataBase!
         .getData('hycop_users', 'user=$userId')
         .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
-            error: error,
-            defaultMessage: 'not exist account(userId:$userId) !!!'));
+            error: error, defaultMessage: 'not exist account(userId:$userId) !!!'));
     if (getUserData.isEmpty) {
       logger.severe('getData error !!!');
       throw const HycopException(message: 'getData failed !!!');
@@ -253,9 +232,8 @@ class SupabaseAccount extends AbsAccount {
       throw const HycopException(message: 'not match secret-key !!!');
     }
     getUserData['password'] = HycopUtils.stringToSha1(newPassword);
-    await HycopFactory.dataBase!
-        .setData('hycop_users', 'user=$userId', getUserData)
-        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
-            error: error, defaultMessage: 'setData Error !!!'));
+    await HycopFactory.dataBase!.setData('hycop_users', 'user=$userId', getUserData).catchError(
+        (error, stackTrace) =>
+            throw HycopUtils.getHycopException(error: error, defaultMessage: 'setData Error !!!'));
   }
 }

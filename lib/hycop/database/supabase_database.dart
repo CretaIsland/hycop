@@ -118,14 +118,18 @@ class SupabaseDatabase extends AbsDatabase {
     int? offset,
     List<Object?>? startAfter, // 사용안됨.
   }) async {
-    logger.finest('before');
+    logger.finest('queryData $collectionId');
     await initialize();
-    logger.finest('after');
     assert(AbsDatabase.sbDBConn != null);
+  
+    if (AbsDatabase.sbDBConn == null) {
+      logger.severe('sbDBConn is null');
+      return [];
+    }
     SupabaseQueryBuilder fromRef = AbsDatabase.sbDBConn!.from(collectionId);
     PostgrestFilterBuilder filterBuilder = fromRef.select();
     where.forEach((key, value) {
-      queryMaker(key, value, filterBuilder);
+      filterBuilder = queryMaker('"$key"', OperType.isEqualTo, value, filterBuilder);
     });
 
     // Map<String, Object> objWhere = {};
@@ -157,56 +161,46 @@ class SupabaseDatabase extends AbsDatabase {
     return resultList.isNotEmpty;
   }
 
-  void queryMaker(String mid, QueryValue value, PostgrestFilterBuilder filterBuilder) {
-    switch (value.operType) {
+  PostgrestFilterBuilder queryMaker(
+      String mid, OperType operType, dynamic value, PostgrestFilterBuilder filterBuilder) {
+    logger.fine('queryMaker : $mid $operType, $value');
+    switch (operType) {
       case OperType.isEqualTo:
-        filterBuilder = filterBuilder.eq(mid, value.value);
-        break;
+        return filterBuilder.eq(mid, value);
       case OperType.isGreaterThan:
-        filterBuilder = filterBuilder.gt(mid, value.value);
-        break;
+        return filterBuilder.gt(mid, value);
       case OperType.isGreaterThanOrEqualTo:
-        filterBuilder = filterBuilder.gte(mid, value.value);
-        break;
+        return filterBuilder.gte(mid, value);
       case OperType.isLessThan:
-        filterBuilder = filterBuilder.lt(mid, value.value);
-        break;
+        return filterBuilder.lt(mid, value);
       case OperType.isLessThanOrEqualTo:
-        filterBuilder = filterBuilder.lte(mid, value.value);
-        break;
+        return filterBuilder.lte(mid, value);
       case OperType.isNotEqualTo:
-        filterBuilder = filterBuilder.neq(mid, value.value);
-        break;
+        return filterBuilder.neq(mid, value);
       case OperType.arrayContains:
         if (value.value is String) {
           String temp = '"${value.value}"'; // 쌍따옴표로 묶어 주어야 한다.
-          filterBuilder = filterBuilder.ilike(mid, '%$temp%');
+          return filterBuilder.ilike(mid, '%$temp%');
         } else {
-          filterBuilder = filterBuilder.ilike(mid, '%${value.value}%');
+          return filterBuilder.ilike(mid, '%${value.value}%');
         }
-        break;
       case OperType.arrayContainsAny: // ilike 로 대체
         if (value.value is String) {
           String temp = '"${value.value}"'; // 쌍따옴표로 묶어 주어야 한다.
-          filterBuilder = filterBuilder.ilike(mid, '%$temp%');
+          return filterBuilder.ilike(mid, '%$temp%');
         } else {
-          filterBuilder = filterBuilder.ilike(mid, '%${value.value}%');
+          return filterBuilder.ilike(mid, '%${value.value}%');
         }
-        break;
       case OperType.whereIn:
-        filterBuilder = filterBuilder.contains(mid, value.value);
-        break;
+        return filterBuilder.contains(mid, value);
       case OperType.whereNotIn:
-        filterBuilder = filterBuilder.not(mid, "in", value.value);
-        break;
+        return filterBuilder.not(mid, "in", value);
       case OperType.isNull:
-        filterBuilder = filterBuilder.eq(mid, ''); // isNull 함수가 없다. 일단 빈 문자열로 처리한다.
-        break;
+        return filterBuilder.eq(mid, ''); // isNull 함수가 없다. 일단 빈 문자열로 처리한다.
       case OperType.textSearch:
-        filterBuilder = filterBuilder.textSearch(mid, value.value);
-        break;
+        return filterBuilder.textSearch(mid, value);
     }
-    return;
+    //return filterBuilder;
   }
 
   SupabaseStreamBuilder queryMakerStream(
@@ -281,14 +275,13 @@ class SupabaseDatabase extends AbsDatabase {
     PostgrestFilterBuilder filterBuilder = fromRef.select();
 
     where.forEach((key, value) {
-      queryMaker(key, value, filterBuilder);
+      filterBuilder = queryMaker(key, value.operType, value.value, filterBuilder);
     });
 
     // Map<String, Object> objWhere = {};
     // where.forEach((key, value) {
     //   objWhere[key] = value;
     // });
-    //print('--------------orderBy : $orderBy');
     if (orderBy.isEmpty) {
       if (limit != null) {
         if (offset != null) {
@@ -296,7 +289,6 @@ class SupabaseDatabase extends AbsDatabase {
         }
         return await filterBuilder.limit(limit);
       }
-      //print('--------------44444444444444444');
       return await filterBuilder.select();
     }
 

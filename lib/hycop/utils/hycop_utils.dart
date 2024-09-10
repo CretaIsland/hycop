@@ -111,7 +111,7 @@ class HycopUtils {
     }
     return HycopException(
       message: defMsg,
-      exception: error,
+      exception: (error is Exception) ? error : Exception(error.toString()),
       code: code,
     );
   }
