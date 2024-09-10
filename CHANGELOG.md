@@ -1,3 +1,5 @@
+## 0.4.63
+- supabase merge 
 ## 0.4.62
 - watchHistory --> watch_hostory 
 ## 0.4.61

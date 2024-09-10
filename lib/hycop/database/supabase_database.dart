@@ -123,28 +123,26 @@ class SupabaseDatabase extends AbsDatabase {
     logger.finest('after');
     assert(AbsDatabase.sbDBConn != null);
     SupabaseQueryBuilder fromRef = AbsDatabase.sbDBConn!.from(collectionId);
-
-    Map<String, Object> objWhere = {};
+    PostgrestFilterBuilder filterBuilder = fromRef.select();
     where.forEach((key, value) {
-      objWhere[key] = value;
+      queryMaker(key, value, filterBuilder);
     });
+
+    // Map<String, Object> objWhere = {};
+    // where.forEach((key, value) {
+    //   objWhere[key] = value;
+    // });
 
     if (limit != null) {
       if (offset != null) {
-        return await fromRef
-            .select()
-            .match(objWhere)
+        return await filterBuilder
             .order(orderBy, ascending: !descending)
             .limit(limit)
             .range(offset, offset + limit);
       }
-      return await fromRef
-          .select()
-          .match(objWhere)
-          .order(orderBy, ascending: !descending)
-          .limit(limit);
+      return await filterBuilder.order(orderBy, ascending: !descending).limit(limit);
     }
-    return await fromRef.select().match(objWhere).order(orderBy, ascending: !descending);
+    return await filterBuilder.order(orderBy, ascending: !descending);
   }
 
   @override
@@ -159,40 +157,111 @@ class SupabaseDatabase extends AbsDatabase {
     return resultList.isNotEmpty;
   }
 
-  // Query<Object?> queryMaker(String mid, QueryValue value, Query<Object?> query) {
-  //   switch (value.operType) {
-  //     case OperType.isEqualTo:
-  //       return query.where(mid, isEqualTo: value.value);
-  //     case OperType.isGreaterThan:
-  //       return query.where(mid, isGreaterThan: value.value);
-  //     case OperType.isGreaterThanOrEqualTo:
-  //       return query.where(mid, isGreaterThanOrEqualTo: value.value);
-  //     case OperType.isLessThan:
-  //       return query.where(mid, isLessThan: value.value);
-  //     case OperType.isLessThanOrEqualTo:
-  //       return query.where(mid, isLessThanOrEqualTo: value.value);
-  //     case OperType.isNotEqualTo:
-  //       return query.where(mid, isNotEqualTo: value.value);
-  //     case OperType.arrayContains:
-  //       logger.finest('query=mid arrayContains ${value.value}');
-  //       return query.where(mid, arrayContains: value.value);
-  //     case OperType.arrayContainsAny:
-  //       logger.finest('query=mid arrayContainsAny ${value.value}');
-  //       return query.where(mid, arrayContainsAny: value.value);
-  //     case OperType.whereIn:
-  //       logger.finest('query=mid whereIn ${value.value}');
-  //       return query.where(mid, whereIn: value.value);
-  //     case OperType.whereNotIn:
-  //       logger.finest('query=mid whereNotIn ${value.value}');
-  //       return query.where(mid, whereNotIn: value.value);
-  //     case OperType.isNull:
-  //       logger.finest('query=mid isNull ${value.value}');
-  //       return query.where(mid, isNull: value.value);
-  //     case OperType.textSearch:
-  //       logger.severe('query=--- supabase IS NOT SUPPORT TextSearch !!! ---');
-  //       return query;
-  //   }
-  // }
+  void queryMaker(String mid, QueryValue value, PostgrestFilterBuilder filterBuilder) {
+    switch (value.operType) {
+      case OperType.isEqualTo:
+        filterBuilder = filterBuilder.eq(mid, value.value);
+        break;
+      case OperType.isGreaterThan:
+        filterBuilder = filterBuilder.gt(mid, value.value);
+        break;
+      case OperType.isGreaterThanOrEqualTo:
+        filterBuilder = filterBuilder.gte(mid, value.value);
+        break;
+      case OperType.isLessThan:
+        filterBuilder = filterBuilder.lt(mid, value.value);
+        break;
+      case OperType.isLessThanOrEqualTo:
+        filterBuilder = filterBuilder.lte(mid, value.value);
+        break;
+      case OperType.isNotEqualTo:
+        filterBuilder = filterBuilder.neq(mid, value.value);
+        break;
+      case OperType.arrayContains:
+        if (value.value is String) {
+          String temp = '"${value.value}"'; // 쌍따옴표로 묶어 주어야 한다.
+          filterBuilder = filterBuilder.ilike(mid, '%$temp%');
+        } else {
+          filterBuilder = filterBuilder.ilike(mid, '%${value.value}%');
+        }
+        break;
+      case OperType.arrayContainsAny: // ilike 로 대체
+        if (value.value is String) {
+          String temp = '"${value.value}"'; // 쌍따옴표로 묶어 주어야 한다.
+          filterBuilder = filterBuilder.ilike(mid, '%$temp%');
+        } else {
+          filterBuilder = filterBuilder.ilike(mid, '%${value.value}%');
+        }
+        break;
+      case OperType.whereIn:
+        filterBuilder = filterBuilder.contains(mid, value.value);
+        break;
+      case OperType.whereNotIn:
+        filterBuilder = filterBuilder.not(mid, "in", value.value);
+        break;
+      case OperType.isNull:
+        filterBuilder = filterBuilder.eq(mid, ''); // isNull 함수가 없다. 일단 빈 문자열로 처리한다.
+        break;
+      case OperType.textSearch:
+        filterBuilder = filterBuilder.textSearch(mid, value.value);
+        break;
+    }
+    return;
+  }
+
+  SupabaseStreamBuilder queryMakerStream(
+      String mid, QueryValue value, SupabaseStreamFilterBuilder streamBuilder) {
+    switch (value.operType) {
+      case OperType.isEqualTo:
+        return streamBuilder.eq(mid, value.value);
+      case OperType.isGreaterThan:
+        streamBuilder.gt(mid, value.value);
+        break;
+      case OperType.isGreaterThanOrEqualTo:
+        streamBuilder.gte(mid, value.value);
+        break;
+      case OperType.isLessThan:
+        streamBuilder.lt(mid, value.value);
+        break;
+      case OperType.isLessThanOrEqualTo:
+        streamBuilder.lte(mid, value.value);
+        break;
+      case OperType.isNotEqualTo:
+        streamBuilder.neq(mid, value.value);
+        break;
+      // case OperType.arrayContains:
+      //   if (value.value is String) {
+      //     String temp = '"${value.value}"'; // 쌍따옴표로 묶어 주어야 한다.
+      //     streamBuilder.ilike(mid, '%$temp%');
+      //   } else {
+      //     streamBuilder.ilike(mid, '%${value.value}%');
+      //   }
+      //   break;
+      // case OperType.arrayContainsAny: // ilike 로 대체
+      //   if (value.value is String) {
+      //     String temp = '"${value.value}"'; // 쌍따옴표로 묶어 주어야 한다.
+      //     streamBuilder.ilike(mid, '%$temp%');
+      //   } else {
+      //     streamBuilder.ilike(mid, '%${value.value}%');
+      //   }
+      //   break;
+      // case OperType.whereIn:
+      //   streamBuilder.contains(mid, value.value);
+      //   break;
+      // case OperType.whereNotIn:
+      //   streamBuilder.not(mid, "in", value.value);
+      //   break;
+      // case OperType.textSearch:
+      //   streamBuilder.textSearch(mid, value.value);
+      //   break;
+      case OperType.isNull:
+        streamBuilder.eq(mid, ''); // isNull 함수가 없다. 일단 빈 문자열로 처리한다.
+        break;
+      default:
+        return streamBuilder.eq(mid, value.value);
+    }
+    return streamBuilder;
+  }
 
   @override
   Future<List> queryPage(
@@ -209,19 +278,26 @@ class SupabaseDatabase extends AbsDatabase {
     assert(AbsDatabase.sbDBConn != null);
     SupabaseQueryBuilder fromRef = AbsDatabase.sbDBConn!.from(collectionId);
 
-    Map<String, Object> objWhere = {};
+    PostgrestFilterBuilder filterBuilder = fromRef.select();
+
     where.forEach((key, value) {
-      objWhere[key] = value;
+      queryMaker(key, value, filterBuilder);
     });
 
+    // Map<String, Object> objWhere = {};
+    // where.forEach((key, value) {
+    //   objWhere[key] = value;
+    // });
+    //print('--------------orderBy : $orderBy');
     if (orderBy.isEmpty) {
       if (limit != null) {
         if (offset != null) {
-          return await fromRef.select().match(objWhere).limit(limit).range(offset, offset + limit);
+          return await filterBuilder.limit(limit).range(offset, offset + limit);
         }
-        return await fromRef.select().match(objWhere).limit(limit);
+        return await filterBuilder.limit(limit);
       }
-      return await fromRef.select().match(objWhere);
+      //print('--------------44444444444444444');
+      return await filterBuilder.select();
     }
 
     if (orderBy.length == 1) {
@@ -230,23 +306,16 @@ class SupabaseDatabase extends AbsDatabase {
 
       if (limit != null) {
         if (offset != null) {
-          return await fromRef
-              .select()
-              .match(objWhere)
+          return await filterBuilder
               .order(key, ascending: value == OrderDirection.ascending)
               .limit(limit)
               .range(offset, offset + limit);
         }
-        return await fromRef
-            .select()
-            .match(objWhere)
+        return await filterBuilder
             .order(key, ascending: value == OrderDirection.ascending)
             .limit(limit);
       }
-      return await fromRef
-          .select()
-          .match(objWhere)
-          .order(key, ascending: value == OrderDirection.ascending);
+      return await filterBuilder.order(key, ascending: value == OrderDirection.ascending);
     }
 
     OrderDirection value1 = orderBy.values.first;
@@ -256,24 +325,18 @@ class SupabaseDatabase extends AbsDatabase {
 
     if (limit != null) {
       if (offset != null) {
-        return await fromRef
-            .select()
-            .match(objWhere)
+        return await filterBuilder
             .order(key1, ascending: value1 == OrderDirection.ascending)
             .order(key2, ascending: value2 == OrderDirection.ascending)
             .limit(limit)
             .range(offset, offset + limit);
       }
-      return await fromRef
-          .select()
-          .match(objWhere)
+      return await filterBuilder
           .order(key1, ascending: value1 == OrderDirection.ascending)
           .order(key2, ascending: value2 == OrderDirection.ascending)
           .limit(limit);
     }
-    return await fromRef
-        .select()
-        .match(objWhere)
+    return await filterBuilder
         .order(key1, ascending: value1 == OrderDirection.ascending)
         .order(key1, ascending: value1 == OrderDirection.ascending);
   }
@@ -290,7 +353,7 @@ class SupabaseDatabase extends AbsDatabase {
   @override
   dynamic initStream({
     required String collectionId,
-    required Map<String, dynamic> where,
+    required Map<String, dynamic> where, //dynamic is QueryValue
     required String orderBy,
     bool descending = true,
     int? limit, // 페이지 크기
@@ -299,38 +362,44 @@ class SupabaseDatabase extends AbsDatabase {
     assert(AbsDatabase.sbDBConn != null);
     SupabaseQueryBuilder fromRef = AbsDatabase.sbDBConn!.from(collectionId);
 
-    Map<String, Object> objWhere = {};
+    SupabaseStreamFilterBuilder streamBuilder = fromRef.stream(primaryKey: ['mid']);
+    SupabaseStreamBuilder filterBuilder = streamBuilder;
     where.forEach((key, value) {
-      objWhere[key] = value;
+      filterBuilder = queryMakerStream(key, value, streamBuilder);
     });
+    // Map<String, Object> objWhere = {};
+    // where.forEach((key, value) {
+    //   objWhere[key] = value;
+    // });
 
     if (where.isNotEmpty) {
       // where 절을 하나 밖에 처리하지 못하기 때문에, 나머지는  builder 에서 제거한다.
-      String key = where.keys.first;
-      Object value = where.values.first;
+      // String key = where.keys.first;
+      // Object value = where.values.first;
 
       if (limit != null) {
-        return fromRef
-            .stream(primaryKey: ['mid'])
-            .eq(key, value)
-            .order(orderBy, ascending: !descending)
-            .limit(limit);
+        return
+            // fromRef
+            //     .stream(primaryKey: ['mid'])
+            //     .eq(key, value)
+            filterBuilder.order(orderBy, ascending: !descending).limit(limit);
       }
-      return fromRef
-          .stream(primaryKey: ['mid'])
-          .eq(key, value)
-          .order(orderBy, ascending: !descending);
+      return
+          // fromRef
+          //     .stream(primaryKey: ['mid'])
+          //.eq(key, value)
+          filterBuilder.order(orderBy, ascending: !descending);
     }
 
     // where 조건절이 비어있는 경우.
 
     if (limit != null) {
-      return fromRef
-          .stream(primaryKey: ['mid'])
-          .order(orderBy, ascending: !descending)
-          .limit(limit);
+      return
+          // fromRef
+          //     .stream(primaryKey: ['mid'])
+          filterBuilder.order(orderBy, ascending: !descending).limit(limit);
     }
-    return fromRef.stream(primaryKey: ['mid']).order(orderBy, ascending: !descending);
+    return streamBuilder.order(orderBy, ascending: !descending);
   }
 
   @override
