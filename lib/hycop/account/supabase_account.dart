@@ -48,7 +48,18 @@ class SupabaseAccount extends AbsAccount {
 
   @override
   Future<AccountSignUpType?> isExistAccount(String email) async {
-    return AccountSignUpType.hycop;
+    List getUserDataList = await HycopFactory.dataBase!
+        .simpleQueryData('hycop_users', name: 'email', value: email, orderBy: 'email')
+        .catchError((error, stackTrace) => throw HycopUtils.getHycopException(
+            error: error, defaultMessage: 'not exist account(email:$email) !!!'));
+    if (getUserDataList.isEmpty) {
+      logger.finest('not exist account(email:$email) !!!');
+      return AccountSignUpType.none;
+    }
+    logger.finest('exist account(email:$email)');
+    final getUserData = getUserDataList[0]; // exist only-one
+    final userModel = UserModel(userData: getUserData);
+    return userModel.accountSignUpType;
   }
 
   @override
