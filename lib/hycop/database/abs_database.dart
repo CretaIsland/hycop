@@ -39,6 +39,10 @@ class QueryValue {
     required this.value,
     this.operType = OperType.isEqualTo,
   });
+  @override
+  String toString() {
+    return 'QueryValue(operType: $operType, value: $value)';
+  }
 }
 
 abstract class AbsDatabase {

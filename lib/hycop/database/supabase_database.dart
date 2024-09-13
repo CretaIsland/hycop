@@ -1,4 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
+import 'dart:convert';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
 import '../../common/util/logger.dart';
@@ -162,53 +164,59 @@ class SupabaseDatabase extends AbsDatabase {
   }
 
   PostgrestFilterBuilder queryMaker(
-      String mid, OperType operType, dynamic value, PostgrestFilterBuilder filterBuilder) {
-    logger.fine('queryMaker : $mid $operType, $value');
+      String column, OperType operType, dynamic value, PostgrestFilterBuilder filterBuilder) {
+    logger.fine('queryMaker : $column $operType, $value');
     switch (operType) {
       case OperType.isEqualTo:
-        return filterBuilder.eq(mid, value);
+        if (value is bool) {
+          //print('This is boolean type ------------------------------');
+          return filterBuilder.eq(column, value ? 'true' : 'false');
+        }
+        return filterBuilder.eq(column, value);
       case OperType.isGreaterThan:
-        return filterBuilder.gt(mid, value);
+        return filterBuilder.gt(column, value);
       case OperType.isGreaterThanOrEqualTo:
-        return filterBuilder.gte(mid, value);
+        return filterBuilder.gte(column, value);
       case OperType.isLessThan:
-        return filterBuilder.lt(mid, value);
+        return filterBuilder.lt(column, value);
       case OperType.isLessThanOrEqualTo:
-        return filterBuilder.lte(mid, value);
+        return filterBuilder.lte(column, value);
       case OperType.isNotEqualTo:
-        return filterBuilder.neq(mid, value);
+        return filterBuilder.neq(column, value);
       case OperType.arrayContains:
         String temp = '"$value"'; // 쌍따옴표로 묶어 주어야 한다.
-        return filterBuilder.ilike(mid, '%$temp%');
+        return filterBuilder.ilike(column, '%$temp%');
       case OperType.arrayContainsAny:
+        List data = [];
         if (value is List<String>) {
-          //print('2 : $value');
-          // 각 요소를 개별적으로 비교하여 OR 조건으로 결합
-          String filterString = '';
-          for (var i = 0; i < value.length; i++) {
-            if (i > 0) filterString += ',';
-            filterString += '$mid.cs.{${value[i]}}';
-          }
-          return filterBuilder.or(filterString);
+          data = value;
+          //print('string type case-------------list:$data');
+        } else if (value is String) {
+          //print('list type case-------------list:$data');
+          data = jsonStringToList(value);
         }
-        //print('1 : $value');
-        return filterBuilder.contains(mid, value);
-      // case OperType.arrayContainsAny: // ilike 로 대체
-      //   if (value is List) {
-      //     print('2 : $value');
-      //     return filterBuilder.ilike(mid, '%${value}%');
-      //   }
-      //   print('1 : $value');
-      //   return filterBuilder.contains(mid, value);
+        List<String> tempList = data.map((item) => '"$item"').toList();
+        String filterString = '{${tempList.join(',')}}'; // Supabase에서는 {}가 리스트를 의미하므로 묶어 주어야 합니다.
+        //print('---------filterString : $filterString');
+        return filterBuilder.filter(column, "cs", filterString);
 
       case OperType.whereIn:
-        return filterBuilder.contains(mid, value);
+        List data = [];
+        if (value is List<String>) {
+          data = value;
+          //print('string type case-------------list:$data');
+        } else if (value is String) {
+          data = jsonStringToList(value);
+          //print('list type case-------------list:$data');
+        }
+        return filterBuilder.inFilter(column, data);
+
       case OperType.whereNotIn:
-        return filterBuilder.not(mid, "in", value);
+        return filterBuilder.not(column, "in", value);
       case OperType.isNull:
-        return filterBuilder.eq(mid, ''); // isNull 함수가 없다. 일단 빈 문자열로 처리한다.
+        return filterBuilder.isFilter(column, null);
       case OperType.textSearch:
-        return filterBuilder.textSearch(mid, value);
+        return filterBuilder.textSearch(column, value);
     }
     //return filterBuilder;
   }
@@ -503,5 +511,20 @@ class SupabaseDatabase extends AbsDatabase {
       // 첫 번째 키를 사용하여 요소를 제거
       where.remove(firstKey);
     }
+  }
+
+  List<String> jsonStringToList(String value) {
+    if (value.isEmpty) {
+      return [];
+    }
+    try {
+      List<dynamic> parsedList = jsonDecode(value);
+      // List<dynamic>을 List<String>으로 변환
+      List<String> stringList = parsedList.map((item) => item.toString()).toList();
+      return stringList;
+    } catch (e) {
+      logger.severe('invalid json format ($value)');
+    }
+    return [];
   }
 }
