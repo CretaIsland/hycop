@@ -242,7 +242,7 @@ class SupabaseDatabase extends AbsDatabase {
       //   }
       //   break;
       // case OperType.arrayContainsAny: // ilike 로 대체
-      //   if (value.value is String) {
+      //   if (value.value is String) {s
       //     String temp = '"${value.value}"'; // 쌍따옴표로 묶어 주어야 한다.
       //     streamBuilder.ilike(mid, '%$temp%');
       //   } else {
