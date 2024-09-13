@@ -121,7 +121,7 @@ class SupabaseDatabase extends AbsDatabase {
     logger.finest('queryData $collectionId');
     await initialize();
     assert(AbsDatabase.sbDBConn != null);
-  
+
     if (AbsDatabase.sbDBConn == null) {
       logger.severe('sbDBConn is null');
       return [];
@@ -178,19 +178,29 @@ class SupabaseDatabase extends AbsDatabase {
       case OperType.isNotEqualTo:
         return filterBuilder.neq(mid, value);
       case OperType.arrayContains:
-        if (value.value is String) {
-          String temp = '"${value.value}"'; // 쌍따옴표로 묶어 주어야 한다.
-          return filterBuilder.ilike(mid, '%$temp%');
-        } else {
-          return filterBuilder.ilike(mid, '%${value.value}%');
+        String temp = '"$value"'; // 쌍따옴표로 묶어 주어야 한다.
+        return filterBuilder.ilike(mid, '%$temp%');
+      case OperType.arrayContainsAny:
+        if (value is List<String>) {
+          //print('2 : $value');
+          // 각 요소를 개별적으로 비교하여 OR 조건으로 결합
+          String filterString = '';
+          for (var i = 0; i < value.length; i++) {
+            if (i > 0) filterString += ',';
+            filterString += '$mid.cs.{${value[i]}}';
+          }
+          return filterBuilder.or(filterString);
         }
-      case OperType.arrayContainsAny: // ilike 로 대체
-        if (value.value is String) {
-          String temp = '"${value.value}"'; // 쌍따옴표로 묶어 주어야 한다.
-          return filterBuilder.ilike(mid, '%$temp%');
-        } else {
-          return filterBuilder.ilike(mid, '%${value.value}%');
-        }
+        //print('1 : $value');
+        return filterBuilder.contains(mid, value);
+      // case OperType.arrayContainsAny: // ilike 로 대체
+      //   if (value is List) {
+      //     print('2 : $value');
+      //     return filterBuilder.ilike(mid, '%${value}%');
+      //   }
+      //   print('1 : $value');
+      //   return filterBuilder.contains(mid, value);
+
       case OperType.whereIn:
         return filterBuilder.contains(mid, value);
       case OperType.whereNotIn:

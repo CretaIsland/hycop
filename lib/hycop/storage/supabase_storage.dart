@@ -30,16 +30,14 @@ class SupabaseAppStorage extends AbsStorage {
   //버킷은 hycop로 정해져 있다(firebase는 기본 하나의 버킷이 있다) 파이어 베이스도 폴더(유저)를 지정하는 것이다
   @override
   Future<void> setBucket() async {
-    myConfig!.serverConfig.storageConnInfo.bucketId =
-        StorageUtils.createBucketId(AccountManager.currentLoginUser.email,
-            AccountManager.currentLoginUser.userId);
+    myConfig!.serverConfig.storageConnInfo.bucketId = StorageUtils.createBucketId(
+        AccountManager.currentLoginUser.email, AccountManager.currentLoginUser.userId);
     //userFolder를 지정 하는 것임
     // ignore: unused_local_variable
     String? bucketId = myConfig!.serverConfig.storageConnInfo.bucketId;
     //print('supabase mainBucketId:$mainBucketId');
     // ignore: unused_local_variable
-    final bucket =
-        await Supabase.instance.client.storage.getBucket(mainBucketId);
+    final bucket = await Supabase.instance.client.storage.getBucket(mainBucketId);
     //print('supabase bucket.name: ${bucket.name}');
     //print('supabase bucket.id: ${bucket.id}');
     //print('supabase bucket.public: ${bucket.public}');
@@ -61,8 +59,7 @@ class SupabaseAppStorage extends AbsStorage {
   }) async {
     try {
       bucketId ??= myConfig!.serverConfig.storageConnInfo.bucketId;
-      fileName = StorageUtils.sanitizeString(
-          StorageUtils.getMD5(fileBytes) + fileName);
+      fileName = StorageUtils.sanitizeString(StorageUtils.getMD5(fileBytes) + fileName);
       late String folderPath;
 
       if (usageType == "content") {
@@ -106,9 +103,8 @@ class SupabaseAppStorage extends AbsStorage {
       }
 
       // ignore: unused_local_variable
-      final result = await Supabase.instance.client.storage
-          .from(mainBucketId)
-          .uploadBinary(fileId, fileBytes);
+      final result =
+          await Supabase.instance.client.storage.from(mainBucketId).uploadBinary(fileId, fileBytes);
       //print('uploadFile success!! result:$result');
       //result에 오는 값 : hycop/ks-park-sqisoft-com.3ca5a91e9da54c6e8e10781758e3e4d5/content/image/05ede4a4a175bd4f538ca018ab3e1a72test1.jpg
 
@@ -128,16 +124,16 @@ class SupabaseAppStorage extends AbsStorage {
         client.withCredentials = true;
       }
 
-      var response = await client.post(
-          Uri.parse("${myConfig!.serverConfig.apiServerUrl}/createThumbnail"),
-          headers: {"Content-type": "application/json"},
-          body: jsonEncode({
-            "bucketId": bucketId,
-            "folderName": fileId.replaceAll("/", "%2F"),
-            "fileName": fileName,
-            "fileType": fileType,
-            "cloudType": "supabase"
-          }));
+      var response =
+          await client.post(Uri.parse("${myConfig!.serverConfig.apiServerUrl}/createThumbnail"),
+              headers: {"Content-type": "application/json"},
+              body: jsonEncode({
+                "bucketId": bucketId,
+                "folderName": fileId.replaceAll("/", "%2F"),
+                "fileName": fileName,
+                "fileType": fileType,
+                "cloudType": "supabase"
+              }));
       if (response.statusCode == 200) return true;
     } catch (error) {
       logger.severe("error at Storage.createThumbnail >>> $error");
@@ -148,9 +144,7 @@ class SupabaseAppStorage extends AbsStorage {
   @override
   Future<bool> deleteFile(String fileId, {String? bucketId}) async {
     try {
-      await Supabase.instance.client.storage
-          .from(mainBucketId)
-          .remove([fileId]);
+      await Supabase.instance.client.storage.from(mainBucketId).remove([fileId]);
       //print('deleteFile fileId:$fileId success!!');
       return true;
     } catch (e) {
@@ -181,8 +175,7 @@ class SupabaseAppStorage extends AbsStorage {
   }
 
   @override
-  Future<bool> downloadFile(String fileId, String saveName,
-      {String? bucketId}) async {
+  Future<bool> downloadFile(String fileId, String saveName, {String? bucketId}) async {
     try {
       if (kIsWeb) {
         final Uint8List? targetBytes = await getFileBytes(fileId);
@@ -227,9 +220,8 @@ class SupabaseAppStorage extends AbsStorage {
   @override
   Future<Uint8List?> getFileBytes(String fileId, {String? bucketId}) async {
     try {
-      final Uint8List fileBytes = await Supabase.instance.client.storage
-          .from(mainBucketId)
-          .download(fileId);
+      final Uint8List fileBytes =
+          await Supabase.instance.client.storage.from(mainBucketId).download(fileId);
       return fileBytes;
     } catch (e) {
       //print('getFileBytes error:$e');
@@ -247,8 +239,7 @@ class SupabaseAppStorage extends AbsStorage {
   }
 
   @override
-  Future<List<FileModel>> getMultiFileData(List<String> fileIds,
-      {String? bucketId}) async {
+  Future<List<FileModel>> getMultiFileData(List<String> fileIds, {String? bucketId}) async {
     try {
       List<FileModel> fileDatas = [];
       for (String fileId in fileIds) {
@@ -276,8 +267,7 @@ class SupabaseAppStorage extends AbsStorage {
     if (file != null) {
       //print('파일 존재 fileModel:${file.toDetailString()}');
     }
-    final removeUserFolderPath =
-        sourceFileId.substring(sourceFileId.indexOf('/'));
+    final removeUserFolderPath = sourceFileId.substring(sourceFileId.indexOf('/'));
 
     ///content/image/05ede4a4a175bd4f538ca018ab3e1a72test1.jpg
     //print('removeUserFolderPath:$removeUserFolderPath');
@@ -287,11 +277,10 @@ class SupabaseAppStorage extends AbsStorage {
     //    'targetFileId:$targetFileId'); //ks-park-sqisoft-com.43c6ea3c83284a838dbabcd947e9e6f9/content/image/05ede4a4a175bd4f538ca018ab3e1a72test1.jpg
     try {
       // ignore: unused_local_variable
-      final copyResult =
-          await Supabase.instance.client.storage.from(mainBucketId).copy(
-                sourceFileId,
-                targetFileId,
-              );
+      final copyResult = await Supabase.instance.client.storage.from(mainBucketId).copy(
+            sourceFileId,
+            targetFileId,
+          );
       //print('copyFile success result:$copyResult');
       return await getFileData(targetFileId);
     } catch (e) {
@@ -333,23 +322,21 @@ class SupabaseAppStorage extends AbsStorage {
       //print('파일 존재 fileModel:${file.toDetailString()}');
     }
 
-    final removeUserFolderPath =
-        sourceFileId.substring(sourceFileId.indexOf('/'));
+    final removeUserFolderPath = sourceFileId.substring(sourceFileId.indexOf('/'));
 
     ///content/image/05ede4a4a175bd4f538ca018ab3e1a72test1.jpg
     //print('removeUserFolderPath:$removeUserFolderPath');
 
     final targetFileId = '$bucketId$removeUserFolderPath';
-   // print(
+    // print(
     //    'targetFileId:$targetFileId'); //ks-park-sqisoft-com.43c6ea3c83284a838dbabcd947e9e6f9/content/image/05ede4a4a175bd4f538ca018ab3e1a72test1.jpg
 
     try {
       // ignore: unused_local_variable
-      final moveResult =
-          await Supabase.instance.client.storage.from(mainBucketId).move(
-                sourceFileId,
-                targetFileId,
-              );
+      final moveResult = await Supabase.instance.client.storage.from(mainBucketId).move(
+            sourceFileId,
+            targetFileId,
+          );
       //print('moveFile success result:$moveResult');
       return await getFileData(targetFileId);
     } catch (e) {
@@ -385,9 +372,8 @@ class SupabaseAppStorage extends AbsStorage {
       String fullPath = fileId;
       String folderPath = fullPath.substring(0, fullPath.lastIndexOf('/'));
       String fileName = fullPath.split('/').last;
-      final fileObjects = await Supabase.instance.client.storage
-          .from(mainBucketId)
-          .list(path: folderPath);
+      final fileObjects =
+          await Supabase.instance.client.storage.from(mainBucketId).list(path: folderPath);
 
       if (fileObjects.isNotEmpty) {
         FileObject? fileObject = fileObjects.firstWhereOrNull(
@@ -407,8 +393,7 @@ class SupabaseAppStorage extends AbsStorage {
             url: '${await getPublicFileUrl(fullPath)}',
             thumbnailUrl: '$thumbnailUrl',
             size: fileObject?.metadata!['size'],
-            contentType: ContentsType.getContentTypes(
-                fileObject?.metadata!['mimetype']));
+            contentType: ContentsType.getContentTypes(fileObject?.metadata!['mimetype']));
       } else {
         return null;
       }
@@ -444,12 +429,10 @@ class SupabaseAppStorage extends AbsStorage {
       String fileName = fullPath.split('/').last;
 
       //파일 존재 여부
-      final fileObjects = await Supabase.instance.client.storage
-          .from(mainBucketId)
-          .list(path: folderPath);
+      final fileObjects =
+          await Supabase.instance.client.storage.from(mainBucketId).list(path: folderPath);
 
       if (fileObjects.isNotEmpty) {
-        
         // ignore: unused_local_variable
         FileObject? fileObject = fileObjects.firstWhereOrNull(
           (file) => file.name == fileName,
@@ -459,9 +442,7 @@ class SupabaseAppStorage extends AbsStorage {
         return null;
       }
 
-      final publicUrl = Supabase.instance.client.storage
-          .from(mainBucketId)
-          .getPublicUrl(fullPath);
+      final publicUrl = Supabase.instance.client.storage.from(mainBucketId).getPublicUrl(fullPath);
 
       //print(
       //    'publicUrl:$publicUrl'); //https://jaeumzhrdayuyqhemhyk.supabase.co/storage/v1/object/public/test_bucket/test_folder/test.jpg
