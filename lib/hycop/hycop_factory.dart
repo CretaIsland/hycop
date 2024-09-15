@@ -22,6 +22,7 @@ import 'storage/abs_storage.dart';
 import 'storage/appwrite_storage.dart';
 import 'storage/firebase_storage.dart';
 import 'function/supabase_function.dart';
+import 'storage/supabase_storage.dart';
 
 class HycopFactory {
   static String enterprise = 'Demo';
@@ -70,6 +71,8 @@ class HycopFactory {
   static Future<void> selectStorage() async {
     if (HycopFactory.serverType == ServerType.appwrite) {
       storage = AppwriteStorage();
+    } else if (HycopFactory.serverType == ServerType.supabase) {
+      storage = SupabaseAppStorage();
     } else {
       storage = FirebaseAppStorage();
     }

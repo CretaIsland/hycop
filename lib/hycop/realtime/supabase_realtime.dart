@@ -73,7 +73,7 @@ class SupabaseRealtime extends AbsRealtime {
               filter: PostgresChangeFilter(
                   type: PostgresChangeFilterType.eq, column: "realTimeKey", value: realTimeKey),
               callback: (PostgresChangePayload payload) {
-                //print('Change received: ${payload.toString()}');
+                print('Change received: ${payload.toString()}');
                 processEvent(payload.newRecord);
               })
           .subscribe();
@@ -167,9 +167,14 @@ class SupabaseRealtime extends AbsRealtime {
     logger.finest('setDelta = ${input.toString()}');
 
     try {
-      SupabaseQueryBuilder fromRef = AbsRealtime.sbRTConn!.from('hycop_delta');
-      fromRef.upsert(input, onConflict: 'mid', ignoreDuplicates: true);
+      SupabaseQueryBuilder fromRef = Supabase.instance.client.from('hycop_delta');
+      await fromRef.upsert(input, onConflict: 'mid');
+      //PostgrestList result = await fromRef.upsert(input, onConflict: 'mid').select();
+      //PostgrestList result = await fromRef.insert(input).select();
+
+      //logger.finest("hycop_delta sample data created : $result");
       logger.finest("hycop_delta sample data created");
+
       return true;
     } catch (e) {
       logger.severe("hycop_delta SET DB ERROR : $e");

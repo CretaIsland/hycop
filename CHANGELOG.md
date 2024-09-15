@@ -1,3 +1,6 @@
+## 0.4.68
+- supabase factory --> supabaseAppStorage 
+- supabase realtime upsert --> upsert().select() 
 ## 0.4.67
 - supabase order --> order_   hyCopUtils.order 
 ## 0.4.66
