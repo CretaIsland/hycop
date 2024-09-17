@@ -183,30 +183,42 @@ class SupabaseDatabase extends AbsDatabase {
         return filterBuilder.lte(column, value);
       case OperType.isNotEqualTo:
         return filterBuilder.neq(column, value);
-      case OperType.arrayContains:
-        String temp = '"$value"'; // 쌍따옴표로 묶어 주어야 한다.
-        return filterBuilder.ilike(column, '%$temp%');
-      case OperType.arrayContainsAny:
+      case OperType.arrayContains: //cs  : contains
         List data = [];
         if (value is List<String>) {
           data = value;
           //print('string type case-------------list:$data');
         } else if (value is String) {
           //print('list type case-------------list:$data');
-          data = jsonStringToList(value);
+          //data = jsonStringToList(value);
+          data = value.split(',');
         }
         List<String> tempList = data.map((item) => '"$item"').toList();
         String filterString = '{${tempList.join(',')}}'; // Supabase에서는 {}가 리스트를 의미하므로 묶어 주어야 합니다.
         //print('---------filterString : $filterString');
         return filterBuilder.filter(column, "cs", filterString);
-
+      case OperType.arrayContainsAny: // ov : overlap
+        List data = [];
+        if (value is List<String>) {
+          data = value;
+          //print('string type case-------------list:$data');
+        } else if (value is String) {
+          //print('list type case-------------list:$data');
+          //data = jsonStringToList(value);
+          data = value.split(',');
+        }
+        List<String> tempList = data.map((item) => '"$item"').toList();
+        String filterString = '{${tempList.join(',')}}'; // Supabase에서는 {}가 리스트를 의미하므로 묶어 주어야 합니다.
+        //print('---------filterString : $filterString');
+        return filterBuilder.filter(column, "ov", filterString);
       case OperType.whereIn:
         List data = [];
         if (value is List<String>) {
           data = value;
           //print('string type case-------------list:$data');
         } else if (value is String) {
-          data = jsonStringToList(value);
+          //data = jsonStringToList(value);
+          data = value.split(',');
           //print('list type case-------------list:$data');
         }
         return filterBuilder.inFilter(column, data);

@@ -1,3 +1,5 @@
+## 0.4.69
+- supabase filter ov  
 ## 0.4.68
 - supabase factory --> supabaseAppStorage 
 - supabase realtime upsert --> upsert().select() 
