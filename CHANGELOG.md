@@ -1,3 +1,5 @@
+## 0.4.70
+- supabase queryMaker  
 ## 0.4.69
 - supabase filter ov  
 ## 0.4.68

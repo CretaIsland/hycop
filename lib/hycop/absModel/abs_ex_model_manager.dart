@@ -18,24 +18,23 @@ abstract class AbsExModelManager extends ChangeNotifier {
   List<AbsExModel> modelList = [];
 
   void removeDuplicatesByMid() {
-  // Set을 사용하여 고유한 mid 값을 추적
-  Set<String> seenMids = {};
-  // 중복을 제거한 결과를 저장할 리스트
-  List<AbsExModel> uniqueList = [];
+    // Set을 사용하여 고유한 mid 값을 추적
+    Set<String> seenMids = {};
+    // 중복을 제거한 결과를 저장할 리스트
+    List<AbsExModel> uniqueList = [];
 
-  for (var model in modelList) {
-    if (!seenMids.contains(model.mid)) {
-      seenMids.add(model.mid);
-      uniqueList.add(model);
+    for (var model in modelList) {
+      if (!seenMids.contains(model.mid)) {
+        seenMids.add(model.mid);
+        uniqueList.add(model);
+      }
     }
+
+    // 중복 제거된 리스트로 교체
+    modelList
+      ..clear()
+      ..addAll(uniqueList);
   }
-
-  // 중복 제거된 리스트로 교체
-  modelList
-    ..clear()
-    ..addAll(uniqueList);
-}
-
 
   String debugText() {
     String retval = '${modelList.length} $collectionId founded\n';
@@ -235,6 +234,7 @@ abstract class AbsExModelManager extends ChangeNotifier {
     required dynamic snapshot,
     required Widget Function(List<Map<String, dynamic>> resultList) consumerFunc,
   }) {
+    //print('streamData2()');
     return HycopFactory.dataBase!.streamData2(
       snapshot: snapshot,
       consumerFunc: (List<Map<String, dynamic>> resultList) {

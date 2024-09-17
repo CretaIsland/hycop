@@ -386,18 +386,16 @@ class SupabaseDatabase extends AbsDatabase {
 
     SupabaseStreamFilterBuilder streamBuilder = fromRef.stream(primaryKey: ['mid']);
     SupabaseStreamBuilder filterBuilder = streamBuilder;
-    where.forEach((key, value) {
-      filterBuilder = queryMakerStream(key, value, streamBuilder);
-    });
-    // Map<String, Object> objWhere = {};
     // where.forEach((key, value) {
-    //   objWhere[key] = value;
+    //   filterBuilder = queryMakerStream(key, value, streamBuilder);
     // });
 
     if (where.isNotEmpty) {
       // where 절을 하나 밖에 처리하지 못하기 때문에, 나머지는  builder 에서 제거한다.
-      // String key = where.keys.first;
-      // Object value = where.values.first;
+      String key = where.keys.first;
+      QueryValue value = where.values.first;
+
+      filterBuilder = queryMakerStream(key, value, streamBuilder);
 
       if (limit != null) {
         return
