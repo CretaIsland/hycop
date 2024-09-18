@@ -41,7 +41,16 @@ class SupabaseRealtime extends AbsRealtime {
               table: 'hycop_delta',
               //filter: ,
               callback: (PostgresChangePayload payload) {
-                //print('Change received: ${payload.toString()}');
+                logger.finest('insert received: ${payload.toString()}');
+                processEvent(payload.newRecord);
+              })
+          .onPostgresChanges(
+              event: PostgresChangeEvent.update,
+              schema: 'public',
+              table: 'hycop_delta',
+              //filter: ,
+              callback: (PostgresChangePayload payload) {
+                logger.finest('update received: ${payload.toString()}');
                 processEvent(payload.newRecord);
               })
           .subscribe();
@@ -73,7 +82,17 @@ class SupabaseRealtime extends AbsRealtime {
               filter: PostgresChangeFilter(
                   type: PostgresChangeFilterType.eq, column: "realTimeKey", value: realTimeKey),
               callback: (PostgresChangePayload payload) {
-                //print('Change received: ${payload.toString()}');
+                logger.finest('Insert received: ${payload.toString()}');
+                processEvent(payload.newRecord);
+              })
+          .onPostgresChanges(
+              event: PostgresChangeEvent.update,
+              schema: 'public',
+              table: 'hycop_delta',
+              filter: PostgresChangeFilter(
+                  type: PostgresChangeFilterType.eq, column: "realTimeKey", value: realTimeKey),
+              callback: (PostgresChangePayload payload) {
+                logger.finest('Update received: ${payload.toString()}');
                 processEvent(payload.newRecord);
               })
           .subscribe();

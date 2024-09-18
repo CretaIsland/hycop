@@ -1,3 +1,5 @@
+## 0.4.71
+- supabase realtime PostgresChangeEvent.update  
 ## 0.4.70
 - supabase queryMaker  
 ## 0.4.69
