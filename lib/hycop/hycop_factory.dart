@@ -106,9 +106,10 @@ class HycopFactory {
     if (HycopFactory.serverType == ServerType.supabase) {
       final projectURL = myConfig!.serverConfig.dbConnInfo.databaseURL;
       final projectApiKey = myConfig!.serverConfig.dbConnInfo.apiKey;
+      final projectServiceRoleKey = myConfig!.serverConfig.dbConnInfo.appId;
       await Supabase.initialize(
         url: projectURL,
-        anonKey: projectApiKey,
+        anonKey: projectServiceRoleKey,
       );
     }
     await HycopFactory.selectAccount();
