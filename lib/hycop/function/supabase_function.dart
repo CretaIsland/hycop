@@ -49,10 +49,16 @@ class SupabaseFunction extends AbsFunction {
       realParams.addAll(params);
     }
     String body = jsonEncode(realParams);
-    final result = await Supabase.instance.client.functions
+    final FunctionResponse response = await Supabase.instance.client.functions
         .invoke(functionId, body: body, queryParameters: realParams);
-    logger.info('$functionId finished, $result');
 
-    return result.toString();
+    if (response.status != 200) {
+      // 오류가 발생한 경우
+      logger.info('Error invoking function: ${response.status}');
+    } else {
+      // 성공적으로 반환 값을 받은 경우
+      logger.info('Function response: ${response.status}, ${response.data}');
+    }
+    return response.data.toString();
   }
 }
