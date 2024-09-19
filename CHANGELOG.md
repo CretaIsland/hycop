@@ -1,3 +1,5 @@
+## 0.4.72
+- supabase storage initialize
 ## 0.4.71
 - supabase realtime PostgresChangeEvent.update  
 ## 0.4.70

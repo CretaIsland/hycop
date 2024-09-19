@@ -105,6 +105,7 @@ class HycopFactory {
     await myConfig!.serverConfig.loadAsset();
     if (HycopFactory.serverType == ServerType.supabase) {
       final projectURL = myConfig!.serverConfig.dbConnInfo.databaseURL;
+      // ignore: unused_local_variable
       final projectApiKey = myConfig!.serverConfig.dbConnInfo.apiKey;
       final projectServiceRoleKey = myConfig!.serverConfig.dbConnInfo.appId;
       await Supabase.initialize(
