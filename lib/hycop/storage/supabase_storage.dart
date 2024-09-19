@@ -37,18 +37,20 @@ class SupabaseAppStorage extends AbsStorage {
     //userFolder를 지정 하는 것임
     // ignore: unused_local_variable
     String? bucketId = myConfig!.serverConfig.storageConnInfo.bucketId;
+    logger.finest('SupabaseStorage bucketId(userFolder):$bucketId');
     logger.finest('SupabaseStorage mainBucketId:$mainBucketId');
-    // ignore: unused_local_variable
-    final bucket =
-        await Supabase.instance.client.storage.getBucket(mainBucketId);
-    logger.finest('SupabaseStorage bucket.name: ${bucket.name}');
-    logger.finest('SupabaseStorage bucket.id: ${bucket.id}');
-    logger.finest('SupabaseStorage bucket.public: ${bucket.public}');
-    // ignore: unused_local_variable
-    final bucketUrl = Supabase.instance.client.storage.from(mainBucketId).url;
-    logger.finest('SupabaseStorage bucket.url: $bucketUrl');
-
-    //print('supabase bucketId(userFolder):$bucketId');
+    try {
+      final bucket =
+          await Supabase.instance.client.storage.getBucket(mainBucketId);
+      logger.finest('SupabaseStorage bucket.name: ${bucket.name}');
+      logger.finest('SupabaseStorage bucket.id: ${bucket.id}');
+      logger.finest('SupabaseStorage bucket.public: ${bucket.public}');
+      // ignore: unused_local_variable
+      final bucketUrl = Supabase.instance.client.storage.from(mainBucketId).url;
+      logger.finest('SupabaseStorage bucket.url: $bucketUrl');
+    } catch (e) {
+      logger.severe('SupabaseStorage getBucket error:$e');
+    }
   }
 
   @override
