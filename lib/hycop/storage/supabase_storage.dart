@@ -65,7 +65,7 @@ class SupabaseAppStorage extends AbsStorage {
     try {
       bucketId ??= myConfig!.serverConfig.storageConnInfo.bucketId;
       fileName = StorageUtils.sanitizeString(
-          StorageUtils.getMD5(fileBytes) + fileName);
+          StorageUtils.getMD5(fileBytes) + Uri.encodeComponent(fileName));
       late String folderPath;
 
       if (usageType == "content") {
@@ -406,7 +406,7 @@ class SupabaseAppStorage extends AbsStorage {
         //print('getFileData fileId:$fileId, success!!');
         return FileModel(
             id: fullPath,
-            name: fileName,
+            name: fileName.substring(32),
             url: '${await getPublicFileUrl(fullPath)}',
             thumbnailUrl: '$thumbnailUrl',
             size: fileObject?.metadata!['size'],
