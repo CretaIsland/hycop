@@ -117,6 +117,7 @@ class SupabaseAppStorage extends AbsStorage {
 
       return await getFileData(fileId);
     } catch (e) {
+      logger.severe('uploadFile error:$e');
       return null;
     }
   }
@@ -157,6 +158,7 @@ class SupabaseAppStorage extends AbsStorage {
       //print('deleteFile fileId:$fileId success!!');
       return true;
     } catch (e) {
+      logger.severe('deleteFile error:$e');
       return false;
     }
   }
@@ -179,6 +181,7 @@ class SupabaseAppStorage extends AbsStorage {
       await deleteFile(fileId);
       return true;
     } catch (e) {
+      logger.severe('deleteFileFromUrl error:$e');
       return false;
     }
   }
@@ -201,6 +204,7 @@ class SupabaseAppStorage extends AbsStorage {
       return true;
     } catch (e) {
       //print('downloadFile error:$e');
+      logger.severe('downloadFile error:$e');
       return false;
     }
   }
@@ -223,6 +227,7 @@ class SupabaseAppStorage extends AbsStorage {
       await downloadFile(fileId, saveName);
       return true;
     } catch (e) {
+      logger.severe('downloadFileFromUrl error:$e');
       return false;
     }
   }
@@ -236,6 +241,7 @@ class SupabaseAppStorage extends AbsStorage {
       return fileBytes;
     } catch (e) {
       //print('getFileBytes error:$e');
+      logger.severe('getFileBytes error:$e');
       return null;
     }
   }
@@ -299,6 +305,7 @@ class SupabaseAppStorage extends AbsStorage {
       return await getFileData(targetFileId);
     } catch (e) {
       //print('copyFile error:$e');
+      logger.severe('copyFile error:$e');
       return null;
     }
   }
@@ -317,6 +324,7 @@ class SupabaseAppStorage extends AbsStorage {
       return copyFile('', fileId, bucketId: bucketId);
     } catch (e) {
       //print('copyFileFromUrl error:$e');
+      logger.severe('copyFileFromUrl error:$e');
       return null;
     }
   }
@@ -417,6 +425,7 @@ class SupabaseAppStorage extends AbsStorage {
       }
     } catch (e) {
       //print('getFileObject error:$e');
+      logger.severe('uploadFile error:$e');
       return null;
     }
   }
