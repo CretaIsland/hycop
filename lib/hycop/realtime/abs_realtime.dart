@@ -147,7 +147,7 @@ abstract class AbsRealtime {
       return;
     }
     if (fromDeviceId == myDeviceId) {
-      logger.info('!!! deviceId same !!! $myDeviceId');
+      logger.fine('!!! deviceId same !!! $myDeviceId');
       //print('same deviceId=$fromDeviceId &&&&&&&&&&&&&&&&&&&&&&&&');
       return;
     }

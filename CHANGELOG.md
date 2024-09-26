@@ -1,3 +1,7 @@
+## 0.4.74
+- comment
+## 0.4.73
+- supabase storage hangul file upload
 ## 0.4.72
 - supabase storage initialize
 ## 0.4.71
