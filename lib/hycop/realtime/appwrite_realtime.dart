@@ -116,23 +116,16 @@ class AppwriteRealtime extends AbsRealtime {
     logger.info('event myinfo=${AbsRealtime.myDeviceId}, $realTimeKey');
     String? directive = event.payload['directive'];
     _lastUpdateTime = DateTime.now();
-    if (directive == null || directive == "ping") {
+    if (directive == "ping") {
       logger.info("It's ping (${_lastUpdateTime.toIso8601String()})");
       return;
     }
     String? eventRealTimeKey = event.payload['realTimeKey'];
-    if (eventRealTimeKey == null) {
-      return;
-    }
     if (eventRealTimeKey != realTimeKey) {
       logger.info('!!! realTimeKey defferent !!! $eventRealTimeKey != $realTimeKey');
       return;
     }
     String? deviceId = event.payload['deviceId'];
-    if (deviceId == null) {
-      logger.info('!!! deviceId is null !!! ');
-      return;
-    }
     if (deviceId == AbsRealtime.myDeviceId) {
       logger.info('!!! deviceId same !!! $deviceId');
       return;
@@ -140,10 +133,6 @@ class AppwriteRealtime extends AbsRealtime {
     //  최근 15초 이내의 데이터만 받는다.
     String seconsAgo = _getTimeStrSecondsAgo(15);
     String? updateTime = event.payload['updateTime'];
-    if (updateTime == null) {
-      logger.info('!!! updateTime is null !!! ');
-      return;
-    }
     if (updateTime.compareTo(seconsAgo) < 0) {
       logger.info('!!! old data  !!! $updateTime < $seconsAgo');
       return;

@@ -242,6 +242,10 @@ abstract class AbsExModelManager extends ChangeNotifier {
         for (Map<String, dynamic> ele in resultList) {
           AbsExModel model = newModel(ele['mid'] ?? '');
           model.fromMap(ele);
+          if (model.isRemoved.value == true) {
+            print('${model.mid} is removed');
+            continue;
+          }
           modelList.add(model);
         }
         //notifyListeners();
@@ -263,6 +267,7 @@ abstract class AbsExModelManager extends ChangeNotifier {
         modelList.clear();
         for (Map<String, dynamic> ele in resultList) {
           AbsExModel model = newModel(ele['mid'] ?? '');
+          if (model.isRemoved.value == true) continue;
           model.fromMap(ele);
           modelList.add(model);
         }

@@ -31,9 +31,7 @@ class SupabaseDatabase extends AbsDatabase {
     await initialize();
     SupabaseQueryBuilder fromRef = AbsDatabase.sbDBConn!.from(collectionId);
     Map<String, dynamic>? result = await fromRef.select().eq('mid', mid).maybeSingle();
-    if (result != null) {
-      return result;
-    }
+    return result;
     return {};
   }
 
@@ -234,55 +232,85 @@ class SupabaseDatabase extends AbsDatabase {
   }
 
   SupabaseStreamBuilder queryMakerStream(
-      String mid, QueryValue value, SupabaseStreamFilterBuilder streamBuilder) {
+      String column, QueryValue value, SupabaseStreamFilterBuilder streamBuilder) {
     switch (value.operType) {
       case OperType.isEqualTo:
-        return streamBuilder.eq(mid, value.value);
+        return streamBuilder.eq(column, value.value);
       case OperType.isGreaterThan:
-        streamBuilder.gt(mid, value.value);
+        streamBuilder.gt(column, value.value);
         break;
       case OperType.isGreaterThanOrEqualTo:
-        streamBuilder.gte(mid, value.value);
+        streamBuilder.gte(column, value.value);
         break;
       case OperType.isLessThan:
-        streamBuilder.lt(mid, value.value);
+        streamBuilder.lt(column, value.value);
         break;
       case OperType.isLessThanOrEqualTo:
-        streamBuilder.lte(mid, value.value);
+        streamBuilder.lte(column, value.value);
         break;
       case OperType.isNotEqualTo:
-        streamBuilder.neq(mid, value.value);
+        streamBuilder.neq(column, value.value);
         break;
-      // case OperType.arrayContains:
-      //   if (value.value is String) {
-      //     String temp = '"${value.value}"'; // 쌍따옴표로 묶어 주어야 한다.
-      //     streamBuilder.ilike(mid, '%$temp%');
-      //   } else {
-      //     streamBuilder.ilike(mid, '%${value.value}%');
+      case OperType.arrayContains: //cs  : contains
+        logger.severe('supabase streamBuilder does not support arrayContains');
+        break;
+      // case OperType.arrayContains: //cs  : contains
+      //   List data = [];
+      //   if (value is List<String>) {
+      //     data = value;
+      //     //print('string type case-------------list:$data');
+      //   } else if (value is String) {
+      //     //print('list type case-------------list:$data');
+      //     //data = jsonStringToList(value);
+      //     data = value.split(',');
       //   }
+      //   List<String> tempList = data.map((item) => '"$item"').toList();
+      //   String filterString = '{${tempList.join(',')}}'; // Supabase에서는 {}가 리스트를 의미하므로 묶어 주어야 합니다.
+      //   //print('---------filterString : $filterString');
+      //   streamBuilder.filter(column, "cs", filterString);
       //   break;
-      // case OperType.arrayContainsAny: // ilike 로 대체
-      //   if (value.value is String) {s
-      //     String temp = '"${value.value}"'; // 쌍따옴표로 묶어 주어야 한다.
-      //     streamBuilder.ilike(mid, '%$temp%');
-      //   } else {
-      //     streamBuilder.ilike(mid, '%${value.value}%');
+      case OperType.arrayContainsAny: // ov : overlap
+        logger.severe('supabase streamBuilder does not support arrayContainsAny');
+        break;
+      //   List data = [];
+      //   if (value is List<String>) {
+      //     data = value;
+      //     //print('string type case-------------list:$data');
+      //   } else if (value is String) {
+      //     //print('list type case-------------list:$data');
+      //     //data = jsonStringToList(value);
+      //     data = value.split(',');
       //   }
+      //   List<String> tempList = data.map((item) => '"$item"').toList();
+      //   String filterString = '{${tempList.join(',')}}'; // Supabase에서는 {}가 리스트를 의미하므로 묶어 주어야 합니다.
+      //   //print('---------filterString : $filterString');
+      //   streamBuilder.filter(column, "ov", filterString);
       //   break;
-      // case OperType.whereIn:
-      //   streamBuilder.contains(mid, value.value);
-      //   break;
+      case OperType.whereIn:
+        List<Object> data = [];
+        if (value.value is List<String>) {
+          data = List<Object>.from(value.value);
+          //print('string type case-------------list:$data');
+        } else if (value.value is String) {
+          //data = jsonStringToList(value);
+          data = List<Object>.from(value.value.split(','));
+          //print('list type case-------------list:$data');
+        }
+        print('*******************STREAM QUERY---------------$column whereIn $data');
+
+        streamBuilder.inFilter(column, data);
+        break;
       // case OperType.whereNotIn:
-      //   streamBuilder.not(mid, "in", value.value);
+      //   streamBuilder.not(column, "in", value.value);
       //   break;
       // case OperType.textSearch:
-      //   streamBuilder.textSearch(mid, value.value);
+      //   streamBuilder.textSearch(column, value.value);
       //   break;
       case OperType.isNull:
-        streamBuilder.eq(mid, ''); // isNull 함수가 없다. 일단 빈 문자열로 처리한다.
+        streamBuilder.eq(column, ''); // isNull 함수가 없다. 일단 빈 문자열로 처리한다.
         break;
       default:
-        return streamBuilder.eq(mid, value.value);
+        return streamBuilder.eq(column, value.value);
     }
     return streamBuilder;
   }
