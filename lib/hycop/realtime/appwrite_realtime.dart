@@ -133,6 +133,10 @@ class AppwriteRealtime extends AbsRealtime {
     //  최근 15초 이내의 데이터만 받는다.
     String seconsAgo = _getTimeStrSecondsAgo(15);
     String? updateTime = event.payload['updateTime'];
+    if (updateTime == null) {
+      logger.info('!!! no updateTime !!!');
+      return;
+    }
     if (updateTime.compareTo(seconsAgo) < 0) {
       logger.info('!!! old data  !!! $updateTime < $seconsAgo');
       return;

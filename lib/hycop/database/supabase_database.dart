@@ -31,7 +31,9 @@ class SupabaseDatabase extends AbsDatabase {
     await initialize();
     SupabaseQueryBuilder fromRef = AbsDatabase.sbDBConn!.from(collectionId);
     Map<String, dynamic>? result = await fromRef.select().eq('mid', mid).maybeSingle();
-    return result;
+    if (result != null) {
+      return result;
+    }
     return {};
   }
 
@@ -219,6 +221,7 @@ class SupabaseDatabase extends AbsDatabase {
           data = value.split(',');
           //print('list type case-------------list:$data');
         }
+        //print('*******************QUERY---------------$column whereIn $data');
         return filterBuilder.inFilter(column, data);
 
       case OperType.whereNotIn:
@@ -296,7 +299,7 @@ class SupabaseDatabase extends AbsDatabase {
           data = List<Object>.from(value.value.split(','));
           //print('list type case-------------list:$data');
         }
-        print('*******************STREAM QUERY---------------$column whereIn $data');
+        //print('*******************STREAM QUERY---------------$column whereIn $data');
 
         streamBuilder.inFilter(column, data);
         break;
@@ -467,7 +470,7 @@ class SupabaseDatabase extends AbsDatabase {
           case ConnectionState.waiting:
             return const Text('Loading...');
           default:
-            logger.finest('streamData :  ${snapshot.data!.length} data founded');
+            //print('streamData :  ${snapshot.data!.length} data founded');
 
             // 마지막 문서 업데이트 (페이징을 위해)
             // if (hasPage) {
@@ -523,6 +526,7 @@ class SupabaseDatabase extends AbsDatabase {
 
   List<Map<String, dynamic>> filterSnapshotData(
       List<Map<String, dynamic>> snapshotData, Map<String, dynamic>? where) {
+    //print('filterSnapshotData : $where');
     if (where == null || where.length < 2) {
       return snapshotData;
     }
@@ -531,6 +535,7 @@ class SupabaseDatabase extends AbsDatabase {
 
     return snapshotData.where((data) {
       // where 조건에 해당하는 값이 있는지 확인
+      //print('filterSnapshotData : $data');
       for (var key in where.keys) {
         if (!data.containsKey(key) || data[key] != where[key]) {
           return false; // 조건에 맞지 않는 항목은 제외

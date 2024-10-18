@@ -1,3 +1,5 @@
+## 0.4.75
+- abs_ex_model_manager and supabase_database query modify
 ## 0.4.74
 - comment
 ## 0.4.73

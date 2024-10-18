@@ -243,7 +243,7 @@ abstract class AbsExModelManager extends ChangeNotifier {
           AbsExModel model = newModel(ele['mid'] ?? '');
           model.fromMap(ele);
           if (model.isRemoved.value == true) {
-            print('${model.mid} is removed');
+            //print('${model.mid} is removed');
             continue;
           }
           modelList.add(model);
